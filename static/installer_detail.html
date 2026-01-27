@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Профиль мастера | Олег-Холод</title>
+    <link rel="stylesheet" href="/static/css/blocks/header.css" />
+    <link rel="stylesheet" href="/static/css/blocks/footer.css" />
+    <link rel="stylesheet" href="/static/css/blocks/installers.css" /> <link rel="stylesheet" href="/static/css/blocks/installer_profile.css" /> </head>
+  <body>
+    {% include "components/header.html" %}
+
+   <main class="content" id="installer-page" data-id="{{ id }}">
+      <nav style="margin-bottom: 20px;">
+        <a href="/installers_page" style="color: #64748b; text-decoration: none;">← К списку мастеров</a>
+      </nav>
+
+      <div class="profile-layout">
+        <aside class="profile-sidebar">
+          <div class="master-card">
+            <div class="master-card__avatar">
+                <span id="avatar_letter">?</span>
+            </div>
+            <h1 id="view_fio">Загрузка...</h1>
+            <p id="view_nickname" class="text-muted"></p>
+            <div class="master-card__rating" id="view_rating"></div>
+            
+            <hr>
+            
+            <div class="master-card__info">
+              <label>Телефон:</label>
+              <p id="view_phone">—</p>
+              
+              <label>Специализация:</label>
+              <p id="view_spec">—</p>
+              
+              <label>Ставка (монтаж):</label>
+              <p><span id="view_price">0</span> ₽</p>
+              
+              <label>Статус:</label>
+              <p id="view_debt_status">—</p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="profile-main">
+          <h2>Заказы мастера</h2>
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Клиент</th>
+                <th>Адрес</th>
+                <th>Статус</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody id="masterOrdersTable">
+              </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    
+    <script src="/static/js/installer_detail.js"></script>
+  </body>
+</html>

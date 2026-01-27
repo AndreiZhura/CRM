@@ -44,6 +44,14 @@ class OrderCreate(BaseModel):
     installer_id: Optional[int] = None
     installer_opinion: Optional[str] = None
     doubt_reason: Optional[str] = None
+    
+class InstallerCreate(BaseModel):
+    fio: str
+    nickname: Optional[str] = None
+    phone: Optional[str] = None
+    specialization: Optional[str] = "Монтаж"
+    base_price: Optional[float] = 0.0
+    dossier: Optional[str] = None
 
 # СТРАНИЦЫ
 @app.get("/", response_class=HTMLResponse)
@@ -193,19 +201,37 @@ def delete_order(order_id: int):
         conn.close()
 
 # 1. Маршрут для самой страницы (HTML)
-@app.get("/installers_page", response_class=HTMLResponse)
+# 1. Страница СПИСКА (все мастера)
+@app.get("/installers", response_class=HTMLResponse)
 async def get_installers_page(request: Request):
     return templates.TemplateResponse("installers.html", {"request": request})
 
-# 2. Маршрут для данных (JSON)
-@app.get("/api/installers")
-def get_installers_api():
-    conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    # Проверь, что в таблице installers есть эти колонки!
-    cur.execute("SELECT id, fio, phone, specialization, rating FROM installers ORDER BY fio ASC")
-    installers = cur.fetchall()
-    cur.close()
-    conn.close()
-    return installers
+# 2. Страница КАРТОЧКИ (конкретный мастер)
+# Добавляем префикс /profile/, чтобы путь /installers/1 не конфликтовал со списком
+@app.get("/installers/profile/{installer_id}", response_class=HTMLResponse)
+async def get_installer_page(request: Request, installer_id: int):
+    return templates.TemplateResponse("installer_detail.html", {"request": request, "id": installer_id})
 
+# 3. API для получения данных одного мастера (JSON)
+@app.get("/api/installers/{installer_id}")
+def get_installer_details(installer_id: int):
+    conn = get_db_connection()
+    if not conn: raise HTTPException(status_code=500, detail="БД недоступна")
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM installers WHERE id = %s", (installer_id,))
+        installer = cur.fetchone()
+        
+        cur.execute("""
+            SELECT o.id, o.status, c.fio as client_name, o.address
+            FROM orders o
+            JOIN clients c ON o.client_id = c.id
+            WHERE o.installer_id = %s
+            ORDER BY o.id DESC
+        """, (installer_id,))
+        orders = cur.fetchall()
+        
+        return {"info": installer, "orders": orders}
+    finally:
+        cur.close()
+        conn.close()
