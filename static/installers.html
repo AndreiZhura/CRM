@@ -10,41 +10,31 @@
   <body>
     {% include "components/header.html" %}
 
-  <main class="content">
-    <div class="installer-profile">
-        <header class="profile-header">
-            <h1>Карточка мастера: <span id="master_fio">...</span></h1>
-            <span id="master_rating" class="badge">⭐ 10</span>
-        </header>
+    <main class="content">
+      <div class="page-header">
+        <h1>Список мастеров</h1>
+        <a
+          href="/installers/add"
+          class="btn-primary"
+          style="text-decoration: none"
+          >+ Добавить мастера</a
+        >
+      </div>
 
-        <section class="profile-grid">
-            <div class="profile-card">
-                <h3>Контактные данные</h3>
-                <p><strong>Телефон:</strong> <span id="master_phone"></span></p>
-                <p><strong>Спец:</strong> <span id="master_spec"></span></p>
-                <p><strong>Базовая цена:</strong> <span id="master_price"></span> ₽</p>
-            </div>
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>ФИО / Ник</th>
+            <th>Телефон</th>
+            <th>Специализация</th>
+            <th>Рейтинг</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody id="installersTableBody"></tbody>
+      </table>
+    </main>
 
-            <div class="profile-orders">
-                <h3>Заказы в работе</h3>
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>№ Заказа</th>
-                            <th>Клиент</th>
-                            <th>Адрес</th>
-                            <th>Статус</th>
-                        </tr>
-                    </thead>
-                    <tbody id="masterOrdersBody">
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-</main>
-
-    {% include "components/footer.html" %}
     <script src="/static/js/installers_page.js"></script>
   </body>
 </html>

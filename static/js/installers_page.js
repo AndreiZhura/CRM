@@ -5,38 +5,34 @@ async function loadInstallers() {
 
     try {
         const response = await fetch('/api/installers');
-        if (!response.ok) throw new Error('Ошибка сервера');
-
         const installers = await response.json();
 
-        if (installers.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Мастера еще не добавлены</td></tr>';
+        if (!installers || installers.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Мастеров нет</td></tr>';
             return;
         }
 
         tableBody.innerHTML = installers.map(inst => `
             <tr class="orders-table__row">
                 <td class="orders-table__td">
-                    <a href="/installers/${inst.id}" class="installer-link" style="text-decoration: underline; color: #2563eb;">
-                        <strong>${inst.fio}</strong>
+                    <a href="/installers/profile/${inst.id}" style="text-decoration: none; color: #2563eb; font-weight: bold;">
+                        ${inst.fio}
                     </a>
-                    ${inst.nickname ? `<br><small style="color: #64748b;">(${inst.nickname})</small>` : ''}
+                    ${inst.nickname ? `<br><small style="color:gray">(${inst.nickname})</small>` : ''}
                 </td>
                 <td class="orders-table__td">${inst.phone || '—'}</td>
                 <td class="orders-table__td">${inst.specialization || 'Монтаж'}</td>
                 <td class="orders-table__td">⭐ ${inst.rating || 10}</td>
-                <td class="orders-table__td">
-                    <span style="color: ${inst.is_debtor ? '#ef4444' : '#10b981'}; font-weight: bold;">
-                        ${inst.is_debtor ? 'Должник' : 'Ок'}
-                    </span>
+                <td class="orders-table__td" style="color: ${inst.is_debtor ? 'red' : 'green'}">
+                    ${inst.is_debtor ? 'Долг' : 'Ок'}
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка:', error);
-        tableBody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Ошибка подключения к серверу</td></tr>';
+    } catch (e) {
+        console.error(e);
     }
 }
+document.addEventListener('DOMContentLoaded', loadInstallers);
 
 // 2. Обработка формы добавления
 const installerForm = document.getElementById('installerForm');

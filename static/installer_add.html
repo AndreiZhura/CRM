@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить мастера | Олег-Холод</title>
+    <link rel="stylesheet" href="/static/css/blocks/header.css">
+    <link rel="stylesheet" href="/static/css/blocks/installer_add.css">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+   <div class="form-container">
+    <h1>Новое досье мастера</h1>
+    <form id="addInstallerForm">
+        <div class="form-group">
+            <label>ФИО</label>
+            <input type="text" id="fio" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Кликуха (Nickname)</label>
+            <input type="text" id="nickname">
+        </div>
+
+        <div class="form-group">
+            <label>Специализация (можно выбрать несколько):</label>
+            <div class="checkbox-group">
+                <input type="checkbox" name="spec" value="Мойщик"> Мойщик <br>
+                <input type="checkbox" name="spec" value="Альпинист"> Альпинист <br>
+                <input type="checkbox" name="spec" value="Установщик"> Установщик
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Рейтинг (от 1 до 10)</label>
+            <input type="number" id="rating" min="1" max="10" value="10">
+        </div>
+
+        <div class="form-group">
+            <label>Должник?</label>
+            <select id="is_debtor">
+                <option value="false">Нет</option>
+                <option value="true">Да (Должен)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Цена за монтаж (₽)</label>
+            <input type="number" id="base_price" value="0">
+        </div>
+
+        <div class="form-group">
+            <label>Досье (комментарии)</label>
+            <textarea id="comments" rows="4" style="width: 100%; border-radius: 6px; border: 1px solid #ccc;"></textarea>
+        </div>
+
+        <div class="actions">
+            <a href="/installers" class="btn-cancel">Отмена</a>
+            <button type="submit" class="btn-save">Внести в базу</button>
+        </div>
+    </form>
+</div>
+
+    <script src="/static/js/installer_add.js"></script>
+</body>
+</html>

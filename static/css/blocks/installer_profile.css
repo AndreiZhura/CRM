@@ -1,0 +1,41 @@
+.profile-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr; /* Лево - 320пх, право - всё остальное */
+    gap: 30px;
+    align-items: start;
+}
+
+.master-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.master-card__avatar {
+    width: 80px;
+    height: 80px;
+    background: #f1f5f9;
+    color: #1e293b;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
+.master-card__info {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.master-card__info label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+}
