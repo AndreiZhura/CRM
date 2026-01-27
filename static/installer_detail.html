@@ -1,62 +1,82 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Карточка мастера | Олег-Холод</title>
-    <link rel="stylesheet" href="/static/css/blocks/header.css">
-    <link rel="stylesheet" href="/static/css/blocks/installer_profile.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/blocks/header.css" />
+    <link rel="stylesheet" href="/static/css/blocks/installer_profile.css" />
+  </head>
+  <body>
     {% include "components/header.html" %}
 
     <main class="content" id="installer-page" data-id="{{ id }}">
-        <div class="profile-container">
-            <div class="profile-sidebar">
-                <div class="avatar-big" id="avatar_letter">?</div>
-                <h1 id="view_fio">...</h1>
-                <p id="view_nickname"></p>
-                <div class="rating-badge" id="view_rating">⭐ 10</div>
-                
-                <hr>
-                
-                <div class="info-group">
-                    <label>Телефон:</label>
-                    <span id="view_phone">...</span>
-                </div>
-                <div class="info-group">
-                    <label>Спец:</label>
-                    <span id="view_spec">...</span>
-                </div>
-                <div class="info-group">
-                    <label>Базовая цена:</label>
-                    <span id="view_price">0</span> ₽
-                </div>
-                <div id="view_debt_status" style="font-weight: bold; margin-top: 10px;"></div>
+      <div class="profile-container">
+        <div class="profile-sidebar">
+          <div class="avatar-big" id="avatar_letter">?</div>
+          <h1 id="top_fio">...</h1>
+          <div class="status-badge" id="view_status">Активен</div>
 
-                <div class="profile-actions" style="margin-top: 20px;">
-                    <button class="btn-danger" onclick="deleteInstaller()">Удалить мастера</button>
-                </div>
-            </div>
-
-            <div class="profile-main">
-                <h2>Заказы в работе</h2>
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>№</th>
-                            <th>Клиент</th>
-                            <th>Адрес</th>
-                            <th>Статус</th>
-                            <th>Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody id="masterOrdersTable">
-                        </tbody>
-                </table>
-            </div>
+          <div class="profile-actions">
+            <button class="btn-save" onclick="saveProfile()">
+              Сохранить изменения
+            </button>
+            <button class="btn-outline" onclick="deleteInstaller()">
+              Удалить мастера
+            </button>
+          </div>
         </div>
+
+        <div class="profile-main">
+          <section class="dossier-section">
+            <h2>Досье мастера</h2>
+            <div class="dossier-grid">
+              <div class="info-group">
+                <label>ФИО</label>
+                <input type="text" id="edit_fio" placeholder="Введите ФИО" />
+              </div>
+              <div class="info-group">
+                <label>Телефон</label>
+                <input
+                  type="tel"
+                  id="edit_phone"
+                  placeholder="+7 (999) 000-00-00"
+                />
+              </div>
+              <div class="info-group">
+                <label>Специализация</label>
+                <input
+                  type="text"
+                  id="edit_spec"
+                  placeholder="Напр: Монтаж и чистка"
+                />
+              </div>
+              <div class="info-group">
+                <label>Ставка (₽)</label>
+                <input type="number" id="edit_price" placeholder="0" />
+              </div>
+            </div>
+          </section>
+
+          <section class="orders-section">
+            <h2>Заказы в работе</h2>
+            <div class="table-wrapper">
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>№</th>
+                    <th>Клиент</th>
+                    <th>Адрес</th>
+                    <th>Статус</th>
+                  </tr>
+                </thead>
+                <tbody id="masterOrdersTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
     </main>
 
     <script src="/static/js/installer_detail.js"></script>
-</body>
+  </body>
 </html>

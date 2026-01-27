@@ -1,5 +1,5 @@
+// 1. Главная функция загрузки
 async function loadInstallerProfile() {
-    // 1. Берем ID из твоего нового тега <main id="installer-page" data-id="{{ id }}">
     const pageElement = document.getElementById('installer-page');
     if (!pageElement) return;
     
@@ -10,71 +10,76 @@ async function loadInstallerProfile() {
         if (!response.ok) throw new Error("Мастер не найден");
         
         const data = await response.json();
-        const info = data.info;   // Данные из таблицы installers
-        const orders = data.orders; // Данные из JOIN с заказами и клиентами
+        const info = data.info;   
 
-        // 2. Заполняем карточку мастера
-        document.getElementById('view_fio').textContent = info.fio;
-        document.getElementById('view_nickname').textContent = info.nickname ? `@${info.nickname}` : '';
-        document.getElementById('view_phone').textContent = info.phone || 'Не указан';
-        document.getElementById('view_spec').textContent = info.specialization || 'Монтаж';
-        document.getElementById('view_price').textContent = info.base_price || 0;
-        document.getElementById('avatar_letter').textContent = info.fio.charAt(0);
-        
-        const ratingElem = document.getElementById('view_rating');
-        if (ratingElem) ratingElem.textContent = `⭐ ${info.rating || 10}`;
-
-        const debtStatus = document.getElementById('view_debt_status');
-        debtStatus.textContent = info.is_debtor ? "Есть долг" : "Оплачено";
-        debtStatus.style.color = info.is_debtor ? "#ef4444" : "#10b981";
-
-        // 3. Заполняем таблицу его заказов
-        const tableBody = document.getElementById('masterOrdersTable');
-        if (!orders || orders.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">У этого мастера пока нет заказов</td></tr>';
-        } else {
-            tableBody.innerHTML = orders.map(order => `
-                <tr class="orders-table__row">
-                    <td>#${order.id}</td>
-                    <td><strong>${order.client_name}</strong></td>
-                    <td>${order.address || '—'}</td>
-                    <td><span class="status-badge">${order.status}</span></td>
-                    <td><a href="/order_page/${order.id}" class="btn-link" style="color: #2563eb; font-weight: bold;">Открыть</a></td>
-                </tr>
-            `).join('');
+        // ЗАПОЛНЯЕМ ДОСЬЕ (теперь в input-поля)
+        // Мы используем .value, чтобы текст можно было редактировать
+        if (document.getElementById('edit_fio')) {
+            document.getElementById('edit_fio').value = info.fio || '';
+        }
+        if (document.getElementById('edit_phone')) {
+            document.getElementById('edit_phone').value = info.phone || '';
+        }
+        if (document.getElementById('edit_spec')) {
+            document.getElementById('edit_spec').value = info.specialization || 'Монтаж';
+        }
+        if (document.getElementById('edit_price')) {
+            document.getElementById('edit_price').value = info.base_price || 0;
         }
 
+        // Обновляем заголовок и аватарку в сайдбаре
+        document.getElementById('top_fio').textContent = info.fio;
+        document.getElementById('avatar_letter').textContent = info.fio ? info.fio.charAt(0) : '?';
+
+        // Заполняем таблицу заказов
+        renderOrdersTable(data.orders);
+
     } catch (error) {
-        console.error("Ошибка загрузки профиля:", error);
-        document.getElementById('view_fio').textContent = "Ошибка: мастер не найден";
-    }
-}
-// Функция удаления
-async function deleteInstaller() {
-    if (!confirm("Удалить мастера? Все его заказы станут 'без мастера'.")) return;
-    
-    const id = document.getElementById('installer-page').getAttribute('data-id');
-    const res = await fetch(`/api/installers/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-        window.location.href = '/installers'; // Возвращаемся к списку
+        console.error("Ошибка:", error);
     }
 }
 
-// Функция сохранения (редактирования)
-async function saveInstallerChanges() {
+// 2. Функция сохранения (та самая кнопка)
+async function saveProfile() {
     const id = document.getElementById('installer-page').getAttribute('data-id');
-    const data = {
+    
+    // Собираем свежие данные прямо из инпутов
+    const updatedData = {
         fio: document.getElementById('edit_fio').value,
         phone: document.getElementById('edit_phone').value,
-        // ... остальные поля
+        specialization: document.getElementById('edit_spec').value,
+        base_price: parseFloat(document.getElementById('edit_price').value) || 0
     };
 
-    const res = await fetch(`/api/installers/${id}`, {
+    const response = await fetch(`/api/installers/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(updatedData)
     });
-    if (res.ok) alert("Сохранено!");
+
+    if (response.ok) {
+        alert("✅ Изменения сохранены!");
+        loadInstallerProfile(); // Обновляем данные на странице
+    } else {
+        alert("❌ Ошибка при сохранении");
+    }
 }
-// Запускаем один раз при загрузке страницы
+
+// Помогалка для таблицы
+function renderOrdersTable(orders) {
+    const tableBody = document.getElementById('masterOrdersTable');
+    if (!orders || orders.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4">Нет активных заказов</td></tr>';
+        return;
+    }
+    tableBody.innerHTML = orders.map(order => `
+        <tr>
+            <td>#${order.id}</td>
+            <td>${order.client_name || '—'}</td>
+            <td>${order.address || '—'}</td>
+            <td><span class="status-pill">${order.status}</span></td>
+        </tr>
+    `).join('');
+}
+
 document.addEventListener('DOMContentLoaded', loadInstallerProfile);
