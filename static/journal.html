@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Журнал заказов</title>
+    <link rel="stylesheet" href="/static/css/blocks/header.css">
+    <link rel="stylesheet" href="/static/css/blocks/orders-list.css">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+    <main class="page__main">
+        {% include "components/orders-list.html" %}
+    </main>
+
+    <script src="/static/js/api.js"></script>
+</body>
+</html>

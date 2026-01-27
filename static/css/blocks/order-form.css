@@ -1,0 +1,105 @@
+/* Основной контейнер формы */
+.crm-form {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Секции (Fieldset) */
+.crm-form__section {
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background: #f9fafb;
+}
+
+.crm-form__legend {
+    font-weight: 700;
+    color: #2c3e50;
+    padding: 0 10px;
+    font-size: 1.1rem;
+}
+
+/* Сетка полей (Адаптивность) */
+.crm-form__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+/* Поля ввода */
+.crm-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.crm-form__label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.crm-form__input {
+    padding: 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.crm-form__input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #fff;
+}
+
+/* Кнопки действий */
+.crm-form__actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.crm-form__button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.crm-form__button--submit {
+    background: #10b981;
+    color: white;
+}
+
+.crm-form__button--delete {
+    background: #ef4444;
+    color: white;
+    max-width: 200px;
+}
+
+.crm-form__button:active {
+    transform: scale(0.98);
+}
+
+/* На мобилках кнопки в столбик */
+@media (max-width: 600px) {
+    .crm-form__actions {
+        flex-direction: column;
+    }
+    .crm-form__button--delete {
+        max-width: none;
+    }
+}

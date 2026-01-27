@@ -1,0 +1,53 @@
+<form id="orderForm" class="crm-form">
+    <fieldset class="crm-form__section">
+        <legend class="crm-form__legend">👤 Карточка клиента</legend>
+        <input type="text" id="fio" placeholder="ФИО клиента" required class="crm-form__input">
+        <input type="tel" id="phone" placeholder="Номер телефона" required class="crm-form__input">
+        <input type="text" id="address" placeholder="Адрес (Проживания)" required class="crm-form__input">
+        <input type="text" id="model" placeholder="Модель кондиционера" class="crm-form__input">
+    </fieldset>
+
+    <fieldset class="crm-form__section">
+        <legend class="crm-form__legend">📅 Планирование</legend>
+        <div class="crm-form__field">
+            <label class="crm-form__label">Дата обслуживания:</label>
+            <input type="date" id="service_date" class="crm-form__input">
+        </div>
+        <div class="crm-form__field">
+            <label class="crm-form__label">Дата доставки (склад):</label>
+            <input type="date" id="delivery_date" class="crm-form__input">
+        </div>
+        <div class="crm-form__field">
+            <label class="crm-form__label">Установка (договор):</label>
+            <input type="date" id="appointment_date" class="crm-form__input">
+        </div>
+        <select id="warehouse" class="crm-form__input">
+            <option value="Основной">Склад: Основной</option>
+            <option value="Транзит">Склад: Транзит</option>
+        </select>
+    </fieldset>
+
+    <fieldset class="crm-form__section">
+        <legend class="crm-form__legend">💰 Финансы</legend>
+        <input type="number" id="buy_price" placeholder="Закупка (₽)" class="crm-form__input">
+        <input type="number" id="sell_price_ac" placeholder="Продажа (₽)" class="crm-form__input">
+        <input type="number" id="price_install" placeholder="Монтажнику (₽)" class="crm-form__input">
+        <input type="number" id="my_commission" placeholder="Комиссия (₽)" class="crm-form__input">
+        <label class="crm-form__checkbox-label">
+            <input type="checkbox" id="is_money_returned"> Деньги вернули
+        </label>
+    </fieldset>
+
+    <fieldset class="crm-form__section">
+        <legend class="crm-form__legend">📝 Комментарии</legend>
+        <select id="status" class="crm-form__input">
+            <option value="Новая заявка">Новая заявка</option>
+            <option value="Ждет установщика">Ждет установщика</option>
+            <option value="Завершено">Завершено</option>
+        </select>
+        <textarea id="promises" placeholder="Обещания клиенту" class="crm-form__input"></textarea>
+        <textarea id="installer_opinion" placeholder="Мнение монтажника" class="crm-form__input"></textarea>
+    </fieldset>
+
+    <button type="submit" class="crm-form__button">Создать карточку</button>
+</form>

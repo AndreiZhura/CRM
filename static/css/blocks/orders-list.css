@@ -1,0 +1,22 @@
+.orders-list { padding: 20px 0; }
+.orders-list__title { color: #2c3e50; text-align: center; }
+
+.orders-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.orders-table__th, .orders-table__td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.orders-table__th { background: #3498db; color: white; }
+.orders-table__row:hover { background: #f9f9f9; }

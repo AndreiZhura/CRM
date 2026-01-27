@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM Олега | Управление заказами</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+    />
+
+    <link rel="stylesheet" href="/static/css/blocks/header.css" />
+    <link rel="stylesheet" href="/static/css/blocks/order-form.css" />
+    <link rel="stylesheet" href="static/css/blocks/orders-list.css" />
+    <link rel="stylesheet" href="/static/css/blocks/footer.css" />
+  </head>
+  <body class="page">
+    {% include "components/header.html" %}
+
+    <main class="page__main">
+      {% include "components/order-form.html" %} 
+     
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script src="/static/js/api.js" defer></script>
+  </body>
+</html>

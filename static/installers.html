@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Монтажники | Олег-Холод</title>
+    <link rel="stylesheet" href="/static/css/blocks/header.css">
+    <link rel="stylesheet" href="/static/css/blocks/footer.css">
+    <link rel="stylesheet" href="/static/css/blocks/installers.css">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+<main class="content">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Управление монтажниками</h1>
+        <button class="crm-form__button crm-form__button--submit" style="width: auto; padding: 10px 20px;" onclick="location.href='/add_installer'">
+            + Добавить мастера
+        </button>
+    </div>
+
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Телефон</th>
+                <th>Специализация</th>
+                <th>Рейтинг</th>
+                <th>Долг</th>
+            </tr>
+        </thead>
+        <tbody id="installersTableBody">
+            </tbody>
+    </table>
+</main>
+
+    {% include "components/footer.html" %}
+    <script src="/static/js/installers_page.js"></script>
+</body>
+</html>
