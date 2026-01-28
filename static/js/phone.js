@@ -51,3 +51,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (input.value) handlePhoneInput(input);
     });
 });
+
+// Замени свой блок инициализации на этот:
+    function initAllPhones() {
+        document.querySelectorAll('.phone-mask').forEach(input => {
+            if (input.value && input.value.length > 1) {
+                handlePhoneInput(input);
+            }
+        });
+    }
+
+    // Запуск сразу
+    initAllPhones();
+    
+    // Запуск через полсекунды (когда fetch-запросы обычно успевают дойти)
+    setTimeout(initAllPhones, 500);

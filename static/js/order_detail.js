@@ -27,8 +27,16 @@ async function initPage() {
 
         // 3. ЗАПОЛНЯЕМ ПОЛЯ КЛИЕНТА
         document.getElementById('fio').value = data.fio || '';
-        document.getElementById('phone').value = data.phone || '';
         document.getElementById('address').value = data.address || '';
+        
+        // --- ОБРАБОТКА ТЕЛЕФОНА (Теперь ВНУТРИ initPage) ---
+        const phoneInput = document.getElementById('client_phone');
+        if (phoneInput) {
+            // Берем данные из поля phone (как они приходят из БД)
+            phoneInput.value = data.phone || '';
+            // Генерируем событие 'input', чтобы сработал phone.js (маска и кнопки)
+            phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
         
         // 4. ЛОГИСТИКА
         document.getElementById('service_date').value = data.service_date || '';
@@ -49,7 +57,6 @@ async function initPage() {
         document.getElementById('promises').value = data.promises || '';
         document.getElementById('comments').value = data.comments || '';
         
-        // Поле только для чтения
         if (data.created_at) {
             document.getElementById('created_at').value = new Date(data.created_at).toLocaleString('ru-RU');
         }
@@ -65,9 +72,10 @@ const form = document.getElementById('editOrderForm');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Собираем данные. Важно: ID поля телефона теперь client_phone
     const updatedData = {
         fio: document.getElementById('fio').value,
-        phone: document.getElementById('phone').value,
+        phone: document.getElementById('client_phone').value, // ИЗМЕНЕНО
         address: document.getElementById('address').value,
         service_date: document.getElementById('service_date').value || null,
         appointment_date: document.getElementById('appointment_date').value || null,
@@ -82,7 +90,6 @@ form.addEventListener('submit', async (e) => {
         status: document.getElementById('status').value,
         promises: document.getElementById('promises').value,
         comments: document.getElementById('comments').value,
-        // ДОБАВЛЯЕМ ID МОНТАЖНИКА ИЗ ВЫПАДАЮЩЕГО СПИСКА
         installer_id: document.getElementById('installer_id').value ? parseInt(document.getElementById('installer_id').value) : null
     };
 
@@ -103,11 +110,11 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// 3. ФУНКЦИЯ УДАЛЕНИЯ (С ПОПАПОМ)
+// 3. ФУНКЦИЯ УДАЛЕНИЯ
 const deleteBtn = document.getElementById('deleteOrder');
 if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
-        if (confirm("⚠️ ВНИМАНИЕ! Вы точно хотите УДАЛИТЬ этот заказ? Это действие нельзя отменить.")) {
+        if (confirm("⚠️ ВНИМАНИЕ! Вы точно хотите УДАЛИТЬ этот заказ?")) {
             try {
                 const response = await fetch(`/api/order/${orderId}`, { method: 'DELETE' });
                 if (response.ok) {

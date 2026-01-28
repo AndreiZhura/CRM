@@ -1,3 +1,4 @@
+{% import "components/phone.html" as inputs %}
 <!doctype html>
 <html lang="ru">
   <head>
@@ -5,6 +6,7 @@
     <title>Добавить мастера | Олег-Холод</title>
     <link rel="stylesheet" href="/static/css/blocks/header.css" />
     <link rel="stylesheet" href="/static/css/blocks/installer_add.css" />
+    <link rel="stylesheet" href="/static/css/blocks/phone.css" />
   </head>
   <body>
     {% include "components/header.html" %}
@@ -20,7 +22,7 @@
           <label>Кликуха (Nickname)</label>
           <input type="text" id="nickname" />
         </div>
-      {{ inputs.phone_input('phone', info.phone) }}
+        {{ inputs.phone_input('phone', '') }}
         <div class="form-group">
           <label>Специализация:</label>
           <input type="checkbox" name="spec" value="Мойщик" /> Мойщик
@@ -57,8 +59,7 @@
         <button type="submit" class="btn-save">Сохранить</button>
       </form>
     </div>
-    <script src="/static/js/installer_add.js"></script>
-
+    <script src="/static/js/phone.js"></script>
     <script src="/static/js/installer_add.js"></script>
   </body>
 </html>

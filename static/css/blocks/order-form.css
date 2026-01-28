@@ -134,6 +134,10 @@ textarea.crm-form__input {
     border-color: #ef4444;
 }
 
+.crm-form__grid .crm-form__field {
+    min-width: 0; /* Позволяет гридам корректно считать ширину */
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .crm-form { margin: 10px; padding: 20px; }

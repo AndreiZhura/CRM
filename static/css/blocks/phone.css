@@ -1,4 +1,20 @@
-/* Контейнер должен быть относительным, чтобы кнопки позиционировались внутри него */
+/* Общий контейнер */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Лейбл — по твоим параметрам */
+.field-group label {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Контейнер ввода */
 .phone-input-container {
     position: relative;
     display: flex;
@@ -6,40 +22,52 @@
     width: 100%;
 }
 
-/* Сам инпут: добавляем отступ справа, чтобы текст не заходил под кнопки */
+/* Инпут — приводим к общему стилю */
 .phone-mask {
-    padding-right: 70px !important; 
-    width: 100%;
+    width: 100% !important;
+    height: 42px;
+    padding: 0.625rem 0.875rem;
+    padding-right: 85px !important; /* Место для кнопок */
+    
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0; /* Светло-серый Slate 200 */
+    border-radius: 0.5rem; /* 8px */
+    
+    font-size: 0.95rem;
+    color: #1e293b;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
 }
 
-/* Блок с кнопками: выравниваем строго по правому краю */
+/* Фокус как в современных CRM */
+.phone-mask:focus {
+    outline: none;
+    border-color: #3b82f6; /* Синий акцент */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Кнопки связи */
 .phone-actions {
     position: absolute;
-    right: 10px;
+    right: 0.75rem;
     display: flex;
-    gap: 10px; /* Расстояние между трубкой и самолетиком */
-    align-items: center;
-    height: 100%;
+    gap: 0.75rem;
+    z-index: 10;
 }
 
-/* Стили иконок */
 .action-btn {
     text-decoration: none;
     font-size: 1.1rem;
-    line-height: 1;
-    transition: transform 0.2s, opacity 0.2s;
+    transition: all 0.2s ease;
     cursor: pointer;
-    display: inline-block;
+    line-height: 1;
 }
 
+/* Оживляем кнопки при наведении */
 .action-btn:hover {
-    transform: scale(1.2);
+    filter: grayscale(0);
     opacity: 1;
-}
-
-/* Телеграм сделаем чуть бледнее, пока не навели (эффект чистоты) */
-.tg-btn {
-    opacity: 0.6;
+    transform: scale(1.15);
 }
 
 .hidden {

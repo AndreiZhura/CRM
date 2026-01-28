@@ -1,3 +1,4 @@
+{% import "components/phone.html" as phone_comp %}
 <!doctype html>
 <html lang="ru">
   <head>
@@ -7,6 +8,7 @@
 
     <link rel="stylesheet" href="/static/css/blocks/header.css" />
     <link rel="stylesheet" href="/static/css/blocks/footer.css" />
+    <link rel="stylesheet" href="/static/css/blocks/phone.css" />
     <link rel="stylesheet" href="/static/css/blocks/order-form.css" />
   </head>
   <body class="page">
@@ -38,13 +40,7 @@
               />
             </div>
             <div class="crm-form__field">
-              <label class="crm-form__label">Телефон</label>
-              <input
-                type="tel"
-                id="phone"
-                class="crm-form__input"
-                placeholder="+7 (___) ___ - __ - __"
-              />
+              {{ phone_comp.phone_input('client_phone', '') }}
             </div>
             <div class="crm-form__field crm-form__field--full">
               <label class="crm-form__label">Адрес установки</label>
@@ -197,6 +193,6 @@
     {% include "components/footer.html" %}
 
     <script src="/static/js/order_detail.js"></script>
-    <script src="/static/js/order_detail.js"></script>
+    <script src="/static/js/phone.js"></script>
   </body>
 </html>

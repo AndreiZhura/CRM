@@ -152,3 +152,4 @@ async function deleteInstaller() {
         console.error(e);
     }
 }
+
