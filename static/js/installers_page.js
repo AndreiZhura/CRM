@@ -1,73 +1,127 @@
-// 1. Функция загрузки списка мастеров
-async function loadInstallers() {
+// 1. Глобальное состояние
+let allInstallers = [];
+
+// 2. Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("System: Инициализация страницы мастеров...");
+    fetchInstallers();
+
+    // Слушатели для фильтров
+    const searchName = document.getElementById('searchName');
+    const searchSpec = document.getElementById('searchSpec');
+    const filterDebt = document.getElementById('filterDebt');
+
+    if (searchName) searchName.addEventListener('input', applyFilters);
+    if (searchSpec) searchSpec.addEventListener('input', applyFilters);
+    if (filterDebt) filterDebt.addEventListener('change', applyFilters);
+
+    // Инициализация формы
+    initInstallerForm();
+});
+
+// 3. Загрузка данных с сервера
+async function fetchInstallers() {
+    try {
+        const response = await fetch('/api/installers');
+        if (!response.ok) throw new Error('Ошибка сети');
+        allInstallers = await response.json();
+        renderTable(allInstallers);
+    } catch (e) {
+        console.error("Ошибка загрузки:", e);
+    }
+}
+
+// 4. Логика фильтрации (Живой поиск)
+function applyFilters() {
+    const nameQuery = document.getElementById('searchName')?.value.toLowerCase() || '';
+    const specQuery = document.getElementById('searchSpec')?.value.toLowerCase() || '';
+    const onlyDebt = document.getElementById('filterDebt')?.checked;
+
+    const filtered = allInstallers.filter(inst => {
+        const matchesName = (inst.fio || "").toLowerCase().includes(nameQuery) ||
+                            (inst.nickname && inst.nickname.toLowerCase().includes(nameQuery));
+        const matchesSpec = (inst.specialization || "").toLowerCase().includes(specQuery);
+        const matchesDebt = onlyDebt ? inst.is_debtor : true;
+
+        return matchesName && matchesSpec && matchesDebt;
+    });
+
+    renderTable(filtered);
+}
+
+// 5. Отрисовка таблицы
+function renderTable(installers) {
     const tableBody = document.getElementById('installersTableBody');
     if (!tableBody) return;
 
-    try {
-        const response = await fetch('/api/installers');
-        const installers = await response.json();
-
-        if (!installers || installers.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Мастеров нет</td></tr>';
-            return;
-        }
-
-        tableBody.innerHTML = installers.map(inst => {
-            // Подготовка номера для ссылок: убираем всё кроме цифр
-            const rawPhone = inst.phone || '';
-            const cleanNumber = rawPhone.replace(/\D/g, '');
-
-            // Если номер начинается с 8, меняем на 7 для tel: и t.me
-            const linkNumber = cleanNumber.startsWith('8')
-                ? '7' + cleanNumber.substring(1)
-                : cleanNumber;
-
-            return `
-                <tr class="orders-table__row">
-                    <td class="orders-table__td">
-                        <a href="/installers/profile/${inst.id}" style="text-decoration: none; color: #2563eb; font-weight: bold;">
-                            ${inst.fio}
-                        </a>
-                        ${inst.nickname ? `<br><small style="color:gray">(${inst.nickname})</small>` : ''}
-                    </td>
-                  <td class="orders-table__td">
-    <div class="table-phone-wrapper">
-        <span style="font-weight: 500;">${rawPhone || '—'}</span>
-        ${cleanNumber.length >= 10 ? `
-            <div class="table-phone-actions">
-                <a href="tel:+${linkNumber}" title="Позвонить">📞</a>
-                <a href="https://t.me/+${linkNumber}" target="_blank" title="Telegram">✈️</a>
-            </div>
-        ` : ''}
-    </div>
-</td>
-                    <td class="orders-table__td">${inst.specialization || 'Монтаж'}</td>
-                    <td class="orders-table__td">⭐ ${inst.rating || 10}</td>
-                    <td class="orders-table__td" style="color: ${inst.is_debtor ? 'red' : 'green'}">
-                        ${inst.is_debtor ? 'Долг' : 'Ок'}
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    } catch (e) {
-        console.error("Ошибка загрузки списка мастеров:", e);
+    if (!installers || installers.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Мастер не найден</td></tr>';
+        return;
     }
+
+    tableBody.innerHTML = installers.map(inst => {
+        const rawPhone = inst.phone || '';
+        const cleanNumber = rawPhone.replace(/\D/g, '');
+        const linkNumber = cleanNumber.startsWith('8') ? '7' + cleanNumber.substring(1) : cleanNumber;
+
+        return `
+            <tr class="orders-table__row">
+                <td class="orders-table__td">
+                    <a href="/installers/profile/${inst.id}" class="installer-link">
+                        <strong>${inst.fio}</strong>
+                    </a>
+                    ${inst.nickname ? `<br><small style="color:gray">(${inst.nickname})</small>` : ''}
+                </td>
+                <td class="orders-table__td">
+                    <div class="table-phone-wrapper">
+                        <span class="phone-number">${rawPhone || '—'}</span>
+                        ${cleanNumber.length >= 10 ? `
+                            <div class="table-phone-actions">
+                                <a href="tel:+${linkNumber}">📞</a>
+                                <a href="https://t.me/+${linkNumber}" target="_blank">✈️</a>
+                            </div>
+                        ` : ''}
+                    </div>
+                </td>
+                <td class="orders-table__td">${inst.specialization || 'Монтаж'}</td>
+                <td class="orders-table__td">⭐ ${inst.rating || 10}</td>
+                <td class="orders-table__td">
+                    <span class="status-badge" style="color: ${inst.is_debtor ? '#e11d48' : '#10b981'}; font-weight: bold;">
+                        ${inst.is_debtor ? '❌ Долг' : '✅ Ок'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
-document.addEventListener('DOMContentLoaded', loadInstallers);
 
-// 2. Обработка формы добавления
-const installerForm = document.getElementById('installerForm');
-if (installerForm) {
-    installerForm.addEventListener('submit', async (e) => {
+// 6. Работа с формой добавления
+// 6. Работа с формой добавления (ИСПРАВЛЕННАЯ)
+function initInstallerForm() {
+    const form = document.getElementById('addInstallerForm'); // Проверь ID формы
+    if (!form) return;
+
+    form.onsubmit = async (e) => {
         e.preventDefault();
-
+        
+        // СИСТЕМНЫЙ СБОР: забираем всё, что добавили в HTML
         const formData = {
-            fio: document.getElementById('inst_fio').value,
-            nickname: document.getElementById('inst_nickname').value,
-            phone: document.getElementById('inst_phone').value,
-            specialization: document.getElementById('inst_spec').value,
-            base_price: parseFloat(document.getElementById('inst_price').value) || 0
+            fio: document.getElementById('fio').value,
+            nickname: document.getElementById('nickname').value || "",
+            phone: document.getElementById('phone').value || "",
+            specialization: document.getElementById('specialization').value || "Монтаж",
+            rating: parseInt(document.getElementById('rating').value) || 10,
+            
+            // ВОТ ЧЕГО НЕ ХВАТАЛО:
+            is_debtor: document.getElementById('is_debtor').checked, // true/false
+            debt_amount: parseFloat(document.getElementById('debt_amount').value) || 0,
+            
+            base_price: parseFloat(document.getElementById('base_price').value) || 0,
+            status: document.getElementById('status').value || "Новый",
+            dossier: document.getElementById('dossier').value || ""
         };
+
+        console.log("System: Отправка данных на Python-сервер...", formData);
 
         try {
             const response = await fetch('/api/installers', {
@@ -77,27 +131,28 @@ if (installerForm) {
             });
 
             if (response.ok) {
-                alert('Мастер успешно добавлен!');
-                closeAddInstallerModal();
-                loadInstallers(); // Вместо перезагрузки всей страницы просто обновляем таблицу
+                // Если у тебя на этой же странице модалка — закрываем
+                if (typeof closeAddInstallerModal === "function") closeAddInstallerModal();
+                
+                // Если это отдельная страница — перенаправляем
+                window.location.href = '/installers_page';
             } else {
-                alert('Ошибка при сохранении');
+                const err = await response.json();
+                alert('Ошибка сервера: ' + JSON.stringify(err.detail));
             }
         } catch (error) {
-            console.error('Ошибка:', error);
+            console.error('Ошибка сети:', error);
         }
-    });
+    };
 }
 
-// 3. Утилиты для модального окна
+// 7. Функции модального окна
 function openAddInstallerModal() {
-    document.getElementById('addInstallerModal').style.display = 'flex';
+    const modal = document.getElementById('addInstallerModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeAddInstallerModal() {
-    document.getElementById('addInstallerModal').style.display = 'none';
+    const modal = document.getElementById('addInstallerModal');
+    if (modal) modal.style.display = 'none';
 }
-
-
-// Запуск при загрузке
-document.addEventListener('DOMContentLoaded', loadInstallers);

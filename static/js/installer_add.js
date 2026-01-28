@@ -1,48 +1,44 @@
 document.getElementById('addInstallerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const selectedSpecs = Array.from(document.querySelectorAll('input[name="spec"]:checked'))
-                               .map(cb => cb.value);
-
+    // 1. Собираем данные из полей (включая чекбокс и специализацию)
     const formData = {
         fio: document.getElementById('fio').value,
         nickname: document.getElementById('nickname').value || "",
         phone: document.getElementById('phone').value || "",
-        specialization: selectedSpecs.join(', ') || "Монтаж",
+        // Напрямую берем текст, который вписал Олег (например, "Альпинист")
+        specialization: document.getElementById('specialization').value || "Монтаж",
         rating: parseInt(document.getElementById('rating').value) || 10,
         dossier: document.getElementById('dossier').value || "",
-        is_debtor: document.getElementById('is_debtor').value === "true",
+        
+        // ВНИМАНИЕ: Берем состояние чекбокса напрямую (checked - это true или false)
+        is_debtor: document.getElementById('is_debtor').checked,
+        // Сумма долга
+        debt_amount: parseFloat(document.getElementById('debt_amount').value) || 0, 
+        
         base_price: parseFloat(document.getElementById('base_price').value) || 0,
         status: document.getElementById('status').value
     };
 
     try {
+        console.log("System: Отправка досье на сервер...", formData);
+
         const response = await fetch('/api/installers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
 
-        if (response.ok) {
-            window.location.href = '/installers';
+        // 2. Обработка ответа
+        if (response.ok || response.status === 400) { 
+            // Перенаправляем на страницу списка
+            window.location.href = '/installers_page'; 
         } else {
             const err = await response.json();
-            alert("Ошибка: " + JSON.stringify(err.detail));
+            alert("Ошибка сохранения: " + (err.detail || "Неизвестная ошибка"));
         }
     } catch (error) {
-        alert("Сервер не отвечает");
+        console.error("Ошибка сети:", error);
+        alert("Сервер Mac mini не отвечает. Проверь соединение.");
     }
-    const response = await fetch('/api/installers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-});
-
-if (response.ok || response.status === 400) { 
-    // Если 400 (уже существует) или 200 (создан) - всё равно идем в список
-    window.location.href = '/installers';
-} else {
-    const err = await response.json();
-    alert("Ошибка: " + err.detail);
-}
 });

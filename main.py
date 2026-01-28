@@ -12,7 +12,6 @@ from fastapi.templating import Jinja2Templates
 
 app = FastAPI(title="Олег-Холод ERP")
 
-# Монтируем статику и шаблоны
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="static")
 
@@ -27,7 +26,7 @@ def get_db_connection():
         print(f"ОШИБКА ПОДКЛЮЧЕНИЯ К БД: {e}")
         return None
 
-# --- МОДЕЛИ ДАННЫХ (Pydantic для валидации) ---
+# --- МОДЕЛИ ДАННЫХ ---
 
 class InstallerCreate(BaseModel):
     fio: str
@@ -37,69 +36,67 @@ class InstallerCreate(BaseModel):
     rating: int = 10
     dossier: Optional[str] = None
     is_debtor: bool = False
+    debt_amount: float = 0.0  # Финансы
     base_price: float = 0.0
     status: str = "Новый"
 
 class InstallerUpdate(BaseModel):
     fio: str
+    nickname: Optional[str] = None
     phone: Optional[str] = None
     specialization: Optional[str] = None
+    rating: int = 10
+    dossier: Optional[str] = None
+    is_debtor: bool = False   # Позволяет менять статус долга
+    debt_amount: float = 0.0  # Позволяет менять сумму долга
     base_price: float = 0.0
+    status: str = "В работе"
 
 class OrderCreate(BaseModel):
     fio: str
     phone: str
     address: str
-    # Финансы
     buy_price: float = 0.0
     sell_price_ac: float = 0.0
     price_install: float = 0.0
     my_commission: float = 0.0
     is_money_returned: bool = False
-    # Текстовые поля и монтажник
     status: Optional[str] = "Новая заявка"
     promises: Optional[str] = ""
     installer_opinion: Optional[str] = ""
     installer_id: Optional[int] = None
 
-# --- СТРАНИЦЫ FRONTEND (Отрисовка HTML) ---
+# --- СТРАНИЦЫ FRONTEND ---
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index(request: Request):
-    """Главная страница (Дашборд)"""
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/journal", response_class=HTMLResponse)
 async def read_journal(request: Request):
-    """Журнал всех заказов для Олега"""
     return templates.TemplateResponse("journal.html", {"request": request})
 
 @app.get("/order_page/{order_id}", response_class=HTMLResponse)
 async def get_order_page(request: Request, order_id: int):
-    """Детальная страница заказа (редактирование)"""
     return templates.TemplateResponse("order_detail.html", {"request": request, "order_id": order_id})
 
 @app.get("/installers", response_class=HTMLResponse)
 @app.get("/installers_page", response_class=HTMLResponse)
 async def get_installers_page(request: Request):
-    """Список мастеров"""
     return templates.TemplateResponse("installers.html", {"request": request})
 
 @app.get("/installers/add", response_class=HTMLResponse)
 async def add_installer_page(request: Request):
-    """Страница регистрации нового мастера"""
     return templates.TemplateResponse("installer_add.html", {"request": request})
 
 @app.get("/installers/profile/{installer_id}", response_class=HTMLResponse)
 async def get_installer_profile_page(request: Request, installer_id: int):
-    """Личный кабинет (досье) мастера"""
     return templates.TemplateResponse("installer_detail.html", {"request": request, "id": installer_id})
 
-# --- API: ЗАКАЗЫ (Управление заказами) ---
+# --- API: ЗАКАЗЫ ---
 
 @app.get("/orders")
 def get_orders():
-    """Получить все заказы с данными клиентов"""
     conn = get_db_connection()
     if not conn: return []
     cur = conn.cursor()
@@ -115,7 +112,6 @@ def get_orders():
 
 @app.get("/api/order/{order_id}")
 def get_order_api(order_id: int):
-    """Получить один заказ по ID"""
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -130,93 +126,37 @@ def get_order_api(order_id: int):
 
 @app.post("/add_order")
 def create_order(order: OrderCreate):
-    """Создать нового клиента и заказ со всеми финансовыми полями"""
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # 1. Вставляем клиента
         cur.execute(
             "INSERT INTO clients (fio, phone, address) VALUES (%s, %s, %s) RETURNING id",
             (order.fio, order.phone, order.address)
         )
         client_id = cur.fetchone()['id']
-
-        # 2. Считаем профит для нового заказа
         calculated_profit = order.sell_price_ac - order.buy_price - order.price_install
-
-        # 3. Вставляем заказ со ВСЕМИ новыми полями
         cur.execute(
             """INSERT INTO orders (
                 client_id, status, buy_price, sell_price_ac, 
                 price_install, my_commission, is_money_returned, 
                 promises, profit
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-            (
-                client_id, order.status, order.buy_price, order.sell_price_ac,
-                order.price_install, order.my_commission, order.is_money_returned,
-                order.promises, calculated_profit
-            )
+            (client_id, order.status, order.buy_price, order.sell_price_ac,
+             order.price_install, order.my_commission, order.is_money_returned,
+             order.promises, calculated_profit)
         )
         conn.commit()
         return {"status": "success"}
     except Exception as e:
         conn.rollback()
-        print(f"ОШИБКА ПРИ СОЗДАНИИ: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close(); conn.close()
 
-@app.put("/api/order/{order_id}")
-def update_order(order_id: int, order: OrderCreate):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        # 1. Обновляем данные клиента
-        cur.execute("""
-            UPDATE clients 
-            SET fio = %s, phone = %s, address = %s 
-            FROM orders 
-            WHERE orders.client_id = clients.id AND orders.id = %s
-        """, (order.fio, order.phone, order.address, order_id))
-
-        # 2. Считаем профит системно: Продажа - Закупка - Монтажник
-        calculated_profit = order.sell_price_ac - order.buy_price - order.price_install
-
-        # 3. Обновляем заказ (включая обещания и мнение монтажника)
-        cur.execute("""
-            UPDATE orders 
-            SET buy_price = %s, 
-                sell_price_ac = %s, 
-                price_install = %s, 
-                my_commission = %s, 
-                is_money_returned = %s,
-                status = %s,
-                promises = %s,
-                installer_opinion = %s,
-                installer_id = %s,
-                profit = %s
-            WHERE id = %s
-        """, (
-            order.buy_price, order.sell_price_ac, order.price_install, 
-            order.my_commission, order.is_money_returned, order.status,
-            order.promises, order.installer_opinion, order.installer_id,
-            calculated_profit, order_id
-        ))
-
-        conn.commit()
-        return {"status": "success"}
-    except Exception as e:
-        conn.rollback()
-        print(f"ОШИБКА БЭКЕНДА: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cur.close(); conn.close()
-
-# --- API: МОНТАЖНИКИ (Мастера) ---
+# --- API: МОНТАЖНИКИ ---
 
 @app.get("/api/installers")
 def api_get_installers():
-    """Список всех мастеров для выпадающих списков"""
     conn = get_db_connection()
     if not conn: return []
     cur = conn.cursor()
@@ -227,7 +167,6 @@ def api_get_installers():
 
 @app.get("/api/installers/{installer_id}")
 def api_get_installer_detail(installer_id: int):
-    """Карточка мастера и список его выполненных объектов"""
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -246,15 +185,17 @@ def api_get_installer_detail(installer_id: int):
 
 @app.post("/api/installers")
 def api_create_installer(inst: InstallerCreate):
-    """Регистрация нового мастера в базе"""
+    """Регистрация с учетом долга"""
     conn = get_db_connection()
     cur = conn.cursor()
     try:
         cur.execute(
-            """INSERT INTO installers (fio, nickname, phone, specialization, rating, dossier, is_debtor, base_price, status) 
-               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            """INSERT INTO installers (
+                fio, nickname, phone, specialization, rating, 
+                dossier, is_debtor, debt_amount, base_price, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (inst.fio, inst.nickname, inst.phone, inst.specialization, inst.rating,
-             inst.dossier, inst.is_debtor, inst.base_price, inst.status)
+             inst.dossier, inst.is_debtor, inst.debt_amount, inst.base_price, inst.status)
         )
         conn.commit()
         return {"status": "success"}
@@ -269,15 +210,19 @@ def api_create_installer(inst: InstallerCreate):
 
 @app.put("/api/installers/{installer_id}")
 def update_installer(installer_id: int, data: InstallerUpdate):
-    """Обновить профиль мастера"""
+    """Полное обновление профиля, включая финансы"""
     conn = get_db_connection()
     cur = conn.cursor()
     try:
         cur.execute("""
             UPDATE installers 
-            SET fio = %s, phone = %s, specialization = %s, base_price = %s
+            SET fio = %s, nickname = %s, phone = %s, specialization = %s, 
+                rating = %s, dossier = %s, is_debtor = %s, 
+                debt_amount = %s, base_price = %s, status = %s
             WHERE id = %s
-        """, (data.fio, data.phone, data.specialization, data.base_price, installer_id))
+        """, (data.fio, data.nickname, data.phone, data.specialization, 
+              data.rating, data.dossier, data.is_debtor, 
+              data.debt_amount, data.base_price, data.status, installer_id))
         conn.commit()
         return {"status": "success"}
     finally:
@@ -285,7 +230,6 @@ def update_installer(installer_id: int, data: InstallerUpdate):
 
 @app.delete("/api/installers/{installer_id}")
 def api_delete_installer(installer_id: int):
-    """Удалить мастера (отвязав его от заказов)"""
     conn = get_db_connection()
     cur = conn.cursor()
     try:

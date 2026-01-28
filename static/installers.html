@@ -2,6 +2,7 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Монтажники | Олег-Холод</title>
     <link rel="stylesheet" href="/static/css/blocks/header.css" />
     <link rel="stylesheet" href="/static/css/blocks/footer.css" />
@@ -17,46 +18,55 @@
           <span>+</span> Добавить мастера
         </a>
       </div>
+
       <div class="search-filters">
         <div class="search-group">
           <div class="input-wrapper">
             <input
               type="text"
-              id="searchFio"
+              id="searchName"
               placeholder="Поиск по ФИО..."
               class="search-input"
             />
-            <button class="search-btn" onclick="triggerSearch()">🔍</button>
+            <span class="search-icon">🔍</span>
           </div>
         </div>
+
         <div class="search-group">
           <div class="input-wrapper">
             <input
               type="text"
-              id="searchNickname"
-              placeholder="Поиск по кликухе..."
+              id="searchSpec"
+              placeholder="Поиск по специализации..."
               class="search-input"
             />
-            <button class="search-btn" onclick="triggerSearch()">🔍</button>
+            <span class="search-icon">🔍</span>
           </div>
+        </div>
+
+        <div class="search-group checkbox-group">
+          <input type="checkbox" id="filterDebt" class="custom-checkbox" />
+          <label for="filterDebt">Только должники</label>
         </div>
       </div>
 
-      <table class="orders-table">
-        <thead>
-          <tr>
-            <th>ФИО / Ник</th>
-            <th>Телефон</th>
-            <th>Специализация</th>
-            <th>Рейтинг</th>
-            <th>Статус</th>
-          </tr>
-        </thead>
-        <tbody id="installersTableBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>ФИО / Ник</th>
+              <th>Телефон</th>
+              <th>Специализация</th>
+              <th>Рейтинг</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="installersTableBody"></tbody>
+        </table>
+      </div>
     </main>
 
-    <script src="/static/js/installers_page.js"></script>
     <script src="/static/js/common.js"></script>
+    <script src="/static/js/installers_page.js"></script>
   </body>
 </html>

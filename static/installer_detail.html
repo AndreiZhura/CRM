@@ -28,17 +28,59 @@
           <div class="installer-form-linear">
             <div class="field-group">
               <label>Полное ФИО (можно редактировать)</label>
-              <input type="text" id="fio" class="input-large" placeholder="Иванов Иван Иванович" />
+              <input
+                type="text"
+                id="fio"
+                class="input-large"
+                placeholder="Иванов Иван Иванович"
+              />
             </div>
             <div class="field-row">
               <div class="field-group">
                 <label>Кличка / Позывной</label>
-                <input type="text" id="nickname" placeholder="Напр: Снежный Барс" />
+                <input
+                  type="text"
+                  id="nickname"
+                  placeholder="Напр: Снежный Барс"
+                />
               </div>
-              
+
               {{ phone_comp.phone_input('phone', '') }}
             </div>
           </div>
+          <section class="installer-card card-debt">
+            <h3 class="installer-card__title">💰 Финансовое состояние</h3>
+            <div class="installer-form-linear">
+              <div class="field-row" style="align-items: center; gap: 20px">
+                <div
+                  class="field-group-checkbox"
+                  style="display: flex; align-items: center; gap: 10px"
+                >
+                  <input
+                    type="checkbox"
+                    id="is_debtor"
+                    style="width: 22px; height: 22px; cursor: pointer"
+                  />
+                  <label
+                    for="is_debtor"
+                    style="font-weight: bold; color: #e11d48; cursor: pointer"
+                  >
+                    Мастер в долгу
+                  </label>
+                </div>
+
+                <div class="field-group">
+                  <label>Сумма долга (₽)</label>
+                  <input
+                    type="number"
+                    id="debt_amount"
+                    placeholder="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
 
         <section class="installer-card">
@@ -47,7 +89,11 @@
             <div class="field-row">
               <div class="field-group">
                 <label>Специализация</label>
-                <input type="text" id="specialization" placeholder="Установка, чистка..." />
+                <input
+                  type="text"
+                  id="specialization"
+                  placeholder="Установка, чистка..."
+                />
               </div>
               <div class="field-group">
                 <label>Базовая ставка (₽)</label>
@@ -56,7 +102,11 @@
             </div>
             <div class="field-group">
               <label>Досье и заметки (текстовая информация)</label>
-              <textarea id="dossier" rows="6" placeholder="Опишите опыт..."></textarea>
+              <textarea
+                id="dossier"
+                rows="6"
+                placeholder="Опишите опыт..."
+              ></textarea>
             </div>
           </div>
         </section>
@@ -65,8 +115,20 @@
           <div class="card-header-flex">
             <h3 class="installer-card__title">🚀 Заказы мастера</h3>
             <div class="status-filter">
-              <button class="filter-btn active" id="btn-active" onclick="renderOrders('active')">В работе</button>
-              <button class="filter-btn" id="btn-history" onclick="renderOrders('history')">История (архив)</button>
+              <button
+                class="filter-btn active"
+                id="btn-active"
+                onclick="renderOrders('active')"
+              >
+                В работе
+              </button>
+              <button
+                class="filter-btn"
+                id="btn-history"
+                onclick="renderOrders('history')"
+              >
+                История (архив)
+              </button>
             </div>
           </div>
           <div class="table-responsive">
@@ -90,7 +152,9 @@
               <h4>Удаление мастера</h4>
               <p>Это действие нельзя отменить.</p>
             </div>
-            <button class="btn-delete-safe" onclick="confirmDelete()">Удалить профиль мастера</button>
+            <button class="btn-delete-safe" onclick="confirmDelete()">
+              Удалить профиль мастера
+            </button>
           </div>
         </section>
       </div>

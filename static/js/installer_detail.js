@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadInstallerData();
 });
 
-// 2. Основная функция загрузки данных
+// 2. Основная функция загрузки данных (Добавлены поля долга)
 async function loadInstallerData() {
     const pageElement = document.getElementById('installer-page');
     if (!pageElement) return;
@@ -18,27 +18,34 @@ async function loadInstallerData() {
         if (!response.ok) throw new Error("Мастер не найден");
         
         const data = await response.json();
-        // Проверяем структуру: данные могут быть в data.info или в корне data
         const info = data.info || data;   
 
-        // 1. ЗАПОЛНЯЕМ ИНПУТЫ (Линейная структура)
+        // ЗАПОЛНЯЕМ ИНПУТЫ (Линейная структура)
         const fields = {
             'fio': info.fio,
             'nickname': info.nickname,
             'phone': info.phone,
             'specialization': info.specialization,
             'base_price': info.base_price,
-            'dossier': info.dossier
+            'dossier': info.dossier,
+            // СИСТЕМНЫЕ ПОЛЯ ДОЛГА:
+            'is_debtor': info.is_debtor,
+            'debt_amount': info.debt_amount
         };
 
         for (const [id, value] of Object.entries(fields)) {
             const el = document.getElementById(id);
             if (el) {
-                el.value = value || (id === 'base_price' ? 0 : '');
+                if (id === 'is_debtor') {
+                    // Для чекбокса меняем свойство checked
+                    el.checked = Boolean(value);
+                } else {
+                    el.value = value || (id === 'base_price' || id === 'debt_amount' ? 0 : '');
+                }
             }
         }
 
-        // 2. ЗАПОЛНЯЕМ ТАБЛИЦУ ЗАКАЗОВ
+        // ЗАПОЛНЯЕМ ТАБЛИЦУ ЗАКАЗОВ
         allOrders = data.orders || [];
         renderOrders('active'); 
 
@@ -47,7 +54,7 @@ async function loadInstallerData() {
     }
 }
 
-// 3. Функция рендеринга таблицы (без лишних кнопок)
+// 3. Функция рендеринга таблицы заказов
 function renderOrders(filter) {
     const tbody = document.getElementById('installer_orders_body');
     const btnActive = document.getElementById('btn-active');
@@ -60,13 +67,8 @@ function renderOrders(filter) {
     if (btnHistory) btnHistory.classList.toggle('active', filter === 'history');
 
     const filtered = allOrders.filter(order => {
-        // Добавляем 'Завершено' в список финальных статусов
         const finalStatuses = ['Выполнен', 'Отменен', 'Завершено', 'Завершен'];
-        
-        // Проверяем, входит ли текущий статус заказа в наш список финальных
         const isFinished = finalStatuses.includes(order.status);
-        
-        // Если смотрим "В работе", исключаем завершенные. Если "История" — показываем только их.
         return filter === 'active' ? !isFinished : isFinished;
     });
 
@@ -78,7 +80,6 @@ function renderOrders(filter) {
     }
 
     filtered.forEach(order => {
-        // Подсветим статус "Завершено" зеленым цветом (если у тебя есть такой CSS класс)
         const statusClass = (order.status === 'Завершено' || order.status === 'Выполнен') 
                             ? 'status-success' 
                             : `status-${order.status || 'default'}`;
@@ -94,14 +95,16 @@ function renderOrders(filter) {
         tbody.insertAdjacentHTML('beforeend', row);
     });
 }
-// 4. Сохранение данных
+
+// 4. Сохранение данных (Добавлен сбор данных о долге)
 async function saveInstaller() {
     const pageElement = document.getElementById('installer-page');
     if (!pageElement) return;
     const id = pageElement.getAttribute('data-id');
     
-    // Вспомогательная функция для безопасного получения значения
+    // Вспомогательные функции для чтения из DOM
     const val = (id) => document.getElementById(id) ? document.getElementById(id).value : "";
+    const isChecked = (id) => document.getElementById(id) ? document.getElementById(id).checked : false;
 
     const updatedData = {
         fio: val('fio'),
@@ -109,8 +112,14 @@ async function saveInstaller() {
         phone: val('phone'),
         specialization: val('specialization'),
         base_price: parseFloat(val('base_price')) || 0,
-        dossier: val('dossier')
+        dossier: val('dossier'),
+        // ОТПРАВЛЯЕМ ФИНАНСЫ НА СЕРВЕР:
+        is_debtor: isChecked('is_debtor'),
+        debt_amount: parseFloat(val('debt_amount')) || 0,
+        status: "В работе" 
     };
+
+    console.log("System: Отправка обновленных данных...", updatedData);
 
     try {
         const response = await fetch(`/api/installers/${id}`, {
@@ -121,16 +130,17 @@ async function saveInstaller() {
 
         if (response.ok) {
             alert("✅ Изменения сохранены!");
-            loadInstallerData();
+            loadInstallerData(); // Перезагружаем данные для актуализации
         } else {
-            alert("❌ Ошибка при сохранении");
+            const err = await response.json();
+            alert("❌ Ошибка при сохранении: " + JSON.stringify(err.detail));
         }
     } catch (e) {
-        alert("❌ Ошибка связи с сервером");
+        alert("❌ Ошибка связи с сервером Mac mini");
     }
 }
 
-// 5. Удаление
+// 5. Удаление мастера
 function confirmDelete() {
     const fioEl = document.getElementById('fio');
     const name = fioEl ? fioEl.value : "мастера";
@@ -152,4 +162,3 @@ async function deleteInstaller() {
         console.error(e);
     }
 }
-

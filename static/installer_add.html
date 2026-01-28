@@ -6,6 +6,7 @@
     <title>Добавить мастера | Олег-Холод</title>
     <link rel="stylesheet" href="/static/css/blocks/header.css" />
     <link rel="stylesheet" href="/static/css/blocks/installer_add.css" />
+    <link rel="stylesheet" href="/static/css/blocks/installer_detail.css" />
     <link rel="stylesheet" href="/static/css/blocks/phone.css" />
   </head>
   <body>
@@ -16,34 +17,46 @@
       <form id="addInstallerForm">
         <div class="form-group">
           <label>ФИО *</label>
-          <input type="text" id="fio" required />
+          <input type="text" id="fio" required placeholder="Иванов Иван Иванович"/>
         </div>
+        
         <div class="form-group">
           <label>Кликуха (Nickname)</label>
-          <input type="text" id="nickname" />
+          <input type="text" id="nickname" placeholder="Напр: Мороз"/>
         </div>
+
         {{ inputs.phone_input('phone', '') }}
+
         <div class="form-group">
-          <label>Специализация:</label>
-          <input type="checkbox" name="spec" value="Мойщик" /> Мойщик
-          <input type="checkbox" name="spec" value="Альпинист" /> Альпинист
-          <input type="checkbox" name="spec" value="Установщик" /> Установщик
+          <label>Специализация *</label>
+          <input type="text" id="specialization" placeholder="Установщик, Альпинист" required />
+          <small style="color: #64748b">Введите через запятую</small>
         </div>
+
         <div class="form-group">
           <label>Рейтинг (1-10)</label>
           <input type="number" id="rating" value="10" min="1" max="10" />
         </div>
-        <div class="form-group">
-          <label>Должник?</label>
-          <select id="is_debtor">
-            <option value="false">Нет</option>
-            <option value="true">Да</option>
-          </select>
+
+        <div class="installer-form-linear" style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h3 style="font-size: 1rem; color: #991b1b; margin-bottom: 10px;">💰 Финансовый статус</h3>
+          <div class="field-row" style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="is_debtor" style="width: 20px; height: 20px; cursor: pointer;" />
+              <label for="is_debtor" style="font-weight: bold; color: #e11d48; cursor: pointer;">В долгу</label>
+            </div>
+            <div class="field-group" style="margin-bottom: 0; flex-grow: 1;">
+              <label>Сумма долга (₽)</label>
+              <input type="number" id="debt_amount" value="0" step="0.01" />
+            </div>
+          </div>
         </div>
+
         <div class="form-group">
-          <label>Цена за монтаж</label>
+          <label>Цена за монтаж (базовая)</label>
           <input type="number" id="base_price" value="0" />
         </div>
+
         <div class="form-group">
           <label>Статус в воронке</label>
           <select id="status">
@@ -52,13 +65,16 @@
             <option value="В работе">В работе</option>
           </select>
         </div>
+
         <div class="form-group">
-          <label>Досье</label>
-          <textarea id="dossier" rows="4"></textarea>
+          <label>Досье / Заметки</label>
+          <textarea id="dossier" rows="4" placeholder="Особенности мастера..."></textarea>
         </div>
-        <button type="submit" class="btn-save">Сохранить</button>
+
+        <button type="submit" class="btn-save">💾 Сохранить досье</button>
       </form>
     </div>
+
     <script src="/static/js/phone.js"></script>
     <script src="/static/js/installer_add.js"></script>
   </body>
