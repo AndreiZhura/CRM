@@ -111,6 +111,28 @@ textarea.crm-form__input {
     transition: all 0.2s ease;
 }
 
+/* Кнопка возврата */
+.crm-form__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #64748b; /* Спокойный серо-голубой */
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f1f5f9; /* Легкий фон, чтобы выделить зону нажатия */
+}
+
+.crm-form__back-link:hover {
+    color: #1e293b;
+    background: #e2e8f0;
+    transform: translateX(-4px); /* Эффект "отшагивания" назад */
+}
+
 .crm-form__button--submit {
     background: #2563eb;
     color: white;
@@ -143,4 +165,82 @@ textarea.crm-form__input {
     .crm-form { margin: 10px; padding: 20px; }
     .crm-form__actions { flex-direction: column-reverse; }
     .crm-form__button--delete { max-width: none; }
+}
+
+/* --- АДАПТАЦИЯ ФОРМЫ (Планшеты и Смартфоны) --- */
+
+@media (max-width: 1024px) {
+    .crm-form {
+        max-width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .crm-form {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .crm-form__section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .crm-form__legend {
+        font-size: 1.1rem;
+        padding: 0 10px;
+    }
+
+    /* На мобилках (iPhone 12) всё в одну колонку */
+    .crm-form__grid {
+        grid-template-columns: 1fr; 
+        gap: 15px;
+    }
+
+    .crm-form__label {
+        font-size: 0.85rem;
+    }
+
+    .crm-form__input {
+        padding: 14px; /* Увеличиваем область нажатия для пальца */
+        font-size: 16px; /* Важно: 16px предотвращает авто-зум в iOS при фокусе */
+    }
+
+    /* Кнопки внизу */
+    .crm-form__actions {
+        flex-direction: column; /* Кнопки одна под другой */
+        gap: 12px;
+    }
+
+    .crm-form__button {
+        width: 100%;
+        padding: 18px;
+    }
+
+    .crm-form__button--delete {
+        max-width: none;
+        order: 2; /* Кнопка удаления уходит вниз */
+    }
+    
+    .crm-form__button--submit {
+        order: 1; /* Кнопка создания — главная, она сверху */
+    }
+    .crm-form__back-link {
+        font-size: 1rem;
+        padding: 12px 16px; /* Увеличиваем площадь для тапа */
+        background: #fff; /* На мобилках лучше смотрится чистый белый с границей */
+        border: 1px solid #e2e8f0;
+        width: fit-content;
+        margin-left: 10px;
+    }
+}
+
+/* Специальная правка для iPhone SE и узких экранов */
+@media (max-width: 380px) {
+    .crm-form__section--finance {
+        border-left: none;
+        border-top: 4px solid #10b981; /* Зеленая черта сверху, если сбоку мало места */
+    }
 }

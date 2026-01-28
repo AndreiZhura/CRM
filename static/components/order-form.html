@@ -1,53 +1,100 @@
 <form id="orderForm" class="crm-form">
     <fieldset class="crm-form__section">
         <legend class="crm-form__legend">👤 Карточка клиента</legend>
-        <input type="text" id="fio" placeholder="ФИО клиента" required class="crm-form__input">
-        <input type="tel" id="phone" placeholder="Номер телефона" required class="crm-form__input">
-        <input type="text" id="address" placeholder="Адрес (Проживания)" required class="crm-form__input">
-        <input type="text" id="model" placeholder="Модель кондиционера" class="crm-form__input">
+        <div class="crm-form__grid">
+            <div class="crm-form__field">
+                <label class="crm-form__label">ФИО клиента</label>
+                <input type="text" id="fio" required class="crm-form__input" placeholder="Иванов Иван">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Номер телефона</label>
+                <div class="phone-input-container">
+                    <input type="tel" id="phone" name="phone" class="crm-form__input phone-mask" placeholder="+7 (___) ___-__-__" required>
+                </div>
+            </div>
+            <div class="crm-form__field crm-form__field--full">
+                <label class="crm-form__label">Адрес (Проживания)</label>
+                <input type="text" id="address" required class="crm-form__input" placeholder="ул. Пушкина, д. Колотушкина">
+            </div>
+            <div class="crm-form__field crm-form__field--full">
+                <label class="crm-form__label">Модель кондиционера</label>
+                <input type="text" id="model" class="crm-form__input" placeholder="Haier Coral AS25H">
+            </div>
+        </div>
     </fieldset>
 
     <fieldset class="crm-form__section">
-        <legend class="crm-form__legend">📅 Планирование</legend>
-        <div class="crm-form__field">
-            <label class="crm-form__label">Дата обслуживания:</label>
-            <input type="date" id="service_date" class="crm-form__input">
+        <legend class="crm-form__legend">📅 Планирование и Логистика</legend>
+        <div class="crm-form__grid">
+            <div class="crm-form__field">
+                <label class="crm-form__label">Дата обслуживания</label>
+                <input type="date" id="service_date" class="crm-form__input">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Дата доставки (склад)</label>
+                <input type="date" id="delivery_date" class="crm-form__input">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Установка (договор)</label>
+                <input type="date" id="appointment_date" class="crm-form__input">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Склад</label>
+                <select id="warehouse" class="crm-form__input">
+                    <option value="Основной">Основной</option>
+                    <option value="Транзит">Транзит</option>
+                </select>
+            </div>
         </div>
-        <div class="crm-form__field">
-            <label class="crm-form__label">Дата доставки (склад):</label>
-            <input type="date" id="delivery_date" class="crm-form__input">
-        </div>
-        <div class="crm-form__field">
-            <label class="crm-form__label">Установка (договор):</label>
-            <input type="date" id="appointment_date" class="crm-form__input">
-        </div>
-        <select id="warehouse" class="crm-form__input">
-            <option value="Основной">Склад: Основной</option>
-            <option value="Транзит">Склад: Транзит</option>
-        </select>
     </fieldset>
 
-    <fieldset class="crm-form__section">
+    <fieldset class="crm-form__section crm-form__section--finance">
         <legend class="crm-form__legend">💰 Финансы</legend>
-        <input type="number" id="buy_price" placeholder="Закупка (₽)" class="crm-form__input">
-        <input type="number" id="sell_price_ac" placeholder="Продажа (₽)" class="crm-form__input">
-        <input type="number" id="price_install" placeholder="Монтажнику (₽)" class="crm-form__input">
-        <input type="number" id="my_commission" placeholder="Комиссия (₽)" class="crm-form__input">
-        <label class="crm-form__checkbox-label">
-            <input type="checkbox" id="is_money_returned"> Деньги вернули
-        </label>
+        <div class="crm-form__grid">
+            <div class="crm-form__field">
+                <label class="crm-form__label">Закупка (₽)</label>
+                <input type="number" id="buy_price" class="crm-form__input" placeholder="0">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Продажа (₽)</label>
+                <input type="number" id="sell_price_ac" class="crm-form__input" placeholder="0">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Монтажнику (₽)</label>
+                <input type="number" id="price_install" class="crm-form__input" placeholder="0">
+            </div>
+            <div class="crm-form__field">
+                <label class="crm-form__label">Моя комиссия (₽)</label>
+                <input type="number" id="my_commission" class="crm-form__input" placeholder="0">
+            </div>
+        </div>
     </fieldset>
 
     <fieldset class="crm-form__section">
-        <legend class="crm-form__legend">📝 Комментарии</legend>
-        <select id="status" class="crm-form__input">
-            <option value="Новая заявка">Новая заявка</option>
-            <option value="Ждет установщика">Ждет установщика</option>
-            <option value="Завершено">Завершено</option>
-        </select>
-        <textarea id="promises" placeholder="Обещания клиенту" class="crm-form__input"></textarea>
-        <textarea id="installer_opinion" placeholder="Мнение монтажника" class="crm-form__input"></textarea>
+        <legend class="crm-form__legend">📝 Статус и Заметки</legend>
+        <div class="crm-form__grid">
+            <div class="crm-form__field crm-form__field--full">
+                <label class="crm-form__label">Текущий статус</label>
+                <select id="status" class="crm-form__input">
+                    <option value="Новая заявка">Новая заявка</option>
+                    <option value="Ждет установщика">Ждет установщика</option>
+                    <option value="Завершено">Завершено</option>
+                </select>
+            </div>
+            <div class="crm-form__field crm-form__field--full">
+                <label class="crm-form__label">Обещания клиенту</label>
+                <textarea id="promises" class="crm-form__input" placeholder="Уточнить время за час..."></textarea>
+            </div>
+            <div class="crm-form__field crm-form__field--full">
+                <label class="crm-form__label">Мнение монтажника</label>
+                <textarea id="installer_opinion" class="crm-form__input" placeholder="Сложный доступ к блоку..."></textarea>
+            </div>
+        </div>
     </fieldset>
 
-    <button type="submit" class="crm-form__button">Создать карточку</button>
+    <div class="crm-form__actions">
+        <button type="submit" class="crm-form__button crm-form__button--submit">
+            <span>🚀 Создать карточку заказа</span>
+        </button>
+    </div>
 </form>

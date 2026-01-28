@@ -49,7 +49,7 @@ function applyFilters() {
     renderTable(filtered);
 }
 
-// 5. Отрисовка таблицы
+// 5. Отрисовка таблицы (С ПАТЧЕМ ДЛЯ МОБИЛОК И IPHONE 12)
 function renderTable(installers) {
     const tableBody = document.getElementById('installersTableBody');
     if (!tableBody) return;
@@ -66,13 +66,15 @@ function renderTable(installers) {
 
         return `
             <tr class="orders-table__row">
-                <td class="orders-table__td">
-                    <a href="/installers/profile/${inst.id}" class="installer-link">
-                        <strong>${inst.fio}</strong>
-                    </a>
-                    ${inst.nickname ? `<br><small style="color:gray">(${inst.nickname})</small>` : ''}
+                <td class="orders-table__td" data-label="ФИО / Ник">
+                    <div class="installer-info">
+                        <a href="/installers/profile/${inst.id}" class="installer-link">
+                            <strong>${inst.fio}</strong>
+                        </a>
+                        ${inst.nickname ? `<span class="nickname-tag">"${inst.nickname}"</span>` : ''}
+                    </div>
                 </td>
-                <td class="orders-table__td">
+                <td class="orders-table__td" data-label="Телефон">
                     <div class="table-phone-wrapper">
                         <span class="phone-number">${rawPhone || '—'}</span>
                         ${cleanNumber.length >= 10 ? `
@@ -83,9 +85,9 @@ function renderTable(installers) {
                         ` : ''}
                     </div>
                 </td>
-                <td class="orders-table__td">${inst.specialization || 'Монтаж'}</td>
-                <td class="orders-table__td">⭐ ${inst.rating || 10}</td>
-                <td class="orders-table__td">
+                <td class="orders-table__td" data-label="Спец">${inst.specialization || 'Монтаж'}</td>
+                <td class="orders-table__td" data-label="Рейтинг">⭐ ${inst.rating || 10}</td>
+                <td class="orders-table__td" data-label="Статус">
                     <span class="status-badge" style="color: ${inst.is_debtor ? '#e11d48' : '#10b981'}; font-weight: bold;">
                         ${inst.is_debtor ? '❌ Долг' : '✅ Ок'}
                     </span>

@@ -65,6 +65,20 @@ class OrderCreate(BaseModel):
     promises: Optional[str] = ""
     installer_opinion: Optional[str] = ""
     installer_id: Optional[int] = None
+    
+class OrderUpdate(BaseModel):
+    fio: str
+    phone: str
+    address: str
+    buy_price: float = 0.0
+    sell_price_ac: float = 0.0
+    price_install: float = 0.0
+    my_commission: float = 0.0
+    is_money_returned: bool = False
+    status: Optional[str] = "Новая заявка"
+    promises: Optional[str] = ""
+    installer_opinion: Optional[str] = ""
+    installer_id: Optional[int] = None
 
 # --- СТРАНИЦЫ FRONTEND ---
 
@@ -149,6 +163,43 @@ def create_order(order: OrderCreate):
         return {"status": "success"}
     except Exception as e:
         conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+        
+@app.put("/api/order/{order_id}")
+def update_order(order_id: int, order: OrderUpdate):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Ошибка подключения к БД")
+    cur = conn.cursor()
+    try:
+        # 1. Обновляем данные клиента (так как они в другой таблице)
+        cur.execute("""
+            UPDATE clients 
+            SET fio = %s, phone = %s, address = %s 
+            WHERE id = (SELECT client_id FROM orders WHERE id = %s)
+        """, (order.fio, order.phone, order.address, order_id))
+
+        # 2. Обновляем сам заказ
+        calculated_profit = order.sell_price_ac - order.buy_price - order.price_install
+        cur.execute("""
+            UPDATE orders 
+            SET status = %s, buy_price = %s, sell_price_ac = %s, 
+                price_install = %s, my_commission = %s, is_money_returned = %s, 
+                promises = %s, installer_opinion = %s, installer_id = %s, 
+                profit = %s
+            WHERE id = %s
+        """, (order.status, order.buy_price, order.sell_price_ac,
+              order.price_install, order.my_commission, order.is_money_returned,
+              order.promises, order.installer_opinion, order.installer_id,
+              calculated_profit, order_id))
+        
+        conn.commit()
+        return {"status": "success"}
+    except Exception as e:
+        conn.rollback()
+        print(f"Ошибка обновления заказа: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close(); conn.close()

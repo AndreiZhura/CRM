@@ -148,6 +148,32 @@
         border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 }
+/* Добавь это в файл header.css или в блок медиа-запросов */
+@media screen and (max-width: 768px) {
+    .header {
+        padding: 10px 15px !important; /* Уменьшаем внутренние отступы */
+        justify-content: space-between;
+        width: 100%;
+        box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+    }
+
+    .header__logo {
+        font-size: 1.1rem !important; /* Немного уменьшаем текст логотипа */
+        white-space: nowrap;
+    }
+
+    /* Если кнопка меню (гамбургер) слишком большая */
+    .header__menu-toggle {
+        padding: 5px;
+        margin-right: 0;
+    }
+    
+    /* Убираем лишние внешние отступы у контейнера content */
+    .content {
+        padding: 10px !important;
+        overflow-x: hidden; /* Финальный заслон против скролла */
+    }
+}
 
 @media screen and (max-width: 600px) {
     .header__status-text { display: none; }

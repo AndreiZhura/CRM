@@ -1,22 +1,244 @@
-.orders-list { padding: 20px 0; }
-.orders-list__title { color: #2c3e50; text-align: center; }
+/* Основной контейнер */
+.orders-list {
+    padding: 30px 20px;
+    background: #f8fafc;
+    /* Светлый фон как в форме */
+    min-height: 100vh;
+}
 
+.orders-list__title {
+    color: #1e293b;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    letter-spacing: -0.025em;
+}
+
+/* Таблица */
 .orders-table {
     width: 100%;
-    max-width: 800px;
-    margin: 20px auto;
-    border-collapse: collapse;
+    max-width: 1000px;
+    /* Выравниваем по ширине формы */
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
     background: white;
-    border-radius: 8px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-.orders-table__th, .orders-table__td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+/* Заголовок таблицы */
+.orders-table__th {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.orders-table__th { background: #3498db; color: white; }
-.orders-table__row:hover { background: #f9f9f9; }
+/* Ячейки */
+.orders-table__td {
+    padding: 16px 20px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.orders-table__row:hover {
+    background: #f8fafc;
+}
+
+/* --- СТАТУСЫ (Та самая синяя подсветка) --- */
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+    border: 1px solid transparent;
+}
+
+/* Новая заявка -> СИНИЙ */
+.status-novaya-zayavka {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border-color: #dbeafe;
+}
+
+/* Ждет установщика -> ЖЕЛТЫЙ */
+.status-zhdet-ustanovshchika {
+    background-color: #fffbeb;
+    color: #b45309;
+    border-color: #fef3c7;
+}
+
+/* Завершено -> ЗЕЛЕНЫЙ */
+.status-zaversheno {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border-color: #dcfce7;
+}
+/* Адаптация для мобильных устройств (до 768px) */
+@media (max-width: 768px) {
+    /* Скрываем заголовок таблицы, он не нужен в карточном виде */
+    .orders-table__head {
+        display: none;
+    }
+
+    .orders-table, .orders-table__body, .orders-table__row, .orders-table__td {
+        display: block;
+        width: 100%;
+    }
+
+    .orders-table {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .orders-table__row {
+        background: white;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+    }
+
+    .orders-table__td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: right;
+    }
+
+    .orders-table__td:last-child {
+        border-bottom: none;
+    }
+
+    /* Добавляем подписи к данным через псевдоэлементы */
+    .orders-table__td::before {
+        content: attr(data-label); /* Берет текст из атрибута HTML */
+        font-weight: 700;
+        color: #64748b;
+        text-align: left;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+
+    /* Убираем лишние отступы у вложенных тегов в мобилке */
+    .orders-table__td strong {
+        font-size: 1rem;
+    }
+}
+
+/* --- АДАПТИВНОСТЬ --- */
+
+/* 1. Планшеты (iPad, небольшие ноутбуки) */
+@media (max-width: 1024px) {
+    .orders-table {
+        max-width: 95%; /* Даем чуть больше пространства */
+    }
+    .orders-table__th, .orders-table__td {
+        padding: 12px 10px; /* Уменьшаем отступы, чтобы всё влезло */
+        font-size: 0.9rem;
+    }
+}
+
+/* 2. Смартфоны (iPhone 12, Android) */
+@media (max-width: 768px) {
+    .orders-list {
+        padding: 15px 10px;
+    }
+
+    .orders-list__title {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .orders-table__head {
+        display: none; /* Скрываем шапку */
+    }
+
+    .orders-table, .orders-table__body, .orders-table__row, .orders-table__td {
+        display: block;
+        width: 100%;
+    }
+
+    .orders-table {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .orders-table__row {
+        background: white;
+        margin-bottom: 15px;
+        border-radius: 16px; /* Округляем как в iOS */
+        padding: 12px 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s;
+    }
+
+    /* Эффект нажатия для iPhone */
+    .orders-table__row:active {
+        transform: scale(0.98);
+        background: #f8fafc;
+    }
+
+    .orders-table__td {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* Чтобы многострочный текст не ехал */
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+        min-height: 40px;
+    }
+
+    .orders-table__td:last-child {
+        border-bottom: none;
+    }
+
+    /* Подписи колонок слева */
+    .orders-table__td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #94a3b8;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        margin-right: 15px;
+        flex-shrink: 0; /* Чтобы название колонки не сжималось */
+        padding-top: 2px;
+    }
+
+    /* Контент справа */
+    .orders-table__td > * {
+        text-align: right;
+        word-break: break-word; /* Чтобы длинные адреса не ломали верстку */
+    }
+
+    .status-badge {
+        margin-left: auto; /* Прижимаем статус к правому краю */
+    }
+}
+
+/* 3. Очень маленькие экраны (iPhone SE) */
+@media (max-width: 380px) {
+    .orders-table__td {
+        flex-direction: column; /* Складываем в стек, если совсем узко */
+        align-items: flex-start;
+    }
+    .orders-table__td::before {
+        margin-bottom: 4px;
+    }
+    .orders-table__td > * {
+        text-align: left;
+    }
+}
