@@ -99,6 +99,5 @@ function closeAddInstallerModal() {
 }
 
 
-
 // Запуск при загрузке
 document.addEventListener('DOMContentLoaded', loadInstallers);

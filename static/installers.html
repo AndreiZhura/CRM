@@ -13,12 +13,33 @@
     <main class="content">
       <div class="page-header">
         <h1>Список мастеров</h1>
-        <a
-          href="/installers/add"
-          class="btn-primary"
-          style="text-decoration: none"
-          >+ Добавить мастера</a
-        >
+        <a href="/installers/add" class="btn-primary">
+          <span>+</span> Добавить мастера
+        </a>
+      </div>
+      <div class="search-filters">
+        <div class="search-group">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="searchFio"
+              placeholder="Поиск по ФИО..."
+              class="search-input"
+            />
+            <button class="search-btn" onclick="triggerSearch()">🔍</button>
+          </div>
+        </div>
+        <div class="search-group">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="searchNickname"
+              placeholder="Поиск по кликухе..."
+              class="search-input"
+            />
+            <button class="search-btn" onclick="triggerSearch()">🔍</button>
+          </div>
+        </div>
       </div>
 
       <table class="orders-table">
@@ -36,5 +57,6 @@
     </main>
 
     <script src="/static/js/installers_page.js"></script>
+    <script src="/static/js/common.js"></script>
   </body>
 </html>

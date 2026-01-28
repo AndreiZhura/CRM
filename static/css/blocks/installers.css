@@ -122,3 +122,101 @@
 .table-phone-actions a:hover {
     transform: scale(1.2);
 }
+
+/* Контейнер заголовка для выравнивания */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 0 10px;
+}
+
+/* Сама кнопка */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Расстояние для иконки плюса */
+    
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff !important;
+    
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    
+    border-radius: 10px;
+    border: none;
+    
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Эффекты при наведении */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+/* Эффект при нажатии */
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+}
+
+/* Контейнер для поиска — в линию, с отступами */
+.search-filters {
+    display: flex;
+    flex-direction: row; /* Строго в линию */
+    gap: 20px;           /* Расстояние между полями */
+    margin: 20px 0;
+    align-items: center;
+}
+
+/* Ограничиваем длину каждого поля */
+.search-group {
+    width: 280px; /* Фиксированная аккуратная длина */
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Инпут в стиле твоей CRM */
+.search-input {
+    width: 100%;
+    padding: 8px 35px 8px 12px; /* Чуть компактнее по высоте */
+    font-size: 0.9rem;
+    color: #475569;
+    border: 1px solid #e2e8f0; /* Светлая рамка как в карточках */
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #2563eb; /* Твой основной синий */
+}
+
+/* Лупа внутри инпута */
+.search-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.5; /* Чтобы не отвлекала */
+    transition: opacity 0.2s;
+}
+
+.search-btn:hover {
+    opacity: 1;
+}
