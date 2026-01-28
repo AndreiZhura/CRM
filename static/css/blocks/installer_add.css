@@ -1,5 +1,5 @@
 .form-container {
-    max-width: 500px;
+    max-width: 800px;
     margin: 40px auto;
     padding: 30px;
     background: #fff;
@@ -51,4 +51,15 @@
     flex: 1;
     text-align: center;
     text-decoration: none;
+}
+
+.textarea-group{
+    width: 100%;
+}
+
+@media (max-width: 390px) {
+   .form-container {
+    width: 90%;
+   
+}
 }
