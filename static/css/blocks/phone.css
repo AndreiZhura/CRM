@@ -1,0 +1,47 @@
+/* Контейнер должен быть относительным, чтобы кнопки позиционировались внутри него */
+.phone-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Сам инпут: добавляем отступ справа, чтобы текст не заходил под кнопки */
+.phone-mask {
+    padding-right: 70px !important; 
+    width: 100%;
+}
+
+/* Блок с кнопками: выравниваем строго по правому краю */
+.phone-actions {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    gap: 10px; /* Расстояние между трубкой и самолетиком */
+    align-items: center;
+    height: 100%;
+}
+
+/* Стили иконок */
+.action-btn {
+    text-decoration: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.2s, opacity 0.2s;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.action-btn:hover {
+    transform: scale(1.2);
+    opacity: 1;
+}
+
+/* Телеграм сделаем чуть бледнее, пока не навели (эффект чистоты) */
+.tg-btn {
+    opacity: 0.6;
+}
+
+.hidden {
+    display: none !important;
+}

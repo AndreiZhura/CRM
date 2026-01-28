@@ -1,105 +1,142 @@
 /* Основной контейнер формы */
 .crm-form {
-    max-width: 900px;
+    max-width: 1000px; /* Чуть шире для MSI Katana */
     margin: 20px auto;
-    padding: 20px;
+    padding: 30px;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* Секции (Fieldset) */
 .crm-form__section {
-    border: 1px solid #e0e6ed;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 25px;
-    background: #f9fafb;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    background: #ffffff;
+    transition: box-shadow 0.3s ease;
+}
+
+.crm-form__section:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .crm-form__legend {
-    font-weight: 700;
-    color: #2c3e50;
-    padding: 0 10px;
-    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    padding: 0 15px;
+    font-size: 1.2rem;
+    letter-spacing: -0.025em;
 }
 
-/* Сетка полей (Адаптивность) */
+/* Сетка полей */
 .crm-form__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 15px;
+    /* Умная сетка: если места мало — 1 колонка, если много — 2 */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 /* Поля ввода */
 .crm-form__field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+}
+
+/* Поле на всю ширину (для Обещаний и Адреса) */
+.crm-form__field--full {
+    grid-column: 1 / -1;
 }
 
 .crm-form__label {
-    font-size: 0.85rem;
-    color: #64748b;
+    font-size: 0.9rem;
+    color: #475569;
     font-weight: 600;
 }
 
 .crm-form__input {
-    padding: 12px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
     font-size: 1rem;
-    transition: border-color 0.2s;
+    color: #0f172a;
+    transition: all 0.2s ease;
+    background: #f8fafc;
 }
 
 .crm-form__input:focus {
     outline: none;
     border-color: #3b82f6;
     background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Специально для текстовых зон (Обещания) */
+textarea.crm-form__input {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+/* Финансовая зона (делаем её визуально другой) */
+.crm-form__section--finance {
+    background: #f1f5f9;
+    border-left: 5px solid #10b981;
 }
 
 /* Кнопки действий */
 .crm-form__actions {
     display: flex;
-    gap: 15px;
-    margin-top: 30px;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
 }
 
 .crm-form__button {
     flex: 1;
-    padding: 15px;
+    padding: 16px 24px;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    transition: transform 0.1s, opacity 0.2s;
+    gap: 10px;
+    transition: all 0.2s ease;
 }
 
 .crm-form__button--submit {
-    background: #10b981;
+    background: #2563eb;
     color: white;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.crm-form__button--submit:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
 }
 
 .crm-form__button--delete {
-    background: #ef4444;
-    color: white;
-    max-width: 200px;
+    background: #fff;
+    color: #ef4444;
+    border: 2px solid #fecaca;
+    max-width: 180px;
 }
 
-.crm-form__button:active {
-    transform: scale(0.98);
+.crm-form__button--delete:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
 }
 
-/* На мобилках кнопки в столбик */
-@media (max-width: 600px) {
-    .crm-form__actions {
-        flex-direction: column;
-    }
-    .crm-form__button--delete {
-        max-width: none;
-    }
+/* Адаптивность */
+@media (max-width: 768px) {
+    .crm-form { margin: 10px; padding: 20px; }
+    .crm-form__actions { flex-direction: column-reverse; }
+    .crm-form__button--delete { max-width: none; }
 }
