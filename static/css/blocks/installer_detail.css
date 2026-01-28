@@ -9,7 +9,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 60%;
+   max-width: 800px;
 }
 
 /* Шапка с кнопками */
@@ -225,115 +225,75 @@ textarea {
 
 
 @media (max-width: 768px) {
-
-    /* 1. Контейнер и отступы */
+    /* 1. Контейнер: на телефоне нам не нужны 60% или 80%, берем всё пространство */
     .installer-container {
-         width: 100%;
+        width: 100% !important; 
+        max-width: 100% !important;
+        margin: 15px 0 !important; /* Убираем авто-отступы по бокам */
+        padding: 0 10px !important;
     }
 
-    /* 2. Шапка профиля */
+    /* 2. Шапка: кнопка под заголовком */
     .installer-top-bar {
         flex-direction: column;
-        align-items: stretch;
         gap: 15px;
         text-align: center;
     }
 
-    /* 3. Форма и ряды (Главная боль) */
+    /* 3. Ряды полей: превращаем в одну колонку */
     .field-row {
         flex-direction: column !important;
-        /* Принудительно в колонку */
         gap: 15px !important;
     }
 
+    /* 4. Карточки: чуть меньше внутренние отступы */
     .installer-card {
-        padding: 15px;
-        /* Чуть меньше паддинг, чтобы поля были шире */
+        padding: 15px !important;
     }
 
-    /* 4. Инпуты (защита от зума на iOS) */
+    /* 5. Инпуты: важный размер 16px, чтобы iOS не приближала экран (zoom) при клике */
     input, textarea, select {
         font-size: 16px !important;
-        /* Чтобы Safari не приближал экран при клике */
-        width: 100%;
-        box-sizing: border-box;
     }
 
-    /* 5. ТАБЛИЦА (Превращаем в карточки, чтобы не было скролла) */
-    .table-responsive {
-        border: none;
-        overflow-x: visible;
-        /* Отключаем горизонтальный скролл */
-    }
-
+    /* 6. Таблица: превращаем строки в отдельные блоки-карточки */
     .installer-table thead {
-        display: none;
-        /* Прячем заголовки таблицы */
+        display: none; /* Прячем заголовки на мобилке */
     }
 
     .installer-table tr {
         display: block;
-        margin-bottom: 15px;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
-        background: #f8fafc;
+        margin-bottom: 12px;
         padding: 10px;
+        background: #f8fafc;
     }
 
     .installer-table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 5px !important;
+        padding: 8px 0 !important;
         border-bottom: 1px dashed #cbd5e1;
-        text-align: right;
     }
 
     .installer-table td:last-child {
         border-bottom: none;
     }
 
-    /* Добавляем названия столбцов через псевдоэлементы */
+    /* Показываем заголовки колонок слева (если в HTML есть data-label) */
     .installer-table td::before {
         content: attr(data-label);
         font-weight: 700;
         color: #64748b;
-        text-align: left;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
     }
 
-    /* 6. Кнопки */
-    .btn-save {
+    /* 7. Кнопки: на всю ширину для удобства нажатия пальцем */
+    .btn-save, .btn-delete-safe {
         width: 100%;
-        padding: 15px;
-        order: -1;
-        /* Кнопка сохранения будет сверху на мобилке */
+        padding: 14px;
     }
-
-    /* 7. Опасная зона */
-    .danger-zone-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-
-    .btn-delete-safe {
-        width: 100%;
-    }
-}
-
-/* Финальные правки для iPhone и Mac mini */
-
-@media (max-width: 600px) {
-    .field-row {
-        flex-direction: column;
-    }
-
-    .danger-zone-content {
-        flex-direction: column;
-        text-align: center;
-    }
-
-
 }
