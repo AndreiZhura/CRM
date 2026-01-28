@@ -1,9 +1,15 @@
+* {
+    box-sizing: border-box;
+}
+
 .installer-container {
-    max-width: 800px; /* Сужаем для удобства чтения сверху вниз */
+
+    /* Сужаем для удобства чтения сверху вниз */
     margin: 40px auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 60%;
 }
 
 /* Шапка с кнопками */
@@ -25,7 +31,7 @@
     background: #fff;
     padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .installer-card__title {
@@ -102,12 +108,30 @@ textarea {
 }
 
 /* Кнопки */
-.btn-save { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-.btn-delete { background: #fff; color: #ef4444; border: 1px solid #fecaca; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-
-@media (max-width: 600px) {
-    .field-row { flex-direction: column; }
+.btn-save {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }
+
+.btn-delete {
+    background: #fff;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+
+
+/* На мобилках делаем колонкой */
+
 
 .installer-danger-zone {
     margin-top: 50px;
@@ -182,10 +206,12 @@ textarea {
 .filter-btn.active {
     background: #fff;
     color: #3b82f6;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.pagination-hidden { display: none; }
+.pagination-hidden {
+    display: none;
+}
 
 .btn-load-more {
     width: 100%;
@@ -197,10 +223,117 @@ textarea {
     cursor: pointer;
 }
 
-/* На мобилках делаем колонкой */
+
+@media (max-width: 768px) {
+
+    /* 1. Контейнер и отступы */
+    .installer-container {
+         width: 100%;
+    }
+
+    /* 2. Шапка профиля */
+    .installer-top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        text-align: center;
+    }
+
+    /* 3. Форма и ряды (Главная боль) */
+    .field-row {
+        flex-direction: column !important;
+        /* Принудительно в колонку */
+        gap: 15px !important;
+    }
+
+    .installer-card {
+        padding: 15px;
+        /* Чуть меньше паддинг, чтобы поля были шире */
+    }
+
+    /* 4. Инпуты (защита от зума на iOS) */
+    input, textarea, select {
+        font-size: 16px !important;
+        /* Чтобы Safari не приближал экран при клике */
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 5. ТАБЛИЦА (Превращаем в карточки, чтобы не было скролла) */
+    .table-responsive {
+        border: none;
+        overflow-x: visible;
+        /* Отключаем горизонтальный скролл */
+    }
+
+    .installer-table thead {
+        display: none;
+        /* Прячем заголовки таблицы */
+    }
+
+    .installer-table tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 10px;
+    }
+
+    .installer-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 5px !important;
+        border-bottom: 1px dashed #cbd5e1;
+        text-align: right;
+    }
+
+    .installer-table td:last-child {
+        border-bottom: none;
+    }
+
+    /* Добавляем названия столбцов через псевдоэлементы */
+    .installer-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #64748b;
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    /* 6. Кнопки */
+    .btn-save {
+        width: 100%;
+        padding: 15px;
+        order: -1;
+        /* Кнопка сохранения будет сверху на мобилке */
+    }
+
+    /* 7. Опасная зона */
+    .danger-zone-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .btn-delete-safe {
+        width: 100%;
+    }
+}
+
+/* Финальные правки для iPhone и Mac mini */
+
 @media (max-width: 600px) {
+    .field-row {
+        flex-direction: column;
+    }
+
     .danger-zone-content {
         flex-direction: column;
         text-align: center;
     }
+
+
 }
