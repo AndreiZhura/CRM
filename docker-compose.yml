@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: crm_lumen
+      POSTGRES_DB: lumen_db
     ports:
       - "5433:5432"
     volumes:
