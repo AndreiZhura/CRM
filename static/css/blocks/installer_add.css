@@ -1,65 +1,121 @@
+/* Основной контейнер */
 .form-container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 30px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    max-width: 650px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
+.form-container h1 {
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    font-size: 1.5rem;
+}
+
+/* Группировка полей */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
     font-weight: 600;
-    color: #2c3e50;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 0.4rem;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #dcdde1;
-    border-radius: 6px;
-    font-size: 16px;
+.form-group input, 
+.form-group select, 
+.textarea-group {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: #f8fafc;
+    transition: border-color 0.2s;
 }
 
-.actions {
+.form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #fff;
+}
+
+/* Подсказки */
+.helper-text {
+    color: #64748b;
+    margin-top: 0.3rem;
+}
+
+/* КРАСНЫЙ БЛОК: Финансовый статус */
+.debt-banner {
+    background: #fef2f2;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #fee2e2;
+}
+
+.debt-title {
+    font-size: 1rem;
+    color: #991b1b;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.debt-row {
     display: flex;
-    gap: 15px;
-    margin-top: 30px;
+    align-items: center;
+    gap: 1.5rem;
 }
 
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: #e11d48;
+}
+
+.checkbox-group label {
+    font-weight: 700;
+    color: #e11d48;
+    cursor: pointer;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+/* Кнопка сохранения */
 .btn-save {
-    background: #27ae60;
+    width: 100%;
+    padding: 1rem;
+    background: #2563eb;
     color: white;
     border: none;
-    padding: 12px 25px;
-    border-radius: 6px;
+    border-radius: 0.6rem;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
-    flex: 2;
-    font-weight: bold;
+    transition: all 0.2s;
 }
 
-.btn-cancel {
-    background: #bdc3c7;
-    color: #2c3e50;
-    padding: 12px;
-    border-radius: 6px;
-    flex: 1;
-    text-align: center;
-    text-decoration: none;
+.btn-save:hover {
+    background: #1d4ed8;
 }
 
-.textarea-group{
-    width: 100%;
-}
-
-@media (max-width: 390px) {
-   .form-container {
-    width: 90%;
-   
-}
+.btn-save:disabled {
+    background: #94a3b8;
+    opacity: 0.6;
+    cursor: not-allowed;
 }

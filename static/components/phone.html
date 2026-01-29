@@ -1,19 +1,21 @@
 {% macro phone_input(id, value='') %}
 <div class="field-group">
-    <label>Телефон / Связь</label>
-    <div class="phone-input-container">
-        <input 
+    <label for="{{ id }}">Телефон / Связь</label>
+    
+    <div class="phone-input-container"> <input 
             type="tel" 
             id="{{ id }}" 
             name="{{ id }}"
-            value="{{ value if value else '8' }}"
+            value="{{ value if value else '+7' }}" 
             class="phone-mask"
-            placeholder="8 (999) 000-00-00"
+            placeholder="+7 (999) 000-00-00"
             maxlength="18"
+            required
         >
+        
         <div class="phone-actions">
-            <a href="#" id="call_{{ id }}" class="action-btn call-btn hidden">📞</a>
-            <a href="#" id="tg_{{ id }}" target="_blank" class="action-btn tg-btn hidden">✈️</a>
+            <a href="#" id="call_{{ id }}" class="action-btn hidden">📞</a>
+            <a href="#" id="tg_{{ id }}" target="_blank" class="action-btn hidden">✈️</a>
         </div>
     </div>
 </div>
