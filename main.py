@@ -20,7 +20,7 @@ def get_db_connection():
     """Системное подключение к PostgreSQL на Mac mini"""
     try:
         return psycopg2.connect(
-            host="db", database="crm_lumen", user="admin", password="password",
+            host="db", database="lumen_db", user="admin", password="password",
             cursor_factory=RealDictCursor
         )
     except Exception as e:
