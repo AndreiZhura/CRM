@@ -1,17 +1,41 @@
 <section class="orders-list">
-    <div class="orders-list__container">
-        <h2 class="orders-list__title">Журнал заказов</h2>
-        <table class="orders-table">
-            <thead class="orders-table__head">
-                <tr class="orders-table__row">
-                    <th class="orders-table__th">Клиент</th>
-                    <th class="orders-table__th">Адрес</th>
-                    <th class="orders-table__th">Модель</th>
-                    <th class="orders-table__th">Цена</th>
-                    <th class="orders-table__th">Статус</th> </tr>
-            </thead>
-            <tbody id="ordersTableBody" class="orders-table__body">
-                </tbody>
-        </table>
+  <div class="orders-list__container">
+    <h2 class="orders-list__title">Журнал заказов</h2>
+
+    <div class="orders-filter">
+      <div class="filter-group">
+        <label for="filterClient">Клиент</label>
+        <input type="text" id="filterClient" class="filter-input" placeholder="Поиск по ФИО..." />
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterAddress">Адрес</label>
+        <input type="text" id="filterAddress" class="filter-input" placeholder="Поиск по адресу..." />
+      </div>
+
+      <div class="filter-group">
+        <label for="filterStatus">Статус</label>
+        <select id="filterStatus" class="filter-input">
+          <option value="">Все статусы</option>
+          <option value="Новый">Новый</option>
+          <option value="В работе">В работе</option>
+          <option value="Завершен">Завершен</option>
+        </select>
+      </div>
     </div>
+
+    <table class="orders-table">
+      <thead class="orders-table__head">
+        <tr class="orders-table__row">
+          <th class="orders-table__th">Клиент</th>
+          <th class="orders-table__th">Адрес</th>
+          <th class="orders-table__th">Модель</th>
+          <th class="orders-table__th">Цена</th>
+          <th class="orders-table__th">Статус</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody" class="orders-table__body">
+          </tbody>
+    </table>
+  </div>
 </section>
