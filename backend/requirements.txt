@@ -1,0 +1,21 @@
+# === ЯДРО FASTAPI ===
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# === БАЗА ДАННЫХ ===
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# === КОНФИГУРАЦИЯ И ВАЛИДАЦИЯ ===
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# === ШАБЛОНЫ И ВЕБ ===
+jinja2==3.1.3
+python-multipart==0.0.6
+
+# === ОПЦИОНАЛЬНО (разработка) ===
+pytest==7.4.4
+black==23.12.1

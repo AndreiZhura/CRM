@@ -12,8 +12,8 @@ from fastapi.templating import Jinja2Templates
 
 app = FastAPI(title="Олег-Холод ERP")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="static")
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+templates = Jinja2Templates(directory="frontend")
 
 
 def get_db_connection():
