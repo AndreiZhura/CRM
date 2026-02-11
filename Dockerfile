@@ -1,6 +1,13 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
+
 WORKDIR /app
+
+# Копируем requirements.txt из папки backend/
 COPY backend/requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ .
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Копируем весь проект
+COPY . .
+
+CMD ["uvicorn", "backend.src.main:app", "--host", "0.0.0.0", "--port", "8000"]

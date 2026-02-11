@@ -1,28 +1,38 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-# Подключение роутеров
-from routers.orders import router as orders_router
-from routers.installers import router as installers_router
+from fastapi.responses import HTMLResponse
+import os
 
+# Определяем путь относительно текущего файла (main.py)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)  # Поднимаемся на уровень выше (в src/)
+frontend_path = os.path.join(project_root, "..", "frontend")  # Путь к frontend/
 
+app = FastAPI(
+    title="CRM Олега",
+    version="0.1.0",
+    description="Система учета заказов и мастеров"
+)
 
-# --- КОНФИГУРАЦИЯ И ПОДКЛЮЧЕНИЕ ---
-app = FastAPI(title="Олег-Холод ERP")
+# Подключение статических файлов (CSS/JS/изображения)
+app.mount(
+    "/static",
+    StaticFiles(directory=frontend_path),
+    name="static"
+)
 
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
-templates = Jinja2Templates(directory="frontend")
+# Настройка шаблонизатора
+templates = Jinja2Templates(directory=frontend_path)
 
-
-app.include_router(orders_router)
-app.include_router(installers_router)
-
-# --- СТРАНИЦЫ FRONTEND ---
-@app.get("/", response_class=HTMLResponse)
+@app.get("/new_orders", response_class=HTMLResponse)
 async def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    try:
+        return templates.TemplateResponse("new_order.html", {"request": request})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка шаблона: {str(e)}")
 
-@app.get("/journal", response_class=HTMLResponse)
-async def read_journal(request: Request):
-    return templates.TemplateResponse("journal.html", {"request": request})
+# Дополнительный маршрут для проверки
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
