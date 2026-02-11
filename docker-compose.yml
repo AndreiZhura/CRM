@@ -1,8 +1,8 @@
-version: '3.8'
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine   # alpine — легче
     container_name: crm_db
+    platform: linux/amd64
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
@@ -11,16 +11,33 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql   # автоинициализация
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M          # Postgres не жадный, хватит
 
   backend:
     build: .
     container_name: crm_backend
-    volumes:
-      - .:/app
+    platform: linux/amd64
+    env_file:
+      - .env                   # все секреты и ключи тут
     ports:
       - "8000:8000"
     depends_on:
       - db
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G           # FastAPI + геокодер
+    volumes:
+      # при разработке раскомментировать:
+      # - ./backend/src:/app/backend/src
+      # для прода лучше без монтирования
+      - ./logs:/app/logs       # только логи наружу
 
 volumes:
   postgres_data:

@@ -1,0 +1,42 @@
+# Системные файлы
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Среда разработки
+.idea
+.vscode
+*.swp
+*.swo
+
+# Секреты и конфиги (не копируем в образ!)
+.env
+.env.*
+!.env.example   # если есть
+
+# Фронтенд — его отдаёт отдельно nginx или локально, не в бэкенд-образ!
+frontend
+node_modules
+
+# Докер-файлы (не нужны внутри образа)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Логи (они должны быть на хосте через volumes)
+logs
+*.log
+
+# Прочее
+README.md
+LICENSE
+tmp
