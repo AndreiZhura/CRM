@@ -5,7 +5,7 @@ from typing import Optional, List
 from models.clients import Client
 from schemas.clients import ClientCreate, ClientUpdate
 
-async def create_clients(db:AsyncSession, client_data:ClientCreate) -> Client:
+async def create_client(db:AsyncSession, client_data:ClientCreate) -> Client:
     client = Client(**client_data.model_dump())
     db.add(client)
     await db.commit()
