@@ -1,3 +1,4 @@
-backup_final.sql
-__pycache__
+venv/
+__pycache__/
+*.pyc
 .env

@@ -1,12 +1,24 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
+#create_async_engine — создаёт асинхронный движок.
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+# AsyncSession — тип сессии.
+#sessionmaker — фабрика сессий.
+#declarative_base — для будущих моделей.
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-def get_db_connection():
-    try:
-        return psycopg2.connect(
-            host="db", database="lumen_db", user="admin", password="password",
-            cursor_factory=RealDictCursor
-        )
-    except Exception as e:
-        print(f"ОШИБКА ПОДКЛЮЧЕНИЯ К БД: {e}")
-        return None
+from .config import settings
+
+
+ASYNC_DATABASE_URL = settings.DATABASE_URL.replace(
+    "postgresql://", "postgresql+asyncpg://"
+)
+
+engine = create_async_engine(ASYNC_DATABASE_URL, echo = True)
+AsyncSessionLocal = sessionmaker(
+    engine, class_ = AsyncSession,expire_on_commit = False
+)
+
+Base = declarative_base()
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

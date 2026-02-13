@@ -1,38 +1,32 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.db import get_db
 
-# Определяем путь относительно текущего файла (main.py)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)  # Поднимаемся на уровень выше (в src/)
-frontend_path = os.path.join(project_root, "..", "frontend")  # Путь к frontend/
+app = FastAPI(title="СRM Олега")
 
-app = FastAPI(
-    title="CRM Олега",
-    version="0.1.0",
-    description="Система учета заказов и мастеров"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Подключение статических файлов (CSS/JS/изображения)
-app.mount(
-    "/static",
-    StaticFiles(directory=frontend_path),
-    name="static"
-)
+@app.get("/")
+async def root():
+    return {"message": "CRM is running"}
 
-# Настройка шаблонизатора
-templates = Jinja2Templates(directory=frontend_path)
+@app.get("/health")
+async def health():
+    return {"status":"ok"}
 
-@app.get("/new_orders", response_class=HTMLResponse)
-async def read_index(request: Request):
+
+@app.get("/db-check")
+async def db_check(db: AsyncSession = Depends(get_db)):
     try:
-        return templates.TemplateResponse("new_order.html", {"request": request})
+        result = await db.execute(text("SELECT 1"))
+        return {"db_status": "connected", "result": result.scalar()}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка шаблона: {str(e)}")
-
-# Дополнительный маршрут для проверки
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+        return {"db_status": "error", "error": str(e)}
