@@ -1,6 +1,11 @@
+# BaseModel — родительский класс для всех Pydantic-схем.
 from pydantic import BaseModel, ConfigDict
+# ConfigDict — настройки схемы (например, from_attributes).
+# datetime — для полей с датой.
+# Optional — для необязательных полей.
 from datetime import datetime
 from typing import Optional
+
 
 class ClientBase(BaseModel):
     full_name: str
@@ -8,14 +13,17 @@ class ClientBase(BaseModel):
     address: str
     comments: Optional[str] = None
 
+
 class ClientCreate(ClientBase):
     pass
+
 
 class ClientUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
-    address: Optional[str] = None
-    comments: Optional[str] = None
+    addres: Optional[str] = None
+    commets: Optional[str] = None
+
 
 class ClientOut(ClientBase):
     id: int
