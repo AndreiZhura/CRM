@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
-from routers import clients ,installers,orders  # в начало файла, после других импортов
+from routers import clients ,installers,orders,finance  # в начало файла, после других импортов
 
 
 app = FastAPI(title="СRM Олега")
@@ -13,6 +13,7 @@ app = FastAPI(title="СRM Олега")
 app.include_router(clients.router)
 app.include_router(installers.router)
 app.include_router(orders.router)
+app.include_router(finance.router)
 
 app.add_middleware(
     CORSMiddleware,

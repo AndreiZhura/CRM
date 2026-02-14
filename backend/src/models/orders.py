@@ -31,3 +31,5 @@ class Order(Base):
 
     client = relationship("Client", back_populates="orders")
     installer = relationship("Installer", back_populates="orders")
+    
+    finance = relationship("Finance", back_populates="order", uselist=False)
