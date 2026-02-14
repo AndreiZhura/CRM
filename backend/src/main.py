@@ -1,4 +1,3 @@
-from routers import clients   # в начало файла, после других импортов
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,14 +5,18 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
+from routers import clients ,installers  # в начало файла, после других импортов
+
 
 app = FastAPI(title="СRM Олега")
 
 app.include_router(clients.router)
+app.include_router(installers.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # разрешаем все источники (для разработки)
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

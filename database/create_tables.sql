@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS installers (
     full_name TEXT NOT NULL,
     nickname TEXT,
     phone VARCHAR(20) UNIQUE NOT NULL,
+    backup_phone VARCHAR(20),                -- запятая здесь
     specialization TEXT[] NOT NULL,
     rating NUMERIC(3,1) DEFAULT 10.0 CHECK (rating >= 0 AND rating <= 10),
     base_price NUMERIC(10,2) DEFAULT 0 CHECK (base_price >= 0),
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS installers (
     poor_work_count INTEGER DEFAULT 0 CHECK (poor_work_count >= 0),
     warranty_visits_count INTEGER DEFAULT 0 CHECK (warranty_visits_count >= 0),
     last_incident_date TIMESTAMP,
-    quality_score NUMERIC(3,2) GENERATED ALWAYS AS (
+    quality_score NUMERIC(4,2) GENERATED ALWAYS AS (
         CASE 
             WHEN total_orders > 0 
             THEN (total_orders - poor_work_count - warranty_visits_count)::NUMERIC / total_orders::NUMERIC
@@ -77,7 +78,8 @@ CREATE TABLE IF NOT EXISTS installers (
         END
     ) STORED,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
 -- -----------------------------------------------------------------
@@ -87,12 +89,14 @@ CREATE TABLE IF NOT EXISTS clients (
     id SERIAL PRIMARY KEY,
     full_name TEXT NOT NULL,
     phone VARCHAR(20) NOT NULL,
+    backup_phone VARCHAR(20),
     address TEXT NOT NULL,
     coordinates POINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_contact TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     comments TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
 -- -----------------------------------------------------------------

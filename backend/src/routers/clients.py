@@ -52,12 +52,23 @@ async def update_client_endpoint(
         raise HTTPException(status_code=404, detail="Client not found")
     return client
 
+#@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+#async def delete_client_endpoint(
+#   client_id: int,
+#   db: AsyncSession = Depends(get_db)
+#):
+#   """Удалить клиента"""
+#    deleted = await delete_client(db, client_id)
+#    if not deleted:
+#       raise HTTPException(status_code=404, detail="Client not found")
+#    return None
+
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_client_endpoint(
     client_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    """Удалить клиента"""
+    """Мягко удалить клиента (устанавливает deleted_at)"""
     deleted = await delete_client(db, client_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Client not found")
