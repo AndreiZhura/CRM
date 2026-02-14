@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_FROM_NAME: str = "CRM Олега"
+    REMINDER_EMAIL: str = ""
 
     class Config:
         env_file = "../../.env"

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
 from routers import clients ,installers,orders,finance  # в начало файла, после других импортов
 from routers import reminders
+from core.scheduler import start_scheduler
 
 
 
@@ -42,3 +43,8 @@ async def db_check(db: AsyncSession = Depends(get_db)):
         return {"db_status": "connected", "result": result.scalar()}
     except Exception as e:
         return {"db_status": "error", "error": str(e)}
+    
+@app.on_event("startup")
+async def startup_event():
+    # ... возможно, другие инициализации
+    start_scheduler()
