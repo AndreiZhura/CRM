@@ -8,6 +8,7 @@ from schemas.orders import OrderOut
 from typing import List
 from services.email import send_reminder_email
 from fastapi import HTTPException
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(prefix="/reminders", tags=["reminders"])
 
