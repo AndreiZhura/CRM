@@ -5,7 +5,7 @@ from services.installers import (
     create_installer, get_installer, get_installers,
     update_installer, delete_installer
 )
-from schemas.installer import InstallerCreate, InstallerUpdate, InstallerOut
+from schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
 
 router = APIRouter(prefix="/installers", tags=["installers"])
 

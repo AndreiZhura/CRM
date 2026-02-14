@@ -6,6 +6,7 @@ from sqlalchemy.sql import func
 # Base — наш базовый класс из db.py, от которого наследуются все модели.
 from core.db import Base
 from sqlalchemy import DateTime, func
+from sqlalchemy.orm import relationship
 
 
 class LatLngType(sqlalchemy.types.UserDefinedType):
@@ -50,3 +51,4 @@ class Client(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     backup_phone = Column(String(20), nullable=True)
     deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
+    orders = relationship("Order", back_populates="client")

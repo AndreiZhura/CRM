@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime, timezone
-from models.installer import Installer
-from schemas.installer import InstallerCreate, InstallerUpdate
+from models.installers import Installer
+from schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
 
 async def create_installer(db: AsyncSession, installer_data: InstallerCreate):
     installer = Installer(**installer_data.model_dump())

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Numeric
 from sqlalchemy.sql import func
 from core.db import Base
 from sqlalchemy import FetchedValue
+from sqlalchemy.orm import relationship
 
 class Installer(Base):
     __tablename__ = 'installers'
@@ -27,3 +28,4 @@ class Installer(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
+    orders = relationship("Order", back_populates="installer")
