@@ -10,6 +10,7 @@ def start_scheduler():
     scheduler.add_job(
         send_daily_reminder,
         CronTrigger(hour=9, minute=0),
+        #CronTrigger(minute="*"),  # вместо hour=9, minute=0
         id="daily_reminder",
         replace_existing=True,
         args=[settings.REMINDER_EMAIL]  # передаём email получателя

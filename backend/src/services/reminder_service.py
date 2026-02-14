@@ -1,19 +1,17 @@
 from sqlalchemy import select, and_
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timedelta
 from models.orders import Order
 from services.email import send_reminder_email
 from core.db import AsyncSessionLocal
+from sqlalchemy.orm import selectinload
 
 async def send_daily_reminder(recipient: str):
-    """
-    Получает зависшие заказы и отправляет письмо.
-    Вызывается планировщиком.
-    """
-    # Создаём сессию БД (вне Depends)
-    async with AsyncSessionLocal() as db:
+     async with AsyncSessionLocal() as db:
         cutoff_date = datetime.now() - timedelta(days=7)
         result = await db.execute(
             select(Order)
+            .options(selectinload(Order.client), selectinload(Order.installer))
             .where(
                 and_(
                     Order.updated_at < cutoff_date,
@@ -25,15 +23,10 @@ async def send_daily_reminder(recipient: str):
         orders = result.scalars().all()
 
         if not orders:
-            # Если нет зависших заказов, можно ничего не отправлять
             return
 
-        # Формируем HTML-таблицу (как в reminders.py)
         rows = ""
         for order in orders:
-            # Здесь нужно подгрузить связанные данные (клиент, монтажник)
-            # Можно сделать отдельные запросы или использовать selectinload
-            # Для простоты пока так, но можно улучшить
             client_name = order.client.full_name if order.client else "Н/Д"
             rows += f"""
             <tr>
@@ -57,5 +50,4 @@ async def send_daily_reminder(recipient: str):
             {rows}
         </table>
         """
-
         await send_reminder_email(recipient, html)
