@@ -1,0 +1,5 @@
+2026-02-14 17:25:10,403 - core.logging - INFO - Starting CRM application
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Added job "send_daily_reminder" to job store "default"
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-14 17:25:10,403 - core.logging - INFO - Scheduler started

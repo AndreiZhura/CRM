@@ -5,6 +5,8 @@ from models.orders import Order
 from services.email import send_reminder_email
 from core.db import AsyncSessionLocal
 from sqlalchemy.orm import selectinload
+import logging
+logger = logging.getLogger(__name__)
 
 async def send_daily_reminder(recipient: str):
      async with AsyncSessionLocal() as db:
