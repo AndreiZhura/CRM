@@ -1,0 +1,7 @@
+RussiaLumen2296
+
+docker exec -it crm_db psql -U admin -d oleg_crm -c "UPDATE orders SET updated_at = '2020-01-01' WHERE id = 9;"
+
+
+zhuravlev2296@mail.ru
+DDVCEnYArdscaA1lxpgg
