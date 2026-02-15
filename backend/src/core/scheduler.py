@@ -2,17 +2,24 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from core.config import settings
 from services.reminder_service import send_daily_reminder  # создадим этот сервис
+from services.weather_service import daily_weather_collection
 
 scheduler = AsyncIOScheduler()
 
 def start_scheduler():
-    # Запускаем задачу каждый день в 9:00
+    # Задача для напоминаний в 9:00
     scheduler.add_job(
         send_daily_reminder,
         CronTrigger(hour=9, minute=0),
-        #CronTrigger(minute="*"),  # вместо hour=9, minute=0
         id="daily_reminder",
         replace_existing=True,
-        args=[settings.REMINDER_EMAIL]  # передаём email получателя
+        args=[settings.REMINDER_EMAIL]
+    )
+    # Задача для сбора погоды в 1:00
+    scheduler.add_job(
+        daily_weather_collection,
+        CronTrigger(hour=1, minute=0),
+        id="daily_weather",
+        replace_existing=True
     )
     scheduler.start()
