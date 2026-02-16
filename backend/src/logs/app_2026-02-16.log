@@ -5,3 +5,752 @@
 2026-02-16 10:28:12,954 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
 2026-02-16 10:28:12,954 - apscheduler.scheduler - INFO - Scheduler started
 2026-02-16 10:28:12,954 - core.logging - INFO - Scheduler started
+2026-02-16 12:26:39,493 - core.logging - INFO - Starting CRM application
+2026-02-16 12:26:39,493 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:26:39,493 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:26:39,494 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:26:39,494 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:26:39,494 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:26:39,494 - core.logging - INFO - Scheduler started
+2026-02-16 12:27:13,140 - core.logging - ERROR - Unhandled exception: [Errno 111] Connection refused
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 274, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/routers/auth.py", line 13, in register
+    result = await db.execute(select(Admin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 455, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2308, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2180, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2047, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1143, in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3268, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3292, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1269, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 716, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 169, in _do_get
+    with util.safe_reraise():
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 167, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 678, in __init__
+    self.__connect()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 902, in __connect
+    with util.safe_reraise():
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 936, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 125, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 185, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1249, in _connect
+    raise last_error or exceptions.TargetServerAttributeNotMatched(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1099, in __connect_addr
+    tr, pr = await connector
+             ^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 969, in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 2043, in create_connection
+  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
+ConnectionRefusedError: [Errno 111] Connection refused
+2026-02-16 12:29:51,543 - core.logging - INFO - Starting CRM application
+2026-02-16 12:29:51,543 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:29:51,543 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:29:51,544 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:29:51,544 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:29:51,544 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:29:51,544 - core.logging - INFO - Scheduler started
+2026-02-16 12:30:11,234 - core.logging - ERROR - Unhandled exception: [Errno 111] Connection refused
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 274, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/routers/auth.py", line 13, in register
+    result = await db.execute(select(Admin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 455, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2308, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2180, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2047, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1143, in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3268, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3292, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1269, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 716, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 169, in _do_get
+    with util.safe_reraise():
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 167, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 678, in __init__
+    self.__connect()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 902, in __connect
+    with util.safe_reraise():
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 936, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 125, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 185, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2443, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1249, in _connect
+    raise last_error or exceptions.TargetServerAttributeNotMatched(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1218, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1054, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1099, in __connect_addr
+    tr, pr = await connector
+             ^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 969, in _create_ssl_connection
+    tr, pr = await loop.create_connection(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 2043, in create_connection
+  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
+ConnectionRefusedError: [Errno 111] Connection refused
+2026-02-16 12:32:18,450 - core.logging - INFO - Starting CRM application
+2026-02-16 12:32:18,450 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:32:18,450 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:32:18,450 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:32:18,450 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:32:18,450 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:32:18,450 - core.logging - INFO - Scheduler started
+2026-02-16 12:32:47,942 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2026-02-16 12:32:47,943 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:32:47,944 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2026-02-16 12:32:47,945 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:32:47,945 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2026-02-16 12:32:47,946 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:32:47,946 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 12:32:47,997 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins
+2026-02-16 12:32:47,997 - sqlalchemy.engine.Engine - INFO - [generated in 0.00016s] ()
+2026-02-16 12:32:47,999 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 12:32:47,999 - core.logging - ERROR - Unhandled exception: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "admins" does not exist
+[SQL: SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 533, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 784, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "admins" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 591, in execute
+    self._adapt_connection.await_(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 125, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 185, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 569, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 520, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 808, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "admins" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 274, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/routers/auth.py", line 13, in register
+    result = await db.execute(select(Admin))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 455, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2308, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2190, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+           ^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 516, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1639, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2343, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 591, in execute
+    self._adapt_connection.await_(
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 125, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 185, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 569, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 520, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 808, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "admins" does not exist
+[SQL: SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-02-16 12:45:56,017 - core.logging - INFO - Starting CRM application
+2026-02-16 12:45:56,017 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:45:56,017 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:45:56,018 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:45:56,018 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:45:56,018 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:45:56,018 - core.logging - INFO - Scheduler started
+2026-02-16 12:46:21,594 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2026-02-16 12:46:21,594 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:46:21,595 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2026-02-16 12:46:21,595 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:46:21,595 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2026-02-16 12:46:21,595 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:46:21,596 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 12:46:21,650 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins
+2026-02-16 12:46:21,650 - sqlalchemy.engine.Engine - INFO - [generated in 0.00016s] ()
+2026-02-16 12:46:21,652 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-02-16 12:46:21,696 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 12:46:21,697 - core.logging - ERROR - Unhandled exception: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 274, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/routers/auth.py", line 17, in register
+    hashed = get_password_hash(admin_data.password)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/auth.py", line 25, in get_password_hash
+    return pwd_context.hash(password)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/context.py", line 2258, in hash
+    return record.hash(secret, **kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 779, in hash
+    self.checksum = self._calc_checksum(secret)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+    self._stub_requires_backend()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+    cls.set_backend()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+    return owner.set_backend(name, dryrun=dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+    return cls.set_backend(name, dryrun=dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+    cls._set_backend(name, dryrun)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+    super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+    ok = loader(**kwds)
+         ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+    return mixin_cls._finalize_backend_mixin(name, dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+    if detect_wrap_bug(IDENT_2A):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+    if verify(secret, bug_hash):
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 792, in verify
+    return consteq(self._calc_checksum(secret), chk)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+    hash = _bcrypt.hashpw(secret, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2026-02-16 12:48:30,504 - core.logging - INFO - Starting CRM application
+2026-02-16 12:48:30,504 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:48:30,504 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:48:30,504 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:48:30,504 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:48:30,504 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:48:30,504 - core.logging - INFO - Scheduler started
+2026-02-16 12:48:41,916 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2026-02-16 12:48:41,916 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:48:41,918 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2026-02-16 12:48:41,918 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:48:41,919 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2026-02-16 12:48:41,919 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:48:41,919 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 12:48:41,927 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins
+2026-02-16 12:48:41,927 - sqlalchemy.engine.Engine - INFO - [generated in 0.00019s] ()
+2026-02-16 12:48:41,929 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-02-16 12:48:41,934 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 12:48:41,934 - core.logging - ERROR - Unhandled exception: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 98, in receive
+    return self.receive_nowait()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 93, in receive_nowait
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 274, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/routers/auth.py", line 17, in register
+    hashed = get_password_hash(admin_data.password)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/backend/src/auth.py", line 25, in get_password_hash
+    return pwd_context.hash(password)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/context.py", line 2258, in hash
+    return record.hash(secret, **kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 779, in hash
+    self.checksum = self._calc_checksum(secret)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 591, in _calc_checksum
+    self._stub_requires_backend()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2254, in _stub_requires_backend
+    cls.set_backend()
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2156, in set_backend
+    return owner.set_backend(name, dryrun=dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2163, in set_backend
+    return cls.set_backend(name, dryrun=dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2188, in set_backend
+    cls._set_backend(name, dryrun)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2311, in _set_backend
+    super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 2224, in _set_backend
+    ok = loader(**kwds)
+         ^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 626, in _load_backend_mixin
+    return mixin_cls._finalize_backend_mixin(name, dryrun)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 421, in _finalize_backend_mixin
+    if detect_wrap_bug(IDENT_2A):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 380, in detect_wrap_bug
+    if verify(secret, bug_hash):
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/utils/handlers.py", line 792, in verify
+    return consteq(self._calc_checksum(secret), chk)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/CRM/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 655, in _calc_checksum
+    hash = _bcrypt.hashpw(secret, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2026-02-16 12:49:52,936 - core.logging - INFO - Starting CRM application
+2026-02-16 12:49:52,936 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:49:52,936 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:49:52,936 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:49:52,937 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:49:52,937 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:49:52,937 - core.logging - INFO - Scheduler started
+2026-02-16 12:50:06,501 - core.logging - INFO - Starting CRM application
+2026-02-16 12:50:06,501 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:50:06,501 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:50:06,502 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:50:06,502 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:50:06,502 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:50:06,502 - core.logging - INFO - Scheduler started
+2026-02-16 12:53:10,083 - core.logging - INFO - Starting CRM application
+2026-02-16 12:53:10,083 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:53:10,084 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 12:53:10,084 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:53:10,084 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 12:53:10,084 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 12:53:10,084 - core.logging - INFO - Scheduler started
+2026-02-16 12:53:34,554 - sqlalchemy.engine.Engine - INFO - select pg_catalog.version()
+2026-02-16 12:53:34,554 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:53:34,559 - sqlalchemy.engine.Engine - INFO - select current_schema()
+2026-02-16 12:53:34,559 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:53:34,560 - sqlalchemy.engine.Engine - INFO - show standard_conforming_strings
+2026-02-16 12:53:34,560 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2026-02-16 12:53:34,561 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 12:53:34,572 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins
+2026-02-16 12:53:34,572 - sqlalchemy.engine.Engine - INFO - [generated in 0.00020s] ()
+2026-02-16 12:53:34,799 - sqlalchemy.engine.Engine - INFO - INSERT INTO admins (username, password_hash) VALUES ($1::VARCHAR, $2::VARCHAR) RETURNING admins.id, admins.created_at
+2026-02-16 12:53:34,799 - sqlalchemy.engine.Engine - INFO - [generated in 0.00019s] ('oleg', '$2b$12$ztN766ZtzK9XQJ5nwOkauuCbovmkq/zjW0gPR8XnhJrt5cT8388Yy')
+2026-02-16 12:53:34,840 - sqlalchemy.engine.Engine - INFO - COMMIT
+2026-02-16 12:53:34,842 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 12:53:34,843 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.id = $1::INTEGER
+2026-02-16 12:53:34,843 - sqlalchemy.engine.Engine - INFO - [generated in 0.00012s] (1,)
+2026-02-16 12:53:34,845 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 13:09:17,324 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 13:09:17,325 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 13:09:17,325 - sqlalchemy.engine.Engine - INFO - [generated in 0.00018s] ('oleg',)
+2026-02-16 13:09:17,576 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 13:19:28,737 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 13:19:28,737 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 13:19:28,737 - sqlalchemy.engine.Engine - INFO - [cached since 611.4s ago] ('oleg',)
+2026-02-16 13:19:28,953 - sqlalchemy.engine.Engine - INFO - ROLLBACK

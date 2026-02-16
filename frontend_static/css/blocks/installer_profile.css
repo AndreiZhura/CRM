@@ -1,0 +1,91 @@
+/* Общая обертка */
+.profile-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Левая колонка 300px, правая - остальное */
+    gap: 30px;
+    padding: 0 20px;
+    align-items: start;
+}
+
+/* Левая карточка */
+.profile-sidebar {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    text-align: center;
+    position: sticky;
+    top: 20px;
+}
+
+/* Правая часть с досье и таблицей */
+.profile-main {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.dossier-section, .orders-section {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Сетка для полей ввода */
+.dossier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Два поля в ряд */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.info-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.info-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.info-group input:focus {
+    border-color: #4f46e5;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Кнопки */
+.btn-save {
+    width: 100%;
+    background: #22c55e;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.btn-outline {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}

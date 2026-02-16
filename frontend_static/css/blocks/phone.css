@@ -1,0 +1,101 @@
+/* 1. Общий контейнер поля */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 1rem; /* Добавил отступ между полями */
+}
+
+/* 2. Лейбл (Заголовок поля) */
+.field-group label {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 3. Обертка для инпута и иконок */
+.phone-input-container {
+    position: relative; /* База для абсолютного позиционирования кнопок */
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* 4. Поле ввода (Инпут) */
+.phone-mask {
+    width: 100% !important;
+    height: 45px; /* Чуть увеличил для удобства тапа */
+    padding: 0.625rem 0.875rem;
+    padding-right: 90px !important; /* Гарантированный зазор под две кнопки */
+    
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    
+    font-size: 1rem; /* 16px на iPhone предотвращает авто-зум при наборе */
+    color: #1e293b;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+/* Эффект фокуса */
+.phone-mask:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 5. Кнопки внутри инпута (Звонок и ТГ) */
+.phone-actions {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%; /* Выравнивание по центру высоты */
+    transform: translateY(-50%); /* Точная калибровка центра */
+    display: flex;
+    gap: 0.85rem; /* Чуть больше места между иконками */
+    z-index: 10;
+}
+
+.action-btn {
+    text-decoration: none;
+    font-size: 1.3rem; /* Сделал иконки крупнее для пальца */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* Эффект нажатия на iPhone */
+.action-btn:active {
+    transform: scale(1.3);
+}
+
+/* 6. Валидация (Цвета) */
+/* Если номер неполный и поле не пустое */
+.phone-mask.invalid {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2;
+}
+
+/* Если номер введен полностью (11 цифр) */
+.phone-mask.valid {
+    border-color: #10b981 !important;
+    background-color: #f0fdf4;
+}
+
+/* Скрываем кнопки по умолчанию */
+.hidden {
+    display: none !important;
+}
+
+/* Подсказка об ошибке */
+.error-hint {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
