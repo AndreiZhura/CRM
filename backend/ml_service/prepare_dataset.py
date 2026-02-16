@@ -11,10 +11,15 @@ src_path = Path(__file__).parent.parent / 'src'
 sys.path.append(str(src_path))
 
 # Теперь можно импортировать модели и конфиг
+from models.finance import Finance
 from models.weather import Weather
 from models.orders import Order
 from core.config import settings
-
+from models.clients import Client   # добавь эту строку
+from models.installers import Installer
+from datetime import datetime
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+output_file = f"datasets/dataset_{timestamp}.csv"
 async def main():
     # Подключаемся к БД
     engine = create_async_engine(settings.DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://'))
@@ -37,7 +42,7 @@ async def main():
         ).join(
             Weather,
             (func.date(Order.created_at) == Weather.date) & 
-            (Weather.location == func.split_part(Order.address_text, ',', 1))
+            (Weather.location == Order.address_text)
         )
         result = await db.execute(stmt)
         rows = result.all()
