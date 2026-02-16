@@ -76,7 +76,15 @@ const api = {
     method: 'DELETE',
   }),
   getOrders: () => apiFetch('/orders/'),
-
+  getOrder: (id) => apiFetch(`/orders/${id}`),
+  updateOrder: (id, data) => apiFetch(`/orders/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  deleteOrder: (id) => apiFetch(`/orders/${id}`, {
+    method: 'DELETE',
+  }),
+  getClients: () => apiFetch('/clients/')
 };
 
 

@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import '../styles/orders-list.css';
+import React, { useEffect, useState,Link } from "react";
+import api from "../services/api";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import "../styles/orders-list.css";
 
 const OrdersList = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({
-    client: '',
-    address: '',
-    status: ''
+    client: "",
+    address: "",
+    status: "",
   });
 
   useEffect(() => {
@@ -32,10 +32,17 @@ const OrdersList = () => {
 
   useEffect(() => {
     // Фильтрация при изменении фильтров или заказов
-    const filtered = orders.filter(order => {
-      const clientMatch = order.client?.full_name?.toLowerCase().includes(filters.client.toLowerCase()) ?? true;
-      const addressMatch = order.address_text?.toLowerCase().includes(filters.address.toLowerCase()) ?? true;
-      const statusMatch = filters.status === '' || order.status === filters.status;
+    const filtered = orders.filter((order) => {
+      const clientMatch =
+        order.client?.full_name
+          ?.toLowerCase()
+          .includes(filters.client.toLowerCase()) ?? true;
+      const addressMatch =
+        order.address_text
+          ?.toLowerCase()
+          .includes(filters.address.toLowerCase()) ?? true;
+      const statusMatch =
+        filters.status === "" || order.status === filters.status;
       return clientMatch && addressMatch && statusMatch;
     });
     setFilteredOrders(filtered);
@@ -44,22 +51,22 @@ const OrdersList = () => {
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const getStatusClass = (status) => {
     switch (status) {
-      case 'Новый':
-      case 'Новая заявка':
-        return 'status-novaya-zayavka';
-      case 'Ждет установщика':
-        return 'status-zhdet-ustanovshchika';
-      case 'Завершено':
-      case 'Выполнен':
-        return 'status-zaversheno';
+      case "Новый":
+      case "Новая заявка":
+        return "status-novaya-zayavka";
+      case "Ждет установщика":
+        return "status-zhdet-ustanovshchika";
+      case "Завершено":
+      case "Выполнен":
+        return "status-zaversheno";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -130,22 +137,29 @@ const OrdersList = () => {
                 </tr>
               </thead>
               <tbody className="orders-table__body">
-                {filteredOrders.map(order => (
+                {filteredOrders.map((order) => (
                   <tr key={order.id} className="orders-table__row">
                     <td className="orders-table__td" data-label="Клиент">
-                      {order.client?.full_name || '—'}
+                      <Link to={`/orders/${order.id}`}>
+                        {order.client?.full_name || "—"}
+                      </Link>
                     </td>
                     <td className="orders-table__td" data-label="Адрес">
-                      {order.address_text || '—'}
+                      {order.address_text || "—"}
                     </td>
                     <td className="orders-table__td" data-label="Модель">
-                      {order.service_type || '—'}
+                      {order.service_type || "—"}
                     </td>
                     <td className="orders-table__td" data-label="Цена">
-                      {order.finance?.sale_price_client ? `${order.finance.sale_price_client} ₽` : '—'}
+                      {order.finance?.sale_price_client
+                        ? `${order.finance.sale_price_client} ₽`
+                        : "—"}
                     </td>
+
                     <td className="orders-table__td" data-label="Статус">
-                      <span className={`status-badge ${getStatusClass(order.status)}`}>
+                      <span
+                        className={`status-badge ${getStatusClass(order.status)}`}
+                      >
                         {order.status}
                       </span>
                     </td>
