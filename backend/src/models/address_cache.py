@@ -11,8 +11,4 @@ class AddressCache(Base):
     lon = Column(Numeric(10, 7), nullable=False)
     updated_at = Column(DateTime(timezone=True),
                         server_default=func.now(), onupdate=func.now())
-    address = Column(String, primary_key=True)
-    lat = Column(Numeric(10, 7), nullable=False)
-    lon = Column(Numeric(10, 7), nullable=False)
-    updated_at = Column(DateTime(timezone=True),
-                        server_default=func.now(), onupdate=func.now())
+   

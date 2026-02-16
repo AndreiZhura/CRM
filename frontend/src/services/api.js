@@ -84,7 +84,20 @@ const api = {
   deleteOrder: (id) => apiFetch(`/orders/${id}`, {
     method: 'DELETE',
   }),
-  getClients: () => apiFetch('/clients/')
+  getClients: () => apiFetch('/clients/'),
+
+  createClient: (data) => apiFetch('/clients/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  createOrder: (data) => apiFetch('/orders/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  createFinance: (data) => apiFetch('/finance/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
 };
 
 

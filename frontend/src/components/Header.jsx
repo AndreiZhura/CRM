@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/header.css';
 
 const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <header className="header">
       <div className="header__container">
@@ -14,17 +20,21 @@ const Header = () => {
           </div>
         </div>
         
-        <button className="header__burger" id="burgerBtn">
+        <button 
+          className={`header__burger ${isMenuOpen ? 'open' : ''}`} 
+          onClick={toggleMenu}
+          aria-label="Меню"
+        >
           <span></span>
           <span></span>
           <span></span>
         </button>
 
-        <nav className="header__nav" id="headerNav">
-          <Link to="/orders/new" className="header__link">📝 Новый заказ</Link>
-          <Link to="/orders" className="header__link">📋 Журнал</Link>
-          <Link to="/installers" className="header__link">👨‍🔧 Мастера</Link>
-          <Link to="/installers/new" className="header__link">➕ Добавить мастера</Link>
+        <nav className={`header__nav ${isMenuOpen ? 'active' : ''}`}>
+          <Link to="/orders/new" className="header__link" onClick={() => setIsMenuOpen(false)}>📝 Новый заказ</Link>
+          <Link to="/orders" className="header__link" onClick={() => setIsMenuOpen(false)}>📋 Журнал</Link>
+          <Link to="/installers" className="header__link" onClick={() => setIsMenuOpen(false)}>👨‍🔧 Мастера</Link>
+          <Link to="/installers/new" className="header__link" onClick={() => setIsMenuOpen(false)}>➕ Добавить мастера</Link>
         </nav>
       </div>
     </header>

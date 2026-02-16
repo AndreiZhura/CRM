@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/order-form.css';
 
 const NewOrder = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fio: '',
     phone: '',
@@ -17,10 +20,12 @@ const NewOrder = () => {
     sell_price_ac: '',
     price_install: '',
     my_commission: '',
-    status: 'Новая заявка',
+    status: 'Новый',
     promises: '',
     installer_opinion: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,9 +33,50 @@ const NewOrder = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Здесь будет отправка на бэкенд
-    console.log('Отправка формы:', formData);
-    // TODO: создать заказ и затем финансы
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1. Создаём клиента
+      const clientData = {
+        full_name: formData.fio,
+        phone: formData.phone,
+        address: formData.address,
+        comments: formData.installer_opinion || '',
+      };
+      const client = await api.createClient(clientData);
+
+      // 2. Создаём заказ
+      const orderData = {
+        client_id: client.id,
+        installer_id: null, // пока не выбираем монтажника
+        service_type: formData.model || 'Установка кондиционера',
+        service_datetime: formData.service_date || new Date().toISOString(),
+        status: formData.status,
+        address_text: formData.address,
+        warehouse: formData.warehouse,
+        promise: formData.promises || '',
+      };
+      const order = await api.createOrder(orderData);
+
+      // 3. Создаём финансовую запись
+      const financeData = {
+        order_id: order.id,
+        purchase_price: parseFloat(formData.buy_price) || 0,
+        sale_price_client: parseFloat(formData.sell_price_ac) || 0,
+        installer_pay: parseFloat(formData.price_install) || 0,
+        my_commission: parseFloat(formData.my_commission) || 0,
+        payment_state: 'Не оплачен',
+      };
+      await api.createFinance(financeData);
+
+      // 4. Перенаправляем на список заказов
+      navigate('/orders');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,6 +84,8 @@ const NewOrder = () => {
       <Header />
       <main className="page__main">
         <form id="orderForm" className="crm-form" onSubmit={handleSubmit}>
+          <h1>Новый заказ</h1>
+          {error && <div className="error">{error}</div>}
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">👤 Карточка клиента</legend>
             <div className="crm-form__grid">
@@ -202,7 +250,7 @@ const NewOrder = () => {
                   onChange={handleChange}
                   className="crm-form__input"
                 >
-                  <option value="Новая заявка">Новая заявка</option>
+                  <option value="Новый">Новый</option>
                   <option value="Ждет установщика">Ждет установщика</option>
                   <option value="Завершено">Завершено</option>
                 </select>
@@ -229,10 +277,14 @@ const NewOrder = () => {
               </div>
             </div>
           </fieldset>
-
+          
           <div className="crm-form__actions">
-            <button type="submit" className="crm-form__button crm-form__button--submit" id="saveOrderBtn">
-              <span>🚀 Создать карточку заказа</span>
+            <button
+              type="submit"
+              className="crm-form__button crm-form__button--submit"
+              disabled={loading}
+            >
+              {loading ? 'Сохранение...' : '🚀 Создать карточку заказа'}
             </button>
           </div>
         </form>
