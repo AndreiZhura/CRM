@@ -1,0 +1,7 @@
+2026-02-16 10:28:12,927 - core.logging - INFO - Starting CRM application
+2026-02-16 10:28:12,928 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 10:28:12,928 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 10:28:12,954 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 10:28:12,954 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 10:28:12,954 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 10:28:12,954 - core.logging - INFO - Scheduler started

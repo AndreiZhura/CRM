@@ -14,13 +14,12 @@ class Settings(BaseSettings):
     YANDEX_DISK_TOKEN: str = ""
     YANDEX_DISK_PATH: str = "/CRM/backups"
     POSTGRES_PASSWORD: str = ""
-    YANDEX_DISK_TOKEN: str = ""
-    YANDEX_DISK_PATH: str = "/CRM/backups"
+    SECRET_KEY: str = ""
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-
-class Config:
-    env_file = "../../.env"
-    extra = "ignore"
-
+    class Config:
+        env_file = "../../.env"
+        extra = "ignore"
 
 settings = Settings()

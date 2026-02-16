@@ -11,6 +11,7 @@ from core.scheduler import start_scheduler
 from core.logging import logger
 from core.logging import LoggingMiddleware
 from core.scheduler import scheduler
+from routers import auth
 
 
 
@@ -22,6 +23,7 @@ app.include_router(orders.router)
 app.include_router(finance.router)
 app.include_router(reminders.router)
 app.add_middleware(LoggingMiddleware)
+app.include_router(auth.router)
 
 @app.on_event("startup")
 async def startup_event():

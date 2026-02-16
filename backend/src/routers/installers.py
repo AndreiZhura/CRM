@@ -6,13 +6,16 @@ from services.installers import (
     update_installer, delete_installer
 )
 from schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
+from auth import get_current_admin
+from models.admins import Admin
 
 router = APIRouter(prefix="/installers", tags=["installers"])
 
 @router.post("/", response_model=InstallerOut, status_code=status.HTTP_201_CREATED)
 async def create_installer_endpoint(
     installer: InstallerCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     return await create_installer(db, installer)
 
@@ -20,14 +23,16 @@ async def create_installer_endpoint(
 async def read_installers(
     skip: int = 0,
     limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     return await get_installers(db, skip=skip, limit=limit)
 
 @router.get("/{installer_id}", response_model=InstallerOut)
 async def read_installer(
     installer_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     installer = await get_installer(db, installer_id)
     if not installer:
@@ -38,7 +43,8 @@ async def read_installer(
 async def update_installer_endpoint(
     installer_id: int,
     installer: InstallerUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     updated = await update_installer(db, installer_id, installer)
     if not updated:
@@ -48,7 +54,8 @@ async def update_installer_endpoint(
 @router.delete("/{installer_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_installer_endpoint(
     installer_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     deleted = await delete_installer(db, installer_id)
     if not deleted:
