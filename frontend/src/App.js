@@ -3,6 +3,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewOrder from './pages/NewOrder';
 import ProtectedRoute from './components/ProtectedRoute';
+import OrdersList from './pages/OrdersList';
+import AddInstaller from './pages/AddInstaller';
 
 function App() {
   return (
@@ -22,6 +24,22 @@ function App() {
           element={
             <ProtectedRoute>
               <NewOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/installers/new"
+          element={
+            <ProtectedRoute>
+              <AddInstaller />
             </ProtectedRoute>
           }
         />

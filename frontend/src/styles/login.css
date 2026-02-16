@@ -1,0 +1,92 @@
+/* src/styles/login.css */
+
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    border-left: 4px solid #3b82f6;
+    padding-left: 12px;
+}
+
+.login-container .form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-container label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 0.4rem;
+}
+
+.login-container input {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: #f8fafc;
+    transition: border-color 0.2s;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #fff;
+}
+
+.login-container .error {
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #fee2e2;
+    font-size: 0.9rem;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.login-container button:hover {
+    background: #1d4ed8;
+}
+
+.login-container button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Адаптивность для мобильных устройств */
+@media screen and (max-width: 600px) {
+    .login-container {
+        margin: 40px 20px;
+        padding: 1.5rem;
+    }
+
+    .login-container h2 {
+        font-size: 1.3rem;
+    }
+}

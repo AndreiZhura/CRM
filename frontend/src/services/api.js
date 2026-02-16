@@ -72,7 +72,9 @@ const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  // ... остальные методы
+  getOrders: () => apiFetch('/orders/'),
+  
 };
+
 
 export default api;

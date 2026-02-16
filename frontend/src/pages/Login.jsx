@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import api from '../services/api';
-//import '../styles/login.css'; // если есть отдельный CSS для логина
+import React, { useState } from "react";
+import api from "../services/api";
+import '../styles/login.css'; // если есть отдельный CSS для логина
 
 const Login = () => {
   // Состояния для полей ввода
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const data = await api.login(username, password);
       // Предполагаем, что ответ содержит поле access_token
-      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem("access_token", data.access_token);
       // Перенаправляем на главную страницу (например, /dashboard)
-      window.location.href = '/dashboard'; // или используем useNavigate
+      window.location.href = "/orders/new"; // или используем useNavigate
     } catch (err) {
       setError(err.message);
     } finally {
@@ -53,7 +53,7 @@ const Login = () => {
           />
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? 'Вход...' : 'Войти'}
+          {loading ? "Вход..." : "Войти"}
         </button>
       </form>
     </div>
