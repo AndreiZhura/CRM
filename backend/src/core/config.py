@@ -11,10 +11,16 @@ class Settings(BaseSettings):
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_FROM_NAME: str = "CRM Олега"
     REMINDER_EMAIL: str = ""
+    YANDEX_DISK_TOKEN: str = ""
+    YANDEX_DISK_PATH: str = "/CRM/backups"
+    POSTGRES_PASSWORD: str = ""
+    YANDEX_DISK_TOKEN: str = ""
+    YANDEX_DISK_PATH: str = "/CRM/backups"
 
-    class Config:
-        env_file = "../../.env"
-        extra = "ignore"
+
+class Config:
+    env_file = "../../.env"
+    extra = "ignore"
 
 
 settings = Settings()

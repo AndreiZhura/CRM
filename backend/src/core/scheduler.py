@@ -33,3 +33,23 @@ def start_scheduler():
     )
 
     scheduler.start()
+
+from services.backup_service import daily_backup_and_report
+
+def start_scheduler():
+    # ... существующие задачи
+    scheduler.add_job(
+        daily_backup_and_report,
+        CronTrigger(hour=2, minute=0),
+        id="daily_backup_report",
+        replace_existing=True,
+        args=[settings.REMINDER_EMAIL]  # на тот же email, что и напоминания
+    )
+    scheduler.add_job(
+    daily_backup_and_report,
+    CronTrigger(hour=2, minute=0),  # каждый день в 2:00
+    id="daily_backup_report",
+    replace_existing=True,
+    args=[settings.REMINDER_EMAIL]
+)
+    scheduler.start()

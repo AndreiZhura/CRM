@@ -1,6 +1,7 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from core.config import settings
 from typing import List
+from pathlib import Path
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.MAIL_USERNAME,
@@ -25,6 +26,20 @@ async def send_reminder_email(recipient: str, orders_html: str):
         recipients=[recipient],
         body=orders_html,
         subtype="html"
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    
+async def send_email_with_attachment(recipient: str, subject: str, body: str, attachment_path: Path):
+    """
+    Отправляет письмо с одним вложением.
+    """
+    message = MessageSchema(
+        subject=subject,
+        recipients=[recipient],
+        body=body,
+        subtype="plain",
+        attachments=[attachment_path]
     )
     fm = FastMail(conf)
     await fm.send_message(message)
