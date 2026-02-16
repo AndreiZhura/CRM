@@ -49,14 +49,14 @@ async function apiFetch(endpoint, options = {}) {
 // Методы для работы с API
 const api = {
   // Авторизация
-  login: (username, password) => 
+  login: (username, password) =>
     apiFetch('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     }),
 
   // Регистрация (пока не нужна, но добавим для полноты)
-  register: (username, password) => 
+  register: (username, password) =>
     apiFetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
@@ -72,8 +72,11 @@ const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+  deleteInstaller: (id) => apiFetch(`/installers/${id}`, {
+    method: 'DELETE',
+  }),
   getOrders: () => apiFetch('/orders/'),
-  
+
 };
 
 

@@ -33,10 +33,13 @@
 /* --- 2. БЛОК ПОИСКА (ФИЛЬТРЫ) --- */
 .search-filters {
     display: flex;
-    flex-direction: row;
-    gap: 20px;
-    margin: 20px 0;
+    flex-wrap: wrap;         /* чтобы на мобильных переносилось */
+    justify-content: center; /* выравнивание элементов внутри по центру */
     align-items: center;
+    gap: 20px;
+    margin: 20px auto;       /* центрирование блока по горизонтали */
+    max-width: 900px;        /* ограничение ширины (по желанию) */
+    width: 100%;             /* занимает всю доступную ширину до max-width */
 }
 
 .search-group {

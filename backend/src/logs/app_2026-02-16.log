@@ -784,3 +784,77 @@ FROM admins
 WHERE admins.username = $1::VARCHAR
 2026-02-16 14:29:59,178 - sqlalchemy.engine.Engine - INFO - [cached since 4842s ago] ('oleg',)
 2026-02-16 14:29:59,386 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:43:09,899 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:43:09,899 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:43:09,899 - sqlalchemy.engine.Engine - INFO - [cached since 5633s ago] ('oleg',)
+2026-02-16 14:43:10,112 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:45:43,414 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:45:43,415 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:45:43,415 - sqlalchemy.engine.Engine - INFO - [cached since 5786s ago] ('oleg',)
+2026-02-16 14:45:43,624 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:45:54,549 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:45:54,549 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:45:54,549 - sqlalchemy.engine.Engine - INFO - [cached since 5797s ago] ('oleg',)
+2026-02-16 14:45:54,553 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-02-16 14:45:54,553 - sqlalchemy.engine.Engine - INFO - [generated in 0.00023s] (100, 0)
+2026-02-16 14:45:54,556 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:45:54,557 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:45:54,557 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:45:54,557 - sqlalchemy.engine.Engine - INFO - [cached since 5797s ago] ('oleg',)
+2026-02-16 14:45:54,558 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-02-16 14:45:54,558 - sqlalchemy.engine.Engine - INFO - [cached since 0.004971s ago] (100, 0)
+2026-02-16 14:45:54,560 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:49:02,648 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:49:02,648 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:49:02,648 - sqlalchemy.engine.Engine - INFO - [cached since 5985s ago] ('oleg',)
+2026-02-16 14:49:02,650 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-02-16 14:49:02,650 - sqlalchemy.engine.Engine - INFO - [cached since 188.1s ago] (100, 0)
+2026-02-16 14:49:02,651 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:55:31,560 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:55:31,560 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:55:31,561 - sqlalchemy.engine.Engine - INFO - [cached since 6374s ago] ('oleg',)
+2026-02-16 14:55:31,562 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-02-16 14:55:31,562 - sqlalchemy.engine.Engine - INFO - [cached since 577s ago] (100, 0)
+2026-02-16 14:55:31,563 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 14:55:31,564 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-02-16 14:55:31,564 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-02-16 14:55:31,564 - sqlalchemy.engine.Engine - INFO - [cached since 6374s ago] ('oleg',)
+2026-02-16 14:55:31,565 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-02-16 14:55:31,565 - sqlalchemy.engine.Engine - INFO - [cached since 577s ago] (100, 0)
+2026-02-16 14:55:31,567 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-16 15:04:48,599 - core.logging - INFO - Starting CRM application
+2026-02-16 15:04:48,600 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 15:04:48,600 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-16 15:04:48,600 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 15:04:48,600 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-16 15:04:48,600 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-16 15:04:48,600 - core.logging - INFO - Scheduler started
