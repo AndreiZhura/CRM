@@ -145,6 +145,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 -- -----------------------------------------------------------------
 -- 8. ФИНАНСОВАЯ ТАБЛИЦА
 -- -----------------------------------------------------------------
+-- 8. ФИНАНСОВАЯ ТАБЛИЦА (обновленная версия)
 CREATE TABLE IF NOT EXISTS finance (
     id SERIAL PRIMARY KEY,
     order_id INTEGER UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
@@ -155,11 +156,26 @@ CREATE TABLE IF NOT EXISTS finance (
     profit NUMERIC(10,2) GENERATED ALWAYS AS (
         sale_price_client - purchase_price - installer_pay - my_commission
     ) STORED,
+    margin NUMERIC(10,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN sale_price_client > 0 
+            THEN ((sale_price_client - purchase_price) / sale_price_client) * 100
+            ELSE 0
+        END
+    ) STORED,
+    profit_percent NUMERIC(10,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN sale_price_client > 0 AND profit IS NOT NULL
+            THEN (profit / sale_price_client) * 100
+            ELSE 0
+        END
+    ) STORED,
     installer_returned_money BOOLEAN DEFAULT FALSE,
     payment_state payment_status DEFAULT 'Не оплачен',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- -----------------------------------------------------------------
 -- 9. ЖУРНАЛ ИНЦИДЕНТОВ (брак / гарантийные выезды) с аудитом
@@ -254,37 +270,43 @@ BEGIN
             BEFORE UPDATE ON installers
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_clients_updated_at') THEN
         CREATE TRIGGER trg_clients_updated_at 
             BEFORE UPDATE ON clients
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_orders_updated_at') THEN
         CREATE TRIGGER trg_orders_updated_at 
             BEFORE UPDATE ON orders
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_finance_updated_at') THEN
         CREATE TRIGGER trg_finance_updated_at 
             BEFORE UPDATE ON finance
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_address_cache_updated_at') THEN
         CREATE TRIGGER trg_address_cache_updated_at 
             BEFORE UPDATE ON address_cache
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_incidents_updated_at') THEN
         CREATE TRIGGER trg_incidents_updated_at
             BEFORE UPDATE ON installer_incidents
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
+    
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_weather_updated_at') THEN
         CREATE TRIGGER trg_weather_updated_at 
             BEFORE UPDATE ON weather
             FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
     END IF;
-END;
+END
 $$;
 -- -----------------------------------------------------------------
 -- 13. ФУНКЦИЯ И ТРИГГЕР ДЛЯ ПОДСЧЁТА total_orders

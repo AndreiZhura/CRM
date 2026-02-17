@@ -5,6 +5,8 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
+
+
 from routers import clients ,installers,orders,finance  # в начало файла, после других импортов
 from routers import reminders
 from core.scheduler import start_scheduler

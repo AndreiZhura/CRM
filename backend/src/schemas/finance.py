@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
-
+from pydantic import BaseModel
 
 class FinanceBase(BaseModel):
     order_id: int
@@ -24,10 +24,17 @@ class FinanceUpdate(FinanceBase):
     installer_returned_money: Optional[bool] = None
     payment_state: Optional[str] = None
 
-class FinanceOut(FinanceBase):
-    id: int
+class FinanceOut(BaseModel):
+    order_id: int
+    purchase_price: float
+    sale_price_client: float
+    installer_pay: float
+    my_commission: float
     profit: float
+    margin: float  # новая метрика
+    profit_percent: float  # новая метрика
+    installer_returned_money: bool
+    payment_state: str
+    id: int
     created_at: datetime
     updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)

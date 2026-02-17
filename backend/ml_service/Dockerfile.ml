@@ -1,13 +1,20 @@
-FROM python:3.12-slim
+# Dockerfile.ml
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Копируем зависимости и устанавливаем
+# Копируем requirements
 COPY ml_service/requirements_ml.txt .
 RUN pip install --no-cache-dir -r requirements_ml.txt
 
-# Копируем код
-COPY ml_service /app
+# Копируем код сервиса
+COPY ml_service ./ml_service
 
-# Запускаем сервер
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Создаем директории для моделей
+RUN mkdir -p ml_service/models
+RUN mkdir -p models
+
+# Устанавливаем права доступа
+RUN chmod -R 755 ml_service
+
+CMD ["uvicorn", "ml_service.app:app", "--host", "0.0.0.0", "--port", "8001"]

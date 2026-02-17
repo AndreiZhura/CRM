@@ -6,9 +6,16 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем ТОЛЬКО бэкенд и папку с инициализацией БД
-COPY backend/src ./backend/src
+# Копируем всю структуру проекта
+COPY backend ./backend
 COPY database ./database
 
-# Запускаем сервер
+# Устанавливаем права доступа (если нужно)
+RUN chmod -R 755 ./backend
+
+# Проверяем наличие необходимых файлов
+RUN ls -la ./backend/src/core
+RUN ls -la ./backend/src/models
+
+# Запускаем сервер с правильным путем к приложению
 CMD ["uvicorn", "backend.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
