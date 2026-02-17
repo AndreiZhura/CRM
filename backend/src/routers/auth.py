@@ -13,7 +13,7 @@ async def register(admin_data: AdminCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Admin))
     existing = result.scalars().first()
     if existing:
-        raise HTTPException(status_code=400, detail="Admin already exists. Registration disabled.")
+        raise HTTPException(status_code=400, detail="Уже создано необходимое количество админов !!!")
     hashed = get_password_hash(admin_data.password)
     admin = Admin(username=admin_data.username, password_hash=hashed)
     db.add(admin)

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 from .clients import ClientOut
 from .installers import InstallerOut
+from .finance import FinanceOut
 
 class OrderBase(BaseModel):
     client_id: Optional[int] = None
@@ -31,5 +32,5 @@ class OrderOut(OrderBase):
     updated_at: datetime
     client: Optional[ClientOut] = None   # вложенный объект клиента
     installer: Optional[InstallerOut] = None  # вложенный объект монтажника
-
+    finance: Optional[FinanceOut] = None  # добавляем эту строку
     model_config = ConfigDict(from_attributes=True)

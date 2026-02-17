@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
+
 class FinanceBase(BaseModel):
     order_id: int
     purchase_price: float = 0

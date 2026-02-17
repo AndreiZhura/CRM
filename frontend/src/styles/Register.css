@@ -1,0 +1,14 @@
+.register {
+  padding: 2rem;
+}
+
+.register-main {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.auth-main__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

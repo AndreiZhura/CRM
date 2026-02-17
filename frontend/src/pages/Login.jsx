@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { Link } from 'react-router-dom';
 import api from "../services/api";
-import '../styles/login.css'; // если есть отдельный CSS для логина
+import "../styles/login.css"; // если есть отдельный CSS для логина
 
 const Login = () => {
   // Состояния для полей ввода
@@ -55,6 +56,9 @@ const Login = () => {
         <button type="submit" disabled={loading}>
           {loading ? "Вход..." : "Войти"}
         </button>
+        <p style={{ marginTop: "1rem", textAlign: "center" }}>
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </p>
       </form>
     </div>
   );

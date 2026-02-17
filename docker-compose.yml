@@ -39,7 +39,7 @@ services:
   ml:
     build:
       context: ./backend
-      dockerfile: Dockerfile.ml
+      dockerfile: ml_service/Dockerfile.ml
     container_name: crm_ml
     env_file:
       - .env

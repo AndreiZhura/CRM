@@ -44,7 +44,7 @@ async def get_order(db: AsyncSession, order_id: int):
     result = await db.execute(
         select(Order)
         .where(Order.id == order_id)
-        .options(selectinload(Order.client), selectinload(Order.installer))
+        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
     )
     return result.scalar_one_or_none()
 
@@ -53,7 +53,7 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100):
         select(Order)
         .offset(skip)
         .limit(limit)
-        .options(selectinload(Order.client), selectinload(Order.installer))
+        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
     )
     return result.scalars().all()
 

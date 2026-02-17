@@ -8,12 +8,14 @@ import AddInstaller from './pages/AddInstaller';
 import InstallersList from './pages/InstallersList';
 import InstallerDetail from './pages/InstallerDetail';
 import OrderDetail from './pages/OrderDetail';
+import Register from './pages/Register';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/dashboard"
           element={

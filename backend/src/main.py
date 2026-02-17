@@ -17,6 +17,14 @@ from routers import auth
 
 app = FastAPI(title="СRM Олега")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # разрешаем все источники (для разработки)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(clients.router)
 app.include_router(installers.router)
 app.include_router(orders.router)
@@ -31,13 +39,7 @@ async def startup_event():
     start_scheduler()
     logger.info("Scheduler started")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # разрешаем все источники (для разработки)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 @app.get("/")
 async def root():
