@@ -1,31 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import '../styles/order-form.css'; // можно использовать общие стили формы
-// если есть отдельный CSS для деталей заказа – раскомментируй следующую строку
-// import '../styles/order-detail.css';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import PhoneField from "../components/PhoneField"; // новый импорт
+import "../styles/order-form.css";
+import "../styles/phone.css"; // если нужно
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [clients, setClients] = useState([]);
+  const [client, setClient] = useState(null);
+  const [finance, setFinance] = useState(null);
   const [installers, setInstallers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
+  // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [orderData, clientsData, installersData] = await Promise.all([
+        const [orderData, installersData] = await Promise.all([
           api.getOrder(id),
-          api.getClients().catch(() => []), // если метод не добавлен – игнорируем
-          api.getInstallers().catch(() => []),
+          api.getInstallers(),
         ]);
         setOrder(orderData);
-        setClients(clientsData);
+        setClient(orderData.client || null);
+        setFinance(orderData.finance || null);
         setInstallers(installersData);
       } catch (err) {
         setError(err.message);
@@ -36,45 +39,80 @@ const OrderDetail = () => {
     fetchData();
   }, [id]);
 
-  const handleInputChange = (e) => {
+  // Обработчики
+  const handleOrderChange = (e) => {
     const { name, value } = e.target;
-    setOrder(prev => ({ ...prev, [name]: value }));
+    setOrder((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFinanceChange = (field, value) => {
-    setOrder(prev => ({
+  const handleClientChange = (e) => {
+    const { name, value } = e.target;
+    setClient((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (value) => {
+    setClient((prev) => ({ ...prev, phone: value }));
+  };
+
+  const handleFinanceChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFinance((prev) => ({
       ...prev,
-      finance: { ...prev.finance, [field]: value }
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      // Отправляем только изменяемые поля
-      const dataToSend = {
-        client_id: order.client_id,
-        installer_id: order.installer_id,
-        service_type: order.service_type,
-        service_datetime: order.service_datetime,
-        status: order.status,
-        address_text: order.address_text,
-      };
-      await api.updateOrder(id, dataToSend);
-      alert('Заказ обновлён');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSaving(true);
+  setError("");
+  try {
+    // Обновляем клиента (один раз, со всеми полями)
+    if (client?.id) {
+      await api.updateClient(client.id, {
+        full_name: client.full_name,
+        phone: client.phone,
+        backup_phone: client.backup_phone,
+        address: client.address,
+        comments: client.comments,
+      });
     }
-  };
+    // Обновляем заказ
+    await api.updateOrder(order.id, {
+      client_id: client?.id,
+      installer_id: order.installer_id || null,
+      service_type: order.service_type,
+      service_datetime: order.service_datetime,
+      status: order.status,
+      address_text: client?.address || "",
+      warehouse: order.warehouse,
+      promise: order.promise,
+    });
+    // Обновляем финансы
+    if (finance?.id) {
+      await api.updateFinance(finance.id, {
+        purchase_price: parseFloat(finance.purchase_price) || 0,
+        sale_price_client: parseFloat(finance.sale_price_client) || 0,
+        installer_pay: parseFloat(finance.installer_pay) || 0,
+        my_commission: parseFloat(finance.my_commission) || 0,
+        payment_state: finance.payment_state,
+        installer_returned_money: finance.installer_returned_money,
+      });
+    }
+    alert("Заказ обновлён");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   const handleDelete = async () => {
-    if (window.confirm('Удалить заказ?')) {
+    if (window.confirm("Удалить заказ?")) {
       try {
         await api.deleteOrder(id);
-        navigate('/orders');
+        navigate("/orders");
       } catch (err) {
         setError(err.message);
       }
@@ -83,143 +121,262 @@ const OrderDetail = () => {
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>Ошибка: {error}</div>;
-  if (!order) return <div>Заказ не найден</div>;
+  if (!order || !client) return <div>Заказ не найден</div>;
 
   return (
     <div className="page">
       <Header />
-      <main className="page__main">
-        <div className="form-container"> {/* используем общий контейнер из order-form.css */}
-          <h1>Редактирование заказа #{order.id}</h1>
-          <form onSubmit={handleSubmit}>
-            {/* Клиент */}
-            <div className="form-group">
-              <label htmlFor="client_id">Клиент</label>
-              <select
-                id="client_id"
-                name="client_id"
-                value={order.client_id || ''}
-                onChange={handleInputChange}
-              >
-                <option value="">Выберите клиента</option>
-                {clients.map(c => (
-                  <option key={c.id} value={c.id}>{c.full_name}</option>
-                ))}
-              </select>
-            </div>
+      <main className="content">
+        <form onSubmit={handleSubmit} className="crm-form">
+          <div className="crm-form__header-info">
+            <Link to="/orders" className="crm-form__back-link">
+              ← Вернуться в журнал
+            </Link>
+            <h2 className="crm-form__main-title">
+              Редактирование заказа №<span>{order.id}</span>
+            </h2>
+          </div>
 
-            {/* Монтажник */}
-            <div className="form-group">
-              <label htmlFor="installer_id">Монтажник</label>
-              <select
-                id="installer_id"
-                name="installer_id"
-                value={order.installer_id || ''}
-                onChange={handleInputChange}
-              >
-                <option value="">Не назначен</option>
-                {installers.map(i => (
-                  <option key={i.id} value={i.id}>{i.full_name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Тип услуги */}
-            <div className="form-group">
-              <label htmlFor="service_type">Тип услуги</label>
-              <input
-                type="text"
-                id="service_type"
-                name="service_type"
-                value={order.service_type || ''}
-                onChange={handleInputChange}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">👤 Данные клиента</legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field">
+                <label htmlFor="fio">ФИО клиента</label>
+                <input
+                  type="text"
+                  id="fio"
+                  name="full_name"
+                  value={client.full_name || ""}
+                  onChange={handleClientChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <PhoneField
+                id="client_phone"
+                name="phone"
+                value={client.phone || ""}
+                onChange={handlePhoneChange}
+                label="Телефон / Связь"
               />
-            </div>
-
-            {/* Дата и время */}
-            <div className="form-group">
-              <label htmlFor="service_datetime">Дата и время</label>
-              <input
-                type="datetime-local"
-                id="service_datetime"
-                name="service_datetime"
-                value={order.service_datetime ? order.service_datetime.slice(0,16) : ''}
-                onChange={handleInputChange}
+              <PhoneField
+                id="client_backup_phone"
+                name="backup_phone"
+                value={client.backup_phone || ""}
+                onChange={(value) =>
+                  setClient((prev) => ({ ...prev, backup_phone: value }))
+                }
+                label="Резервный телефон (необязательно)"
               />
-            </div>
 
-            {/* Статус */}
-            <div className="form-group">
-              <label htmlFor="status">Статус</label>
-              <select
-                id="status"
-                name="status"
-                value={order.status || ''}
-                onChange={handleInputChange}
-              >
-                <option value="Новый">Новый</option>
-                <option value="Ждет установщика">Ждет установщика</option>
-                <option value="В работе">В работе</option>
-                <option value="Выполнен">Выполнен</option>
-                <option value="Отменен">Отменен</option>
-              </select>
+              <div className="crm-form__field crm-form__field--full">
+                <label htmlFor="address">Адрес установки</label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  value={client.address || ""}
+                  onChange={handleClientChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label htmlFor="installer_id">Назначенный монтажник</label>
+                <select
+                  id="installer_id"
+                  name="installer_id"
+                  value={order.installer_id || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                >
+                  <option value="">-- Выберите монтажника --</option>
+                  {installers.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.full_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
+          </fieldset>
 
-            {/* Адрес */}
-            <div className="form-group">
-              <label htmlFor="address_text">Адрес</label>
-              <input
-                type="text"
-                id="address_text"
-                name="address_text"
-                value={order.address_text || ''}
-                onChange={handleInputChange}
-              />
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">
+              📅 Планирование и Логистика
+            </legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field">
+                <label htmlFor="created_at">Дата обращения</label>
+                <input
+                  type="text"
+                  id="created_at"
+                  value={new Date(order.created_at).toLocaleString()}
+                  className="crm-form__input"
+                  readOnly
+                />
+              </div>
+              <div className="crm-form__field">
+                <label htmlFor="service_date">Дата обслуживания</label>
+                <input
+                  type="date"
+                  id="service_date"
+                  name="service_datetime"
+                  value={order.service_datetime?.slice(0, 10) || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label htmlFor="delivery_date">Привоз кондиционера</label>
+                <input
+                  type="date"
+                  id="delivery_date"
+                  name="delivery_datetime"
+                  value={order.delivery_datetime?.slice(0, 10) || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label htmlFor="warehouse">Склад отгрузки</label>
+                <input
+                  type="text"
+                  id="warehouse"
+                  name="warehouse"
+                  value={order.warehouse || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                />
+              </div>
             </div>
+          </fieldset>
 
-            {/* Финансы */}
-            {order.finance && (
-              <fieldset className="form-section">
-                <legend>Финансы</legend>
-                <div className="form-group">
-                  <label htmlFor="sale_price_client">Цена продажи (₽)</label>
+          {finance && (
+            <fieldset className="crm-form__section crm-form__section--finance">
+              <legend className="crm-form__legend">💰 Финансовая часть</legend>
+              <div className="crm-form__grid">
+                <div className="crm-form__field">
+                  <label htmlFor="buy_price">Цена закупки (₽)</label>
                   <input
                     type="number"
-                    id="sale_price_client"
-                    value={order.finance.sale_price_client || 0}
-                    onChange={(e) => handleFinanceChange('sale_price_client', e.target.value)}
+                    id="buy_price"
+                    name="purchase_price"
+                    value={finance.purchase_price || 0}
+                    onChange={handleFinanceChange}
+                    className="crm-form__input"
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="profit">Прибыль</label>
-                  <span>{order.finance.profit} ₽</span>
+                <div className="crm-form__field">
+                  <label htmlFor="sell_price_ac">Продажа клиенту (₽)</label>
+                  <input
+                    type="number"
+                    id="sell_price_ac"
+                    name="sale_price_client"
+                    value={finance.sale_price_client || 0}
+                    onChange={handleFinanceChange}
+                    className="crm-form__input"
+                  />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="payment_state">Статус оплаты</label>
-                  <select
-                    id="payment_state"
-                    value={order.finance.payment_state || ''}
-                    onChange={(e) => handleFinanceChange('payment_state', e.target.value)}
-                  >
-                    <option value="Не оплачен">Не оплачен</option>
-                    <option value="Частично">Частично</option>
-                    <option value="Оплачен">Оплачен</option>
-                  </select>
+                <div className="crm-form__field">
+                  <label htmlFor="price_install">Оплата монтажнику (₽)</label>
+                  <input
+                    type="number"
+                    id="price_install"
+                    name="installer_pay"
+                    value={finance.installer_pay || 0}
+                    onChange={handleFinanceChange}
+                    className="crm-form__input"
+                  />
                 </div>
-              </fieldset>
-            )}
+                <div className="crm-form__field">
+                  <label htmlFor="my_commission">Ваша комиссия (₽)</label>
+                  <input
+                    type="number"
+                    id="my_commission"
+                    name="my_commission"
+                    value={finance.my_commission || 0}
+                    onChange={handleFinanceChange}
+                    className="crm-form__input"
+                  />
+                </div>
+                <div className="crm-form__field crm-form__field--full">
+                  <label className="crm-form__checkbox-label">
+                    <input
+                      type="checkbox"
+                      id="is_money_returned"
+                      name="installer_returned_money"
+                      checked={finance.installer_returned_money || false}
+                      onChange={handleFinanceChange}
+                    />
+                    <span className="crm-form__checkbox-text">
+                      Монтажник вернул деньги в кассу
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+          )}
 
-            {/* Кнопки действий */}
-            <div className="form-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-              <button type="submit" className="btn-save" disabled={loading}>
-                {loading ? 'Сохранение...' : 'Сохранить'}
-              </button>
-              <button type="button" className="btn-delete" onClick={handleDelete}>
-                Удалить заказ
-              </button>
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">⚙️ Статус и Исполнение</legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field">
+                <label htmlFor="status">Текущий статус</label>
+                <select
+                  id="status"
+                  name="status"
+                  value={order.status || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                >
+                  <option value="Новая заявка">Новая заявка</option>
+                  <option value="Ждет установщика">Ждет установщика</option>
+                  <option value="В работе">В работе</option>
+                  <option value="Завершено">Завершено</option>
+                  <option value="Отказ">Отказ</option>
+                </select>
+              </div>
+              <div className="crm-form__field crm-form__field--full">
+                <label htmlFor="promises">Обещания</label>
+                <textarea
+                  id="promises"
+                  name="promise"
+                  value={order.promise || ""}
+                  onChange={handleOrderChange}
+                  className="crm-form__input"
+                  rows="3"
+                />
+              </div>
+              <div className="crm-form__field crm-form__field--full">
+                <label htmlFor="comments">Комментарии</label>
+                <textarea
+                  id="comments"
+                  name="comments"
+                  value={client.comments || ""}
+                  onChange={handleClientChange}
+                  className="crm-form__input"
+                  rows="3"
+                />
+              </div>
             </div>
-          </form>
-        </div>
+          </fieldset>
+
+          <div className="crm-form__actions">
+            <button
+              type="submit"
+              className="crm-form__button crm-form__button--submit"
+              disabled={saving}
+            >
+              {saving ? "💾 Сохранение..." : "💾 Сохранить все изменения"}
+            </button>
+            <button
+              type="button"
+              className="crm-form__button crm-form__button--delete"
+              onClick={handleDelete}
+            >
+              🗑 Удалить заказ
+            </button>
+          </div>
+        </form>
       </main>
       <Footer />
     </div>

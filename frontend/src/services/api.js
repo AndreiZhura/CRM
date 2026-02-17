@@ -90,6 +90,10 @@ const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+  updateClient: (id, data) => apiFetch(`/clients/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
   createOrder: (data) => apiFetch('/orders/', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -98,7 +102,10 @@ const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-
+  updateFinance: (id, data) => apiFetch(`/finance/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
 };
 
 

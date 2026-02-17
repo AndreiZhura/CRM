@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PhoneField from '../components/PhoneField';
 import '../styles/installer_profile.css';
 import '../styles/installer_detail.css';
 import '../styles/phone.css';
@@ -11,42 +12,52 @@ const InstallerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [installer, setInstaller] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('active'); // 'active' или 'history'
-  const [orders, setOrders] = useState([]);
 
+  // Загрузка данных монтажника и всех заказов
   useEffect(() => {
-    const fetchInstaller = async () => {
+    const fetchData = async () => {
       try {
-        const data = await api.getInstaller(id);
-        setInstaller(data);
-        // TODO: загрузить заказы мастера (пока заглушка)
-        setOrders([]);
+        const [installerData, ordersData] = await Promise.all([
+          api.getInstaller(id),
+          api.getOrders(), // получаем все заказы
+        ]);
+        setInstaller(installerData);
+        setOrders(ordersData);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchInstaller();
+    fetchData();
   }, [id]);
 
+  // Обработка изменений полей формы
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
-    setInstaller(prev => ({
+    setInstaller((prev) => ({
       ...prev,
       [id]: type === 'checkbox' ? checked : value,
     }));
   };
 
+  // Обработка изменения телефона через PhoneField
+  const handlePhoneChange = (value) => {
+    setInstaller((prev) => ({ ...prev, phone: value }));
+  };
+
+  // Сохранение изменений монтажника
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       // Преобразуем specialization из строки в массив (если поле ввода)
       const specializationArray = installer.specialization
-        ? installer.specialization.split(',').map(s => s.trim()).filter(s => s)
+        ? installer.specialization.split(',').map((s) => s.trim()).filter((s) => s)
         : [];
       const dataToSend = {
         ...installer,
@@ -61,6 +72,7 @@ const InstallerDetail = () => {
     }
   };
 
+  // Удаление монтажника
   const handleDelete = async () => {
     if (window.confirm('Вы уверены, что хотите удалить мастера?')) {
       try {
@@ -72,25 +84,20 @@ const InstallerDetail = () => {
     }
   };
 
-  const renderOrders = () => {
-    // TODO: заменить на реальную загрузку заказов
-    const dummyOrders = [
-      { id: 1, client: 'Иванов Иван', address: 'ул. Ленина, 10', status: 'В работе' },
-      { id: 2, client: 'Петров Петр', address: 'пр. Мира, 5', status: 'Завершён' },
-    ];
-    return dummyOrders.map(order => (
-      <tr key={order.id}>
-        <td>{order.id}</td>
-        <td>{order.client}</td>
-        <td>{order.address}</td>
-        <td>{order.status}</td>
-      </tr>
-    ));
-  };
+  // Фильтрация заказов по монтажнику и статусу
+  const installerOrders = orders.filter((order) => order.installer_id === installer?.id);
+  const activeOrders = installerOrders.filter(
+    (order) => order.status !== 'Выполнен' && order.status !== 'Отменен'
+  );
+  const historyOrders = installerOrders.filter(
+    (order) => order.status === 'Выполнен' || order.status === 'Отменен'
+  );
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
-  if (!installer) return <div>Монтажник не найден</div>;
+  const displayedOrders = activeTab === 'active' ? activeOrders : historyOrders;
+
+  if (loading) return <div className="loading">Загрузка...</div>;
+  if (error) return <div className="error">Ошибка: {error}</div>;
+  if (!installer) return <div className="not-found">Монтажник не найден</div>;
 
   return (
     <div className="page">
@@ -106,6 +113,7 @@ const InstallerDetail = () => {
             </div>
           </header>
 
+          {/* Личные данные */}
           <section className="installer-card">
             <h3 className="installer-card__title">👤 Личные данные</h3>
             <div className="installer-form-linear">
@@ -132,23 +140,18 @@ const InstallerDetail = () => {
                   />
                 </div>
 
-                <div className="field-group">
-                  <label>Телефон</label>
-                  <div className="phone-input-container">
-                    <input
-                      type="tel"
-                      id="phone"
-                      className="phone-mask"
-                      value={installer.phone || ''}
-                      onChange={handleInputChange}
-                      placeholder="+7 (___) ___-__-__"
-                    />
-                  </div>
-                </div>
+                <PhoneField
+                  id="phone"
+                  name="phone"
+                  value={installer.phone || ''}
+                  onChange={handlePhoneChange}
+                  label="Телефон"
+                />
               </div>
             </div>
           </section>
 
+          {/* Финансовое состояние */}
           <section className="installer-card card-debt">
             <h3 className="installer-card__title">💰 Финансовое состояние</h3>
             <div className="installer-form-linear">
@@ -171,23 +174,11 @@ const InstallerDetail = () => {
                     Мастер в долгу
                   </label>
                 </div>
-
-                {/* Сумма долга – в модели Installer нет поля debt_amount, поэтому убираем или оставляем заглушку */}
-                <div className="field-group">
-                  <label>Сумма долга (₽)</label>
-                  <input
-                    type="number"
-                    id="debt_amount"
-                    placeholder="0"
-                    step="0.01"
-                    value="0"
-                    disabled
-                  />
-                </div>
               </div>
             </div>
           </section>
 
+          {/* Профессиональные данные */}
           <section className="installer-card">
             <h3 className="installer-card__title">🛠 Профессиональные данные</h3>
             <div className="installer-form-linear">
@@ -226,23 +217,22 @@ const InstallerDetail = () => {
             </div>
           </section>
 
+          {/* Заказы мастера */}
           <section className="installer-card">
             <div className="card-header-flex">
               <h3 className="installer-card__title">🚀 Заказы мастера</h3>
               <div className="status-filter">
                 <button
                   className={`filter-btn ${activeTab === 'active' ? 'active' : ''}`}
-                  id="btn-active"
                   onClick={() => setActiveTab('active')}
                 >
-                  В работе
+                  В работе ({activeOrders.length})
                 </button>
                 <button
                   className={`filter-btn ${activeTab === 'history' ? 'active' : ''}`}
-                  id="btn-history"
                   onClick={() => setActiveTab('history')}
                 >
-                  История (архив)
+                  История ({historyOrders.length})
                 </button>
               </div>
             </div>
@@ -256,13 +246,29 @@ const InstallerDetail = () => {
                     <th>Статус</th>
                   </tr>
                 </thead>
-                <tbody id="installer_orders_body">
-                  {renderOrders()}
+                <tbody>
+                  {displayedOrders.length > 0 ? (
+                    displayedOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.id}</td>
+                        <td>{order.client?.full_name || '—'}</td>
+                        <td>{order.address_text || '—'}</td>
+                        <td>{order.status}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center' }}>
+                        Нет заказов
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </section>
 
+          {/* Опасная зона удаления */}
           <section className="installer-danger-zone">
             <div className="danger-zone-content">
               <div className="danger-zone-text">
