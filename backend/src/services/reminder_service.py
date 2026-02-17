@@ -1,9 +1,9 @@
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime, timedelta
-from models.orders import Order
-from services.email import send_reminder_email
-from core.db import AsyncSessionLocal
+from src.models.orders import Order
+from src.services.email import send_reminder_email
+from src.core.db import AsyncSessionLocal
 from sqlalchemy.orm import selectinload
 import logging
 logger = logging.getLogger(__name__)

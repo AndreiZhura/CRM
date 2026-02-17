@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Numeric, ARRAY
 from sqlalchemy.sql import func
-from core.db import Base
+from src.core.db import Base
 from sqlalchemy import FetchedValue
 from sqlalchemy.orm import relationship
 

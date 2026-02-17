@@ -1,4 +1,4 @@
-cat > init.sql << 'EOF'
+
 -- =====================================================
 -- ПРОЕКТ LUMEN ALPHA: ПОЛНАЯ СХЕМА БАЗЫ ДАННЫХ (HVAC CRM)
 -- Версия: 3.1 (ФИНАЛЬНАЯ, С ДОРАБОТКАМИ)
@@ -145,7 +145,6 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 -- -----------------------------------------------------------------
 -- 8. ФИНАНСОВАЯ ТАБЛИЦА
 -- -----------------------------------------------------------------
--- 8. ФИНАНСОВАЯ ТАБЛИЦА (обновленная версия)
 CREATE TABLE IF NOT EXISTS finance (
     id SERIAL PRIMARY KEY,
     order_id INTEGER UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
@@ -165,8 +164,8 @@ CREATE TABLE IF NOT EXISTS finance (
     ) STORED,
     profit_percent NUMERIC(10,2) GENERATED ALWAYS AS (
         CASE 
-            WHEN sale_price_client > 0 AND profit IS NOT NULL
-            THEN (profit / sale_price_client) * 100
+            WHEN sale_price_client > 0 
+            THEN ((sale_price_client - purchase_price - installer_pay - my_commission) / sale_price_client) * 100
             ELSE 0
         END
     ) STORED,
@@ -175,6 +174,7 @@ CREATE TABLE IF NOT EXISTS finance (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 
 -- -----------------------------------------------------------------
@@ -437,4 +437,3 @@ COMMIT;
 -- =====================================================
 -- ГОТОВО: СХЕМА ПОЛНОСТЬЮ РАЗВЁРНУТА
 -- =====================================================
-EOF

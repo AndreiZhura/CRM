@@ -6,10 +6,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from core.db import get_db
-from core.config import settings
-from models.admins import Admin
-from schemas.auth import TokenData
+from src.core.db import get_db
+from src.core.config import settings
+from src.models.admins import Admin
+from src.schemas.auth import TokenData
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM

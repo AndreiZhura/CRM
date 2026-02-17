@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from models.finance import Finance
-from schemas.finance import FinanceCreate, FinanceUpdate
+from src.models.finance import Finance
+from src.schemas.finance import FinanceCreate, FinanceUpdate
 
 async def create_finance(db: AsyncSession, finance_data: FinanceCreate):
     finance = Finance(**finance_data.model_dump())

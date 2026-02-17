@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.db import get_db
-from services.installers import (
+from src.core.db import get_db
+from src.services.installers import (
     create_installer, get_installer, get_installers,
     update_installer, delete_installer
 )
-from schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
-from auth import get_current_admin
-from models.admins import Admin
+from src.schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
+from src.auth import get_current_admin
+from src.models.admins import Admin
 
 router = APIRouter(prefix="/installers", tags=["installers"])
 

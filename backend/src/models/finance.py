@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Numeric, Boolean, DateTime, ForeignKey, Enum as SQLAEnum, FetchedValue
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from core.db import Base
+from src.core.db import Base
 import enum
 
 class PaymentState(str, enum.Enum):
@@ -19,10 +19,10 @@ class Finance(Base):
     installer_pay = Column(Numeric(10,2), nullable=False, default=0)
     my_commission = Column(Numeric(10,2), nullable=False, default=0)
     
-    # Новые вычисляемые поля
+    # Вычисляемые поля (заполняются базой данных)
     profit = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)
-    margin = Column(Numeric(10,2), nullable=True)  # Маржинальность
-    profit_percent = Column(Numeric(10,2), nullable=True)  # Процент прибыли
+    margin = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)      # Маржинальность
+    profit_percent = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)  # Процент прибыли
     
     payment_state = Column(SQLAEnum(PaymentState, name='payment_status', create_type=False, values_callable=lambda x: [e.value for e in x]), default=PaymentState.UNPAID)
     installer_returned_money = Column(Boolean, default=False)
@@ -32,7 +32,7 @@ class Finance(Base):
 
     order = relationship("Order", back_populates="finance")
 
-    # Добавляем вычисляемые свойства
+    # Вычисляемые свойства (для использования в коде, не в БД)
     @property
     def calculate_profit(self):
         return self.sale_price_client - self.purchase_price - self.installer_pay - self.my_commission

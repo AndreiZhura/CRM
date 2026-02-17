@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from typing import Optional, List
 
-from models.clients import Client
-from schemas.clients import ClientCreate, ClientUpdate
+from src.models.clients import Client
+from src.schemas.clients import ClientCreate, ClientUpdate
 
 from datetime import datetime, timezone
 

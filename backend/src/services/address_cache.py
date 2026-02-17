@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from models.address_cache import AddressCache
+from src.models.address_cache import AddressCache
 
 async def get_address_cache(db: AsyncSession, address: str):
     result = await db.execute(

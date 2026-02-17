@@ -1,10 +1,12 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from models.orders import Order
-from schemas.orders import OrderCreate, OrderUpdate
-from services.geocoding import get_coordinates
-from services.address_cache import get_or_create_address_cache
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, List
+
+from src.models.orders import Order
+from src.schemas.orders import OrderCreate, OrderUpdate
+from src.services.geocoding import get_coordinates
+from src.services.address_cache import get_or_create_address_cache
 
 async def create_order(db: AsyncSession, order_data: OrderCreate):
     # Сначала создаём заказ без address_id
@@ -13,34 +15,37 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
     
     order = Order(**order_dict)
     db.add(order)
-    await db.flush()  # чтобы получить id заказа, но не коммитить
+    await db.flush()  # чтобы получить id заказа
     
     # Если есть адрес, пытаемся получить координаты
     if address_text:
         coords = await get_coordinates(address_text)
         if coords:
             lat, lon = coords
-            # Сохраняем в кэш и получаем запись
+            # Сохраняем в кэш
             cache_entry = await get_or_create_address_cache(db, address_text, lat, lon)
             order.address_id = cache_entry.address
-            order.address_text = address_text  # сохраняем исходный адрес
+            order.address_text = address_text
         else:
-            # если координаты не получены, сохраняем только текст
             order.address_text = address_text
     else:
         order.address_text = None
 
     await db.commit()
-    await db.refresh(order)
-    # Подгружаем связи
+    
+    # Перезагружаем заказ со всеми нужными связями
     result = await db.execute(
         select(Order)
         .where(Order.id == order.id)
-        .options(selectinload(Order.client), selectinload(Order.installer))
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installer),
+            selectinload(Order.finance)
+        )
     )
     return result.scalar_one()
 
-async def get_order(db: AsyncSession, order_id: int):
+async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     result = await db.execute(
         select(Order)
         .where(Order.id == order_id)
@@ -48,7 +53,7 @@ async def get_order(db: AsyncSession, order_id: int):
     )
     return result.scalar_one_or_none()
 
-async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100):
+async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
     result = await db.execute(
         select(Order)
         .offset(skip)
@@ -57,7 +62,7 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100):
     )
     return result.scalars().all()
 
-async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate):
+async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate) -> Optional[Order]:
     order = await get_order(db, order_id)
     if not order:
         return None
@@ -84,9 +89,16 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
 
     await db.commit()
     await db.refresh(order)
-    return order
+    
+    # После обновления перезагружаем со связями
+    result = await db.execute(
+        select(Order)
+        .where(Order.id == order.id)
+        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
+    )
+    return result.scalar_one()
 
-async def delete_order(db: AsyncSession, order_id: int):
+async def delete_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     order = await get_order(db, order_id)
     if order:
         await db.delete(order)

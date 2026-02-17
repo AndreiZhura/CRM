@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 import sqlalchemy
 from sqlalchemy.sql import func
 # Base — наш базовый класс из db.py, от которого наследуются все модели.
-from core.db import Base
+from src.core.db import Base
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import relationship
 

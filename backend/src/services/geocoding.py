@@ -1,5 +1,5 @@
 import aiohttp
-from core.config import settings
+from src.core.config import settings
 import random
 
 # Мок-координаты для разработки (центр Москвы, например)

@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
-from core.db import get_db
-from schemas.clients import ClientCreate, ClientUpdate, ClientOut
-from services.clients import (
-    create_client, get_client, get_clients, update_client, delete_client
-)
-from auth import get_current_admin
-from models.admins import Admin
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.schemas.clients import ClientCreate, ClientUpdate, ClientOut
+from src.services.clients import create_client, get_client, get_clients, update_client, delete_client
+from src.auth import get_current_admin
+
 
 router = APIRouter(prefix="/clients", tags=["Clients"])
 

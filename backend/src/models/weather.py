@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Numeric, DateTime
 from sqlalchemy.sql import func
-from core.db import Base
+from src.core.db import Base
 
 class Weather(Base):
     __tablename__ = 'weather'

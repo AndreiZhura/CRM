@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from datetime import datetime, timedelta
-from core.db import get_db
-from models.orders import Order
-from schemas.orders import OrderOut
+from src.core.db import get_db
+from src.models.orders import Order
+from src.schemas.orders import OrderOut
 from typing import List
-from services.email import send_reminder_email
+from src.services.email import send_reminder_email
 from fastapi import HTTPException
 from sqlalchemy.orm import selectinload
 

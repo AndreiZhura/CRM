@@ -1,9 +1,9 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from core.config import settings
-from services.reminder_service import send_daily_reminder  # создадим этот сервис
-from services.weather_service import daily_weather_collection
-from services.training_service import run_training
+from src.core.config import settings
+from src.services.reminder_service import send_daily_reminder  # создадим этот сервис
+from src.services.weather_service import daily_weather_collection
+from src.services.training_service import run_training
 
 scheduler = AsyncIOScheduler()
 
@@ -34,7 +34,7 @@ def start_scheduler():
 
     scheduler.start()
 
-from services.backup_service import daily_backup_and_report
+from src.services.backup_service import daily_backup_and_report
 
 def start_scheduler():
     # ... существующие задачи

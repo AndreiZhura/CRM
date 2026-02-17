@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 import pandas as pd
 from sqlalchemy import text
-from core.db import AsyncSessionLocal
-from core.config import settings
+from src.core.db import AsyncSessionLocal
+from src.core.config import settings
 import yadisk
 
 logger = logging.getLogger(__name__)

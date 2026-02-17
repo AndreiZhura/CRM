@@ -1,20 +1,16 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.db import get_db
-
-
-from routers import clients ,installers,orders,finance  # в начало файла, после других импортов
-from routers import reminders
-from core.scheduler import start_scheduler
-from core.logging import logger
-from core.logging import LoggingMiddleware
-from core.scheduler import scheduler
-from routers import auth
-
+from src.core.db import get_db
+from src.routers import clients, installers, orders, finance
+from src.routers import reminders
+from src.core.scheduler import start_scheduler
+from src.core.logging import logger
+from src.core.logging import LoggingMiddleware
+from src.core.scheduler import scheduler
+from src.routers import auth
 
 
 app = FastAPI(title="СRM Олега")

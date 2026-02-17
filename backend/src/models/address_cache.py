@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Numeric, DateTime
 from sqlalchemy.sql import func
-from core.db import Base
+from src.core.db import Base
 
 
 class AddressCache(Base):

@@ -4,9 +4,9 @@ from datetime import date, timedelta
 from typing import Optional, Dict, Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.weather import Weather
-from core.db import AsyncSessionLocal
-from models.address_cache import AddressCache
+from src.models.weather import Weather
+from src.core.db import AsyncSessionLocal
+from src.models.address_cache import AddressCache
 
 logger = logging.getLogger(__name__)
 

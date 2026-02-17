@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.db import get_db
-from services.finance import (
+from src.core.db import get_db
+from src.services.finance import (
     create_finance, get_finance, get_finances, get_finance_by_order,
     update_finance, delete_finance
 )
-from schemas.finance import FinanceCreate, FinanceUpdate, FinanceOut
+from src.schemas.finance import FinanceCreate, FinanceUpdate, FinanceOut
 
 router = APIRouter(prefix="/finance", tags=["finance"])
 

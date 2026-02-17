@@ -1,7 +1,7 @@
 import yadisk
 import logging
 from pathlib import Path
-from core.config import settings
+from src.core.config import settings
 from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
