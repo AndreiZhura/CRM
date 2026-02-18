@@ -12,6 +12,7 @@ class ClientBase(BaseModel):
     phone: str
     address: str
     comments: Optional[str] = None
+    backup_phone: Optional[str] = None
 
 
 class ClientCreate(ClientBase):
