@@ -86,6 +86,7 @@ const NewOrder = () => {
           address: formData.address,
           comments: formData.installer_opinion || "",
         };
+        console.log('Sending client data:', clientData);
         const client = await api.createClient(clientData);
         clientId = client.id;
       } else {
