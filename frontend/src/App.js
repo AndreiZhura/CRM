@@ -8,6 +8,7 @@ import AddInstaller from './pages/AddInstaller';
 import InstallersList from './pages/InstallersList';
 import InstallerDetail from './pages/InstallerDetail';
 import OrderDetail from './pages/OrderDetail';
+import Finance from './pages/Finance';
 import Register from './pages/Register';
 
 function App() {
@@ -69,6 +70,14 @@ function App() {
           element={
             <ProtectedRoute>
               <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance"
+          element={
+            <ProtectedRoute>
+              <Finance />
             </ProtectedRoute>
           }
         />

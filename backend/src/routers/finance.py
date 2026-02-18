@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.db import get_db
 from src.services.finance import (
     create_finance, get_finance, get_finances, get_finance_by_order,
+    get_finance_summary, get_monthly_profit,
     update_finance, delete_finance
 )
 from src.schemas.finance import FinanceCreate, FinanceUpdate, FinanceOut
@@ -36,6 +37,17 @@ async def read_finance_by_order(
     if not finance:
         raise HTTPException(status_code=404, detail="Finance record not found for this order")
     return finance
+
+# Специфичные пути должны идти до {finance_id}
+@router.get("/summary")
+async def finance_summary(db: AsyncSession = Depends(get_db)):
+    """Возвращает сводную информацию по финансам"""
+    return await get_finance_summary(db)
+
+@router.get("/monthly")
+async def monthly_profit(db: AsyncSession = Depends(get_db)):
+    """Возвращает прибыль по месяцам"""
+    return await get_monthly_profit(db)
 
 @router.get("/{finance_id}", response_model=FinanceOut)
 async def read_finance(

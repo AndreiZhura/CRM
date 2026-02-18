@@ -70,6 +70,13 @@ const Header = () => {
           >
             ➕ Добавить мастера
           </Link>
+          <Link
+            to="/finance"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            📊 Финансы
+          </Link>
         </nav>
       </div>
     </header>

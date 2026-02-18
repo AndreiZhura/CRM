@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.db import get_db
 from src.routers import clients, installers, orders, finance
-from src.routers import reminders
+from src.routers import reminders,finance
 from src.core.scheduler import start_scheduler
 from src.core.logging import logger
 from src.core.logging import LoggingMiddleware

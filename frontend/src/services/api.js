@@ -106,6 +106,8 @@ const api = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+  getFinanceSummary: () => apiFetch('/finance/summary'),
+  getMonthlyFinance: () => apiFetch('/finance/monthly'),
 };
 
 
