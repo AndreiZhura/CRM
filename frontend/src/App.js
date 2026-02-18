@@ -10,6 +10,7 @@ import InstallerDetail from './pages/InstallerDetail';
 import OrderDetail from './pages/OrderDetail';
 import Finance from './pages/Finance';
 import Register from './pages/Register';
+import MapPage from './pages/Map';
 
 function App() {
   return (
@@ -78,6 +79,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Finance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            <ProtectedRoute>
+              <MapPage />
             </ProtectedRoute>
           }
         />

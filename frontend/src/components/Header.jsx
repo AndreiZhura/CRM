@@ -77,6 +77,13 @@ const Header = () => {
           >
             📊 Финансы
           </Link>
+          <Link
+            to="/map"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            🗺️ Карта
+          </Link>
         </nav>
       </div>
     </header>
