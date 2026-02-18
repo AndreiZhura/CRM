@@ -23,7 +23,7 @@ const InstallerDetail = () => {
       try {
         const [installerData, ordersData] = await Promise.all([
           api.getInstaller(id),
-          api.getOrders(), // получаем все заказы
+          api.getOrders(),
         ]);
         setInstaller(installerData);
         setOrders(ordersData);
@@ -41,7 +41,11 @@ const InstallerDetail = () => {
     const { id, value, type, checked } = e.target;
     setInstaller((prev) => ({
       ...prev,
-      [id]: type === "checkbox" ? checked : value,
+      [id]: type === "checkbox" 
+        ? checked 
+        : (type === "number" 
+            ? (value === "" ? "" : Number(value)) 
+            : value),
     }));
   };
 
@@ -55,15 +59,26 @@ const InstallerDetail = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Преобразуем specialization из строки в массив (если поле ввода)
-      const specializationArray = installer.specialization
-        ? installer.specialization
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s)
-        : [];
-      const dataToSend = {
+      // Нормализуем числовые поля (пустую строку превращаем в 0)
+      const normalizedInstaller = {
         ...installer,
+        base_price: installer.base_price === "" ? 0 : installer.base_price,
+      };
+
+      let specializationArray;
+      if (Array.isArray(normalizedInstaller.specialization)) {
+        specializationArray = normalizedInstaller.specialization;
+      } else if (typeof normalizedInstaller.specialization === "string") {
+        specializationArray = normalizedInstaller.specialization
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s);
+      } else {
+        specializationArray = [];
+      }
+
+      const dataToSend = {
+        ...normalizedInstaller,
         specialization: specializationArray,
       };
       await api.updateInstaller(id, dataToSend);
@@ -123,7 +138,6 @@ const InstallerDetail = () => {
           </header>
 
           {/* Личные данные */}
-          {/* Личные данные */}
           <section className="installer-card">
             <h3 className="installer-card__title">👤 Личные данные</h3>
             <div className="installer-form-linear">
@@ -169,8 +183,7 @@ const InstallerDetail = () => {
                   }
                   label="Резервный телефон (необязательно)"
                 />
-                <div className="field-group"></div>{" "}
-                {/* пустая колонка для отступа справа */}
+                <div className="field-group"></div>
               </div>
             </div>
           </section>
@@ -221,7 +234,11 @@ const InstallerDetail = () => {
                   <input
                     type="text"
                     id="specialization"
-                    value={installer.specialization?.join(", ") || ""}
+                    value={
+                      Array.isArray(installer.specialization)
+                        ? installer.specialization.join(", ")
+                        : installer.specialization || ""
+                    }
                     onChange={handleInputChange}
                     placeholder="Установка, чистка..."
                   />
@@ -231,7 +248,7 @@ const InstallerDetail = () => {
                   <input
                     type="number"
                     id="base_price"
-                    value={installer.base_price || 0}
+                    value={installer.base_price ?? ""}
                     onChange={handleInputChange}
                     placeholder="0"
                   />

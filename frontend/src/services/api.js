@@ -2,7 +2,8 @@
 
 // Базовый URL бэкенда. В разработке он на localhost:8000.
 // Если будем деплоить через nginx, здесь может быть относительный путь '/api'.
-const BASE_URL = '/api';
+//const BASE_URL = '/api';
+const BASE_URL = 'http://localhost:8000';
 
 // Функция для выполнения запросов с учётом авторизации
 async function apiFetch(endpoint, options = {}) {
@@ -65,7 +66,7 @@ const api = {
   // Получить информацию о текущем пользователе
   getMe: () => apiFetch('/auth/me'),
 
-  // Примеры для других сущностей (добавим позже)
+  // Монтажники (installers)
   getInstallers: () => apiFetch('/installers/'),
   getInstaller: (id) => apiFetch(`/installers/${id}`),
   createInstaller: (data) => apiFetch('/installers/', {
@@ -75,6 +76,13 @@ const api = {
   deleteInstaller: (id) => apiFetch(`/installers/${id}`, {
     method: 'DELETE',
   }),
+  // 👇 Добавленный метод для обновления монтажника
+  updateInstaller: (id, data) => apiFetch(`/installers/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
+  // Заказы (orders)
   getOrders: () => apiFetch('/orders/'),
   getOrder: (id) => apiFetch(`/orders/${id}`),
   updateOrder: (id, data) => apiFetch(`/orders/${id}`, {
@@ -84,8 +92,9 @@ const api = {
   deleteOrder: (id) => apiFetch(`/orders/${id}`, {
     method: 'DELETE',
   }),
-  getClients: () => apiFetch('/clients/'),
 
+  // Клиенты (clients)
+  getClients: () => apiFetch('/clients/'),
   createClient: (data) => apiFetch('/clients/', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -94,10 +103,14 @@ const api = {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
+
+  // Заказы (ещё один метод createOrder — уже есть выше, но оставим для полноты)
   createOrder: (data) => apiFetch('/orders/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+
+  // Финансы (finance)
   createFinance: (data) => apiFetch('/finance/', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -109,6 +122,5 @@ const api = {
   getFinanceSummary: () => apiFetch('/finance/summary'),
   getMonthlyFinance: () => apiFetch('/finance/monthly'),
 };
-
 
 export default api;

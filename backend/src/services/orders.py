@@ -97,7 +97,7 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
 
     await db.commit()
     # Перезагружаем связи после коммита
-    await db.refresh(order, attribute_names=['client', 'installer', 'finance'])
+    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installer', 'finance'])
     return order
 
 

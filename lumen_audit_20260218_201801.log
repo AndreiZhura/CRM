@@ -1,0 +1,3485 @@
+=== 1. СТРУКТУРА ПРОЕКТА ===
+.
+├── backend
+│   ├── backups
+│   ├── logs
+│   │   ├── app_2026-02-17.log
+│   │   └── app_2026-02-18.log
+│   ├── ml_service
+│   │   ├── app.py
+│   │   ├── build_features.py
+│   │   ├── Dockerfile.ml
+│   │   ├── prepare_dataset.py
+│   │   ├── requirements_ml.txt
+│   │   ├── run_weather.py
+│   │   └── train.py
+│   └── src
+│       ├── auth.py
+│       ├── core
+│       │   ├── config.py
+│       │   ├── db.py
+│       │   ├── __init__.py
+│       │   ├── logging.py
+│       │   └── scheduler.py
+│       ├── __init__.py
+│       ├── logs
+│       │   ├── app_2026-02-14.log
+│       │   ├── app_2026-02-15.log
+│       │   ├── app_2026-02-16.log
+│       │   └── app_2026-02-17.log
+│       ├── main.py
+│       ├── models
+│       │   ├── address_cache.py
+│       │   ├── admins.py
+│       │   ├── clients.py
+│       │   ├── finance.py
+│       │   ├── __init__.py
+│       │   ├── installers.py
+│       │   ├── orders.py
+│       │   └── weather.py
+│       ├── routers
+│       │   ├── auth.py
+│       │   ├── clients.py
+│       │   ├── finance.py
+│       │   ├── __init__.py
+│       │   ├── installers.py
+│       │   ├── orders.py
+│       │   └── reminders.py
+│       ├── schemas
+│       │   ├── auth.py
+│       │   ├── clients.py
+│       │   ├── finance.py
+│       │   ├── __init__.py
+│       │   ├── installers.py
+│       │   └── orders.py
+│       └── services
+│           ├── address_cache.py
+│           ├── backup_service.py
+│           ├── clients.py
+│           ├── email.py
+│           ├── finance.py
+│           ├── geocoding.py
+│           ├── __init__.py
+│           ├── installers.py
+│           ├── orders.py
+│           ├── reminder_service.py
+│           ├── training_service.py
+│           ├── weather_service.py
+│           └── yandex_disk.py
+├── database
+│   └── init.sql
+├── docker-compose.yml
+├── Dockerfile
+├── docs
+│   ├── admin
+│   │   └── installation.md
+│   └── user
+│       ├── guide.md
+│       └── quickstart.md
+├── frontend
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   │   ├── favicon.ico
+│   │   └── index.html
+│   ├── README.md
+│   └── src
+│       ├── App.js
+│       ├── components
+│       │   ├── AddressSuggest.jsx
+│       │   ├── Footer.jsx
+│       │   ├── Header.jsx
+│       │   ├── Loader.jsx
+│       │   ├── OrderMap.jsx
+│       │   ├── PhoneField.jsx
+│       │   └── ProtectedRoute.jsx
+│       ├── contexts
+│       │   └── ThemeContext.jsx
+│       ├── index.css
+│       ├── index.js
+│       ├── pages
+│       │   ├── AddInstaller.jsx
+│       │   ├── Dashboard.jsx
+│       │   ├── Finance.jsx
+│       │   ├── InstallerDetail.jsx
+│       │   ├── InstallersList.jsx
+│       │   ├── Login.jsx
+│       │   ├── Map.jsx
+│       │   ├── NewOrder.jsx
+│       │   ├── OrderDetail.jsx
+│       │   ├── OrdersList.jsx
+│       │   └── Register.jsx
+│       ├── services
+│       │   └── api.js
+│       └── styles
+│           ├── address-suggest.css
+│           ├── auth.css
+│           ├── finance.css
+│           ├── footer.css
+│           ├── header.css
+│           ├── installer_add.css
+│           ├── installer_detail.css
+│           ├── installer_profile.css
+│           ├── installers.css
+│           ├── Loader.css
+│           ├── login.css
+│           ├── map.css
+│           ├── order-form.css
+│           ├── orders-list.css
+│           ├── phone.css
+│           └── Register.css
+├── install-protection.sh
+├── logs
+│   └── app_2026-02-18.log
+├── lumen_audit.sh
+├── pgagent.sql
+├── README.md
+├── requirements.txt
+├── RussiaLumen2296.txt
+└── test_compatibility.py
+
+25 directories, 113 files
+=== 2. БЭКЕНД: ОСНОВНЫЕ КОНФИГУРАЦИИ ===
+--- backend/src/core/config.py ---
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Определяем корень проекта (папка, содержащая backend)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # backend/
+PROJECT_ROOT = BASE_DIR.parent  # корень CRM
+ENV_FILE = PROJECT_ROOT / '.env'
+
+class Settings(BaseSettings):
+    DATABASE_URL: str = "postgresql://admin:password@localhost:5433/oleg_crm"
+    YANDEX_API_KEY: str = ""
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str = "CRM Олега"
+    REMINDER_EMAIL: str = ""
+    YANDEX_DISK_TOKEN: str = ""
+    YANDEX_DISK_PATH: str = "/CRM/backups"
+    POSTGRES_PASSWORD: str = ""
+    SECRET_KEY: str = ""
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
+
+settings = Settings()
+
+
+--- backend/src/core/db.py ---
+#create_async_engine — создаёт асинхронный движок.
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+# AsyncSession — тип сессии.
+#sessionmaker — фабрика сессий.
+#declarative_base — для будущих моделей.
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+from .config import settings
+
+
+ASYNC_DATABASE_URL = settings.DATABASE_URL.replace(
+    "postgresql://", "postgresql+asyncpg://"
+)
+
+engine = create_async_engine(ASYNC_DATABASE_URL, echo = True)
+AsyncSessionLocal = sessionmaker(
+    engine, class_ = AsyncSession,expire_on_commit = False
+)
+
+Base = declarative_base()
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+--- backend/src/main.py ---
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.db import get_db
+from src.routers import clients, installers, orders, finance
+from src.routers import reminders,finance
+from src.core.scheduler import start_scheduler
+from src.core.logging import logger
+from src.core.logging import LoggingMiddleware
+from src.core.scheduler import scheduler
+from src.routers import auth
+
+
+app = FastAPI(title="СRM Олега")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # разрешаем все источники (для разработки)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(clients.router)
+app.include_router(installers.router)
+app.include_router(orders.router)
+app.include_router(finance.router)
+app.include_router(reminders.router)
+app.add_middleware(LoggingMiddleware)
+app.include_router(auth.router)
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting CRM application")
+    start_scheduler()
+    logger.info("Scheduler started")
+
+
+
+@app.get("/")
+async def root():
+    return {"message": "CRM is running"}
+
+@app.get("/health")
+async def health(db: AsyncSession = Depends(get_db)):
+    """Проверка работоспособности."""
+    health_data = {
+        "status": "ok",
+        "database": "unknown",
+        "scheduler": "running" if scheduler.running else "stopped"
+    }
+    try:
+        await db.execute(text("SELECT 1"))
+        health_data["database"] = "ok"
+    except Exception as e:
+        health_data["database"] = f"error: {e}"
+        health_data["status"] = "degraded"
+    return health_data
+
+
+@app.get("/db-check")
+async def db_check(db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(text("SELECT 1"))
+        return {"db_status": "connected", "result": result.scalar()}
+    except Exception as e:
+        return {"db_status": "error", "error": str(e)}
+    
+
+=== 3. БЭКЕНД: МОДЕЛИ БД (SQLAlchemy) ===
+--- backend/src/models/clients.py ---
+# Импорт нужных типов
+from sqlalchemy import Column, Integer, String, DateTime, Text
+
+import sqlalchemy
+from sqlalchemy.sql import func
+# Base — наш базовый класс из db.py, от которого наследуются все модели.
+from src.core.db import Base
+from sqlalchemy import DateTime, func
+from sqlalchemy.orm import relationship
+
+
+class LatLngType(sqlalchemy.types.UserDefinedType):
+    """Кастомный тип для PostgreSQL POINT"""
+    cache_ok = True
+
+    def get_col_spec(self):
+        return "POINT"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is None:
+                return None
+            # ждём кортеж (lat, lon) или список
+            lat, lon = value[0], value[1]
+            return f"({lat},{lon})"
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is None:
+                return None
+            # из строки "(lat,lon)" делаем кортеж
+            value = value.strip('()')
+            lat, lon = map(float, value.split(','))
+            return (lat, lon)
+        return process
+
+
+class Client(Base):
+    __tablename__ = "clients"
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
+    phone = Column(String, nullable=False, index=True)
+    address = Column(String, nullable=False)
+    coordinates = Column(LatLngType, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_contact = Column(DateTime(timezone=True),
+                          server_default=func.now(), onupdate=func.now())
+    comments = Column(Text, nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    backup_phone = Column(String(20), nullable=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
+    orders = relationship("Order", back_populates="client")
+
+--- backend/src/models/orders.py ---
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum as SQLAEnum
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from src.core.db import Base
+from typing import Optional
+import enum
+
+class OrderStatus(str, enum.Enum):
+    NEW = "Новый"
+    WAITING_INSTALLER = "Ждет установщика"
+    IN_PROGRESS = "В работе"
+    COMPLETED = "Выполнен"
+    CANCELLED = "Отменен"
+
+class Order(Base):
+    __tablename__ = 'orders'
+
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey('clients.id', ondelete='RESTRICT'), nullable=True)
+    installer_id = Column(Integer, ForeignKey('installers.id', ondelete='SET NULL'), nullable=True)
+    status = Column(SQLAEnum(OrderStatus, name='order_status', create_type=False, values_callable=lambda x: [e.value for e in x]), default=OrderStatus.NEW)
+    service_type = Column(String(100), nullable=False)
+    warehouse = Column(Text, nullable=True)
+    service_datetime = Column(DateTime(timezone=False), nullable=False)
+    delivery_datetime = Column(DateTime(timezone=False), nullable=True)
+    promise = Column(Text, nullable=True)
+    marker_color = Column(String(10), nullable=True)
+    address_id = Column(String, ForeignKey('address_cache.address', ondelete='RESTRICT'), nullable=True)
+    address_text = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=False), server_default=func.now())
+    updated_at = Column(DateTime(timezone=False), onupdate=func.now(), server_default=func.now())
+
+    client = relationship("Client", back_populates="orders")
+    installer = relationship("Installer", back_populates="orders")
+    
+    finance = relationship("Finance", back_populates="order", uselist=False)
+    address_cache = relationship("AddressCache", foreign_keys=[address_id])
+    
+    @property
+    def lat(self) -> Optional[float]:
+        return float(self.address_cache.lat) if self.address_cache else None
+
+    @property
+    def lon(self) -> Optional[float]:
+        return float(self.address_cache.lon) if self.address_cache else None
+--- backend/src/models/finance.py ---
+from sqlalchemy import Column, Integer, Numeric, Boolean, DateTime, ForeignKey, Enum as SQLAEnum, FetchedValue
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+from src.core.db import Base
+import enum
+
+class PaymentState(str, enum.Enum):
+    UNPAID = "Не оплачен"
+    PARTIAL = "Частично"
+    PAID = "Оплачен"
+
+class Finance(Base):
+    __tablename__ = 'finance'
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey('orders.id', ondelete='CASCADE'), unique=True, nullable=False)
+    purchase_price = Column(Numeric(10,2), nullable=False, default=0)
+    sale_price_client = Column(Numeric(10,2), nullable=False, default=0)
+    installer_pay = Column(Numeric(10,2), nullable=False, default=0)
+    my_commission = Column(Numeric(10,2), nullable=False, default=0)
+    
+    # Вычисляемые поля (заполняются базой данных)
+    profit = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)
+    margin = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)      # Маржинальность
+    profit_percent = Column(Numeric(10,2), server_default=FetchedValue(), nullable=True)  # Процент прибыли
+    
+    payment_state = Column(SQLAEnum(PaymentState, name='payment_status', create_type=False, values_callable=lambda x: [e.value for e in x]), default=PaymentState.UNPAID)
+    installer_returned_money = Column(Boolean, default=False)
+    
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    order = relationship("Order", back_populates="finance")
+
+    # Вычисляемые свойства (для использования в коде, не в БД)
+    @property
+    def calculate_profit(self):
+        return self.sale_price_client - self.purchase_price - self.installer_pay - self.my_commission
+    
+    @property
+    def calculate_margin(self):
+        if self.sale_price_client == 0:
+            return 0
+        return ((self.sale_price_client - self.purchase_price) / self.sale_price_client) * 100
+    
+    @property
+    def calculate_profit_percent(self):
+        if self.sale_price_client == 0:
+            return 0
+        return (self.profit / self.sale_price_client) * 100
+--- backend/src/models/installers.py ---
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Numeric, ARRAY
+from sqlalchemy.sql import func
+from src.core.db import Base
+from sqlalchemy import FetchedValue
+from sqlalchemy.orm import relationship
+
+class Installer(Base):
+    __tablename__ = 'installers'
+
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
+    nickname = Column(String, nullable=True)
+    phone = Column(String, unique=True, nullable=False)
+    backup_phone = Column(String, nullable=True)
+    specialization = Column(ARRAY(String), nullable=False)  # массив строк
+    rating = Column(Numeric(3,1), default=10.0)
+    base_price = Column(Numeric(10,2), default=0)
+    is_debtor = Column(Boolean, default=False)
+    comments = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    is_in_funnel = Column(Boolean, default=True)
+    total_orders = Column(Integer, default=0)
+    poor_work_count = Column(Integer, default=0)
+    warranty_visits_count = Column(Integer, default=0)
+    last_incident_date = Column(DateTime(timezone=True), nullable=True)
+    # quality_score — вычисляемое поле, объявим как server_default, чтобы не вставлять
+    #quality_score = Column(Numeric(3,2), server_default=FetchedValue(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
+    orders = relationship("Order", back_populates="installer")
+--- backend/src/models/address_cache.py ---
+from sqlalchemy import Column, String, Numeric, DateTime
+from sqlalchemy.sql import func
+from src.core.db import Base
+
+
+class AddressCache(Base):
+    __tablename__ = 'address_cache'
+
+    address = Column(String, primary_key=True)
+    lat = Column(Numeric(10, 7), nullable=False)
+    lon = Column(Numeric(10, 7), nullable=False)
+    updated_at = Column(DateTime(timezone=True),
+                        server_default=func.now(), onupdate=func.now())
+   
+
+--- backend/src/models/weather.py ---
+from sqlalchemy import Column, Integer, String, Date, Numeric, DateTime
+from sqlalchemy.sql import func
+from src.core.db import Base
+
+class Weather(Base):
+    __tablename__ = 'weather'
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, nullable=False)
+    location = Column(String(100), nullable=False)
+    lat = Column(Numeric(10,7), nullable=True)
+    lon = Column(Numeric(10,7), nullable=True)
+    temperature_avg = Column(Numeric(4,1), nullable=True)
+    temperature_min = Column(Numeric(4,1), nullable=True)
+    temperature_max = Column(Numeric(4,1), nullable=True)
+    humidity = Column(Integer, nullable=True)
+    pressure = Column(Integer, nullable=True)
+    wind_speed = Column(Numeric(4,1), nullable=True)
+    precipitation = Column(Numeric(5,2), nullable=True)
+    weather_condition = Column(String(50), nullable=True)
+    source = Column(String(20), default='open-meteo')
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+=== 4. БЭКЕНД: API-ЭНДПОИНТЫ (роутеры) ===
+--- backend/src/routers/clients.py ---
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.schemas.clients import ClientCreate, ClientUpdate, ClientOut
+from src.services.clients import create_client, get_client, get_clients, update_client, delete_client
+from src.auth import get_current_admin
+
+
+router = APIRouter(prefix="/clients", tags=["Clients"])
+
+@router.post("/", response_model=ClientOut, status_code=status.HTTP_201_CREATED)
+async def create_client_endpoint(
+    client_data: ClientCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    client = await create_client(db, client_data)
+    return client
+
+@router.get("/", response_model=List[ClientOut])
+async def read_clients(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    clients = await get_clients(db, skip=skip, limit=limit)
+    return clients
+
+@router.get("/{client_id}", response_model=ClientOut)
+async def read_client(
+    client_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    client = await get_client(db, client_id)
+    if client is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return client
+
+@router.put("/{client_id}", response_model=ClientOut)
+async def update_client_endpoint(
+    client_id: int,
+    client_data: ClientUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    client = await update_client(db, client_id, client_data)
+    if client is None:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return client
+
+@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_client_endpoint(
+    client_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    deleted = await delete_client(db, client_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return None
+--- backend/src/routers/orders.py ---
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.db import get_db
+from src.services.orders import (
+    create_order, get_order, get_orders,
+    update_order, delete_order
+)
+from src.schemas.orders import OrderCreate, OrderUpdate, OrderOut
+
+router = APIRouter(prefix="/orders", tags=["orders"])
+
+@router.post("/", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
+async def create_order_endpoint(
+    order: OrderCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    return await create_order(db, order)
+
+@router.get("/", response_model=list[OrderOut])
+async def read_orders(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    return await get_orders(db, skip, limit)
+
+@router.get("/{order_id}", response_model=OrderOut)
+async def read_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    order = await get_order(db, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+@router.put("/{order_id}", response_model=OrderOut)
+async def update_order_endpoint(
+    order_id: int,
+    order: OrderUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    updated = await update_order(db, order_id, order)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return updated
+
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order_endpoint(
+    order_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    deleted = await delete_order(db, order_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return None
+--- backend/src/routers/finance.py ---
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.db import get_db
+from src.services.finance import (
+    create_finance, get_finance, get_finances, get_finance_by_order,
+    get_finance_summary, get_monthly_profit,
+    update_finance, delete_finance
+)
+from src.schemas.finance import FinanceCreate, FinanceUpdate, FinanceOut
+
+router = APIRouter(prefix="/finance", tags=["finance"])
+
+@router.post("/", response_model=FinanceOut, status_code=status.HTTP_201_CREATED)
+async def create_finance_endpoint(
+    finance: FinanceCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    existing = await get_finance_by_order(db, finance.order_id)
+    if existing:
+        raise HTTPException(status_code=400, detail="Finance record for this order already exists")
+    return await create_finance(db, finance)
+
+@router.get("/", response_model=list[FinanceOut])
+async def read_finances(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db)
+):
+    return await get_finances(db, skip=skip, limit=limit)
+
+@router.get("/order/{order_id}", response_model=FinanceOut)
+async def read_finance_by_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    finance = await get_finance_by_order(db, order_id)
+    if not finance:
+        raise HTTPException(status_code=404, detail="Finance record not found for this order")
+    return finance
+
+# Специфичные пути должны идти до {finance_id}
+@router.get("/summary")
+async def finance_summary(db: AsyncSession = Depends(get_db)):
+    """Возвращает сводную информацию по финансам"""
+    return await get_finance_summary(db)
+
+@router.get("/monthly")
+async def monthly_profit(db: AsyncSession = Depends(get_db)):
+    """Возвращает прибыль по месяцам"""
+    return await get_monthly_profit(db)
+
+@router.get("/{finance_id}", response_model=FinanceOut)
+async def read_finance(
+    finance_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    finance = await get_finance(db, finance_id)
+    if not finance:
+        raise HTTPException(status_code=404, detail="Finance record not found")
+    return finance
+
+@router.put("/{finance_id}", response_model=FinanceOut)
+async def update_finance_endpoint(
+    finance_id: int,
+    finance: FinanceUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    updated = await update_finance(db, finance_id, finance)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Finance record not found")
+    return updated
+
+@router.delete("/{finance_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_finance_endpoint(
+    finance_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    deleted = await delete_finance(db, finance_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Finance record not found")
+    return None
+--- backend/src/routers/auth.py ---
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.schemas.auth import AdminCreate, AdminLogin, Token, AdminOut
+from src.auth import get_password_hash, verify_password, create_access_token, get_current_admin
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+@router.post("/register", response_model=AdminOut)
+async def register(admin_data: AdminCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Admin))
+    existing = result.scalars().first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Уже создано необходимое количество админов !!!")
+    hashed = get_password_hash(admin_data.password)
+    admin = Admin(username=admin_data.username, password_hash=hashed)
+    db.add(admin)
+    await db.commit()
+    await db.refresh(admin)
+    return admin
+
+@router.post("/login", response_model=Token)
+async def login(login_data: AdminLogin, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Admin).where(Admin.username == login_data.username))
+    admin = result.scalar_one_or_none()
+    if not admin or not verify_password(login_data.password, admin.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    access_token = create_access_token(data={"sub": admin.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=AdminOut)
+async def get_me(current_admin: Admin = Depends(get_current_admin)):
+    return current_admin
+--- backend/src/routers/installers.py ---
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.core.db import get_db
+from src.services.installers import (
+    create_installer, get_installer, get_installers,
+    update_installer, delete_installer
+)
+from src.schemas.installers import InstallerCreate, InstallerUpdate, InstallerOut
+from src.auth import get_current_admin
+from src.models.admins import Admin
+
+router = APIRouter(prefix="/installers", tags=["installers"])
+
+@router.post("/", response_model=InstallerOut, status_code=status.HTTP_201_CREATED)
+async def create_installer_endpoint(
+    installer: InstallerCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    return await create_installer(db, installer)
+
+@router.get("/", response_model=list[InstallerOut])
+async def read_installers(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    return await get_installers(db, skip=skip, limit=limit)
+
+@router.get("/{installer_id}", response_model=InstallerOut)
+async def read_installer(
+    installer_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    installer = await get_installer(db, installer_id)
+    if not installer:
+        raise HTTPException(status_code=404, detail="Installer not found")
+    return installer
+
+@router.put("/{installer_id}", response_model=InstallerOut)
+async def update_installer_endpoint(
+    installer_id: int,
+    installer: InstallerUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    updated = await update_installer(db, installer_id, installer)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Installer not found")
+    return updated
+
+@router.delete("/{installer_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_installer_endpoint(
+    installer_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    deleted = await delete_installer(db, installer_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Installer not found")
+    return None
+--- backend/src/routers/reminders.py ---
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
+from datetime import datetime, timedelta
+from src.core.db import get_db
+from src.models.orders import Order
+from src.schemas.orders import OrderOut
+from typing import List
+from src.services.email import send_reminder_email
+from fastapi import HTTPException
+from sqlalchemy.orm import selectinload
+
+router = APIRouter(prefix="/reminders", tags=["reminders"])
+
+@router.get("/stale-orders", response_model=List[OrderOut])
+async def get_stale_orders(
+    days: int = Query(7, description="Количество дней без обновления"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Возвращает заказы, которые не обновлялись более указанного количества дней
+    и при этом не находятся в финальных статусах (Выполнен, Отменен).
+    """
+    cutoff_date = datetime.now() - timedelta(days=days)
+    
+    result = await db.execute(
+        select(Order)
+        .where(
+            and_(
+                Order.updated_at < cutoff_date,
+                Order.status.not_in(["Выполнен", "Отменен"])
+            )
+        )
+        .order_by(Order.updated_at)
+    )
+    orders = result.scalars().all()
+    return orders
+
+@router.post("/send-email", status_code=200)
+async def send_reminder_email_endpoint(
+    recipient: str = Query(..., description="Email получателя"),
+    days: int = Query(7, description="Количество дней без обновления"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Отправляет письмо со списком зависших заказов на указанный email.
+    """
+    # Получаем зависшие заказы
+    cutoff_date = datetime.now() - timedelta(days=days)
+    result = await db.execute(
+        select(Order)
+        .where(
+            and_(
+                Order.updated_at < cutoff_date,
+                Order.status.not_in(["Выполнен", "Отменен"])
+            )
+        )
+        .options(selectinload(Order.client), selectinload(Order.installer))
+        .order_by(Order.updated_at)
+    )
+    orders = result.scalars().all()
+    
+    if not orders:
+        return {"message": "Нет зависших заказов"}
+    
+    # Формируем HTML-таблицу
+    rows = ""
+    for order in orders:
+        rows += f"""
+        <tr>
+            <td>{order.id}</td>
+            <td>{order.client.full_name if order.client else 'Н/Д'}</td>
+            <td>{order.service_type}</td>
+            <td>{order.status}</td>
+            <td>{order.updated_at.strftime('%Y-%m-%d %H:%M')}</td>
+        </tr>
+        """
+    html = f"""
+    <h2>Зависшие заказы (более {days} дней без обновления)</h2>
+    <table border="1" cellpadding="5" style="border-collapse: collapse;">
+        <tr>
+            <th>ID</th>
+            <th>Клиент</th>
+            <th>Тип услуги</th>
+            <th>Статус</th>
+            <th>Последнее обновление</th>
+        </tr>
+        {rows}
+    </table>
+    """
+    
+    try:
+        await send_reminder_email(recipient, html)
+        return {"message": f"Письмо отправлено на {recipient}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка отправки: {str(e)}")
+
+=== 5. БЭКЕНД: БИЗНЕС-ЛОГИКА (сервисы) ===
+--- backend/src/services/clients.py ---
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update, delete
+from typing import Optional, List
+
+from src.models.clients import Client
+from src.schemas.clients import ClientCreate, ClientUpdate
+
+from datetime import datetime, timezone
+
+async def create_client(db:AsyncSession, client_data:ClientCreate) -> Client:
+    client = Client(**client_data.model_dump())
+    db.add(client)
+    await db.commit()
+    await db.refresh(client)
+    return client
+
+async def get_client(db: AsyncSession, client_id: int) -> Optional[Client]:
+    result = await db.execute(select(Client).where(Client.id == client_id))
+    return result.scalar_one_or_none()
+
+async def get_clients(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Client]:
+    result = await db.execute(select(Client).offset(skip).limit(limit))
+    return result.scalars().all()
+
+async def update_client(db: AsyncSession, client_id: int, client_data: ClientUpdate) -> Optional[Client]:
+    client = await get_client(db, client_id)
+    if client is None:
+        return None
+
+    update_data = client_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(client, field, value)
+
+    await db.commit()
+    await db.refresh(client)
+    return client
+
+async def delete_client(db: AsyncSession, client_id: int):
+    # Ищем активного клиента (deleted_at IS NULL)
+    result = await db.execute(
+        select(Client)
+        .where(Client.id == client_id)
+        .where(Client.deleted_at.is_(None))
+    )
+    client = result.scalar_one_or_none()
+    if client:
+        client.deleted_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(client)
+    return client  # возвращаем обновлённого клиента (с deleted_at)
+--- backend/src/services/orders.py ---
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, List
+
+from src.models.orders import Order
+from src.schemas.orders import OrderCreate, OrderUpdate
+from src.services.geocoding import get_coordinates
+from src.services.address_cache import get_or_create_address_cache
+
+
+async def create_order(db: AsyncSession, order_data: OrderCreate):
+    # Преобразуем данные в словарь
+    order_dict = order_data.model_dump()
+
+    # Убираем часовой пояс у datetime полей
+    for field in ['service_datetime', 'delivery_datetime']:
+        if order_dict.get(field) and hasattr(order_dict[field], 'tzinfo'):
+            order_dict[field] = order_dict[field].replace(tzinfo=None)
+
+    # Геокодинг адреса
+    address_text = order_dict.get('address_text')
+    if address_text:
+        coords = await get_coordinates(address_text)
+        if coords:
+            lat, lon = coords
+            cache_entry = await get_or_create_address_cache(db, address_text, lat, lon)
+            order_dict['address_id'] = cache_entry.address
+        else:
+            order_dict['address_id'] = None
+    else:
+        order_dict['address_id'] = None
+
+    order = Order(**order_dict)
+    db.add(order)
+    await db.flush()  # получаем id
+
+    # Загружаем все связанные объекты для сериализации
+    await db.refresh(order, attribute_names=['client', 'installer', 'finance', 'address_cache'])
+    await db.commit()
+    return order
+
+
+async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
+    result = await db.execute(
+        select(Order)
+        .where(Order.id == order_id)
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installer),
+            selectinload(Order.finance),
+            selectinload(Order.address_cache)   # добавь
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
+    result = await db.execute(
+        select(Order)
+        .offset(skip)
+        .limit(limit)
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installer),
+            selectinload(Order.finance),
+            selectinload(Order.address_cache)   # добавь
+        )
+    )
+    return result.scalars().all()
+
+
+async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate) -> Optional[Order]:
+    order = await get_order(db, order_id)
+    if not order:
+        return None
+
+    update_data = order_data.model_dump(exclude_unset=True)
+    address_text = update_data.get('address_text')
+
+    # Если адрес обновляется, обрабатываем геокодинг
+    if address_text is not None:
+        coords = await get_coordinates(address_text)
+        if coords:
+            lat, lon = coords
+            cache_entry = await get_or_create_address_cache(db, address_text, lat, lon)
+            order.address_id = cache_entry.address
+            order.address_text = address_text
+        else:
+            order.address_id = None
+            order.address_text = address_text
+
+    # Применяем остальные обновления
+    for key, value in update_data.items():
+        if key != 'address_text':
+            setattr(order, key, value)
+
+    await db.commit()
+    # Перезагружаем связи после коммита
+    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installer', 'finance'])
+    return order
+
+
+async def delete_order(db: AsyncSession, order_id: int) -> Optional[Order]:
+    order = await get_order(db, order_id)
+    if order:
+        await db.delete(order)
+        await db.commit()
+    return order
+
+--- backend/src/services/finance.py ---
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select,func, extract
+from src.models.finance import Finance
+from src.schemas.finance import FinanceCreate, FinanceUpdate
+from src.models.finance import Finance
+from src.models.orders import Order
+
+async def create_finance(db: AsyncSession, finance_data: FinanceCreate):
+    finance = Finance(**finance_data.model_dump())
+    db.add(finance)
+    await db.commit()
+    await db.refresh(finance)
+    return finance
+
+async def get_finance(db: AsyncSession, finance_id: int):
+    result = await db.execute(
+        select(Finance).where(Finance.id == finance_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_finance_by_order(db: AsyncSession, order_id: int):
+    result = await db.execute(
+        select(Finance).where(Finance.order_id == order_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_finances(db: AsyncSession, skip: int = 0, limit: int = 100):
+    result = await db.execute(
+        select(Finance).offset(skip).limit(limit)
+    )
+    return result.scalars().all()
+
+async def update_finance(db: AsyncSession, finance_id: int, finance_data: FinanceUpdate):
+    finance = await get_finance(db, finance_id)
+    if finance:
+        update_data = finance_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(finance, key, value)
+        await db.commit()
+        await db.refresh(finance)
+    return finance
+
+async def delete_finance(db: AsyncSession, finance_id: int):
+    finance = await get_finance(db, finance_id)
+    if finance:
+        await db.delete(finance)
+        await db.commit()
+    return finance
+
+async def get_finance_summary(db: AsyncSession):
+    """Возвращает сводку по финансам: общая прибыль, выплаты, количество заказов, средняя прибыль"""
+    # Общая прибыль
+    result = await db.execute(select(func.sum(Finance.profit)))
+    total_profit = result.scalar() or 0.0
+
+    # Сумма выплат монтажникам
+    result = await db.execute(select(func.sum(Finance.installer_pay)))
+    total_installer_pay = result.scalar() or 0.0
+
+    # Количество заказов
+    result = await db.execute(select(func.count(Order.id)))
+    total_orders = result.scalar() or 0
+
+    # Средняя прибыль на заказ
+    avg_profit = total_profit / total_orders if total_orders > 0 else 0
+
+    return {
+        "total_profit": total_profit,
+        "total_installer_pay": total_installer_pay,
+        "total_orders": total_orders,
+        "avg_profit": avg_profit,
+    }
+
+async def get_monthly_profit(db: AsyncSession):
+    """Возвращает прибыль по месяцам за всё время (или за последние 12 месяцев)"""
+    stmt = select(
+        extract('year', Finance.created_at).label('year'),
+        extract('month', Finance.created_at).label('month'),
+        func.sum(Finance.profit).label('profit')
+    ).group_by('year', 'month').order_by('year', 'month')
+
+    result = await db.execute(stmt)
+    rows = result.all()
+    # Преобразуем в список словарей
+    monthly_data = [{"year": int(r.year), "month": int(r.month), "profit": float(r.profit)} for r in rows]
+    return monthly_data
+--- backend/src/services/geocoding.py ---
+import aiohttp
+from src.core.config import settings
+import random
+
+# Мок-координаты для разработки (центр Москвы, например)
+MOCK_LAT = 55.7558
+MOCK_LON = 37.6176
+
+async def get_coordinates(address: str) -> tuple[float, float] | None:
+    """
+    Асинхронно получает координаты (lat, lon) для указанного адреса через API Яндекс.Карт.
+    Если ключ не задан, возвращает мок-координаты.
+    Возвращает None, если адрес пуст или не удалось найти.
+    """
+    if not address:
+        return None
+
+    # Если нет API-ключа, используем мок
+    if not settings.YANDEX_API_KEY:
+        # Для разнообразия можно генерировать случайное смещение, но для простоты фикс
+        return (MOCK_LAT, MOCK_LON)
+
+    # Формируем запрос к Яндекс.Геокодеру
+    url = "https://geocode-maps.yandex.ru/1.x/"
+    params = {
+        "apikey": settings.YANDEX_API_KEY,
+        "geocode": address,
+        "format": "json",
+        "results": 1
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as resp:
+                if resp.status != 200:
+                    return None
+                data = await resp.json()
+                # Парсим ответ
+                try:
+                    pos = data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["Point"]["pos"]
+                    lon, lat = map(float, pos.split())
+                    return (lat, lon)
+                except (KeyError, IndexError, ValueError):
+                    return None
+    except Exception:
+        return None
+--- backend/src/services/weather_service.py ---
+import aiohttp
+import logging
+from datetime import date, timedelta
+from typing import Optional, Dict, Any
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.models.weather import Weather
+from src.core.db import AsyncSessionLocal
+from src.models.address_cache import AddressCache
+
+logger = logging.getLogger(__name__)
+
+BASE_URL = "https://api.open-meteo.com/v1/forecast"
+
+async def fetch_weather_data(
+    lat: float,
+    lon: float,
+    start_date: date,
+    end_date: date
+) -> Optional[Dict[str, Any]]:
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode",
+        "timezone": "auto",
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat()
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(BASE_URL, params=params) as resp:
+                if resp.status != 200:
+                    logger.error(f"Open-Meteo error: {resp.status}")
+                    return None
+                data = await resp.json()
+                return data
+    except Exception as e:
+        logger.exception(f"Failed to fetch weather: {e}")
+        return None
+
+async def save_weather_data(db: AsyncSession, location: str, lat: float, lon: float, data: dict):
+    times = data.get("daily", {}).get("time", [])
+    max_temps = data.get("daily", {}).get("temperature_2m_max", [])
+    min_temps = data.get("daily", {}).get("temperature_2m_min", [])
+    precipt = data.get("daily", {}).get("precipitation_sum", [])
+    codes = data.get("daily", {}).get("weathercode", [])
+
+    for i, day_str in enumerate(times):
+        day = date.fromisoformat(day_str)
+        # Проверяем, есть ли уже запись
+        stmt = select(Weather).where(
+            Weather.date == day,
+            Weather.location == location
+        )
+        result = await db.execute(stmt)
+        existing = result.scalar_one_or_none()
+        if existing:
+            # Можно обновить или пропустить
+            continue
+        weather = Weather(
+            date=day,
+            location=location,
+            lat=lat,
+            lon=lon,
+            temperature_max=max_temps[i] if i < len(max_temps) else None,
+            temperature_min=min_temps[i] if i < len(min_temps) else None,
+            precipitation=precipt[i] if i < len(precipt) else None,
+            weather_condition=str(codes[i]) if i < len(codes) else None,
+            source="open-meteo"
+        )
+        db.add(weather)
+    await db.commit()
+
+
+
+async def daily_weather_collection():
+    """
+    Фоновая задача: собирает погоду для всех уникальных адресов из кэша.
+    """
+    async with AsyncSessionLocal() as db:
+        # Получаем все уникальные адреса с координатами
+        result = await db.execute(
+            select(AddressCache.address, AddressCache.lat, AddressCache.lon).distinct()
+        )
+        locations = result.all()
+        today = date.today()
+        start_date = today - timedelta(days=1)   # вчера
+        end_date = today + timedelta(days=7)     # прогноз на 7 дней
+
+        for loc in locations:
+            if loc.lat is None or loc.lon is None:
+                continue
+            data = await fetch_weather_data(loc.lat, loc.lon, start_date, end_date)
+            if data:
+                await save_weather_data(db, loc.address, loc.lat, loc.lon, data)
+        logger.info("Daily weather collection completed")
+--- backend/src/services/reminder_service.py ---
+from sqlalchemy import select, and_
+from sqlalchemy.orm import selectinload
+from datetime import datetime, timedelta
+from src.models.orders import Order
+from src.services.email import send_reminder_email
+from src.core.db import AsyncSessionLocal
+from sqlalchemy.orm import selectinload
+import logging
+logger = logging.getLogger(__name__)
+
+async def send_daily_reminder(recipient: str):
+     async with AsyncSessionLocal() as db:
+        cutoff_date = datetime.now() - timedelta(days=7)
+        result = await db.execute(
+            select(Order)
+            .options(selectinload(Order.client), selectinload(Order.installer))
+            .where(
+                and_(
+                    Order.updated_at < cutoff_date,
+                    Order.status.not_in(["Выполнен", "Отменен"])
+                )
+            )
+            .order_by(Order.updated_at)
+        )
+        orders = result.scalars().all()
+
+        if not orders:
+            return
+
+        rows = ""
+        for order in orders:
+            client_name = order.client.full_name if order.client else "Н/Д"
+            rows += f"""
+            <tr>
+                <td>{order.id}</td>
+                <td>{client_name}</td>
+                <td>{order.service_type}</td>
+                <td>{order.status}</td>
+                <td>{order.updated_at.strftime('%Y-%m-%d %H:%M')}</td>
+            </tr>
+            """
+        html = f"""
+        <h2>Зависшие заказы (более 7 дней без обновления)</h2>
+        <table border="1" cellpadding="5" style="border-collapse: collapse;">
+            <tr>
+                <th>ID</th>
+                <th>Клиент</th>
+                <th>Тип услуги</th>
+                <th>Статус</th>
+                <th>Последнее обновление</th>
+            </tr>
+            {rows}
+        </table>
+        """
+        await send_reminder_email(recipient, html)
+=== 6. ФРОНТЕНД: ОСНОВНЫЕ КОМПОНЕНТЫ ===
+--- frontend/src/App.js ---
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import NewOrder from './pages/NewOrder';
+import ProtectedRoute from './components/ProtectedRoute';
+import OrdersList from './pages/OrdersList';
+import AddInstaller from './pages/AddInstaller';
+import InstallersList from './pages/InstallersList';
+import InstallerDetail from './pages/InstallerDetail';
+import OrderDetail from './pages/OrderDetail';
+import Finance from './pages/Finance';
+import Register from './pages/Register';
+import MapPage from './pages/Map';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/new"
+          element={
+            <ProtectedRoute>
+              <NewOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/installers/new"
+          element={
+            <ProtectedRoute>
+              <AddInstaller />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/installers"
+          element={
+            <ProtectedRoute>
+              <InstallersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/installers/:id"
+          element={
+            <ProtectedRoute>
+              <InstallerDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance"
+          element={
+            <ProtectedRoute>
+              <Finance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            <ProtectedRoute>
+              <MapPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+--- frontend/src/components/Header.jsx ---
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useTheme } from "../contexts/ThemeContext";
+import "../styles/header.css";
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  return (
+    <header className="header">
+      <div className="header__container">
+        <div className="header__left-group">
+          <Link to="/" className="header__logo">
+            ❄️ Тестовая
+          </Link>
+          <div className="header__status">
+            <span className="header__dot"></span>
+            <span className="header__status-text">Система Online</span>
+          </div>
+        </div>
+        {/* Кнопка переключения темы */}
+        <button
+          onClick={toggleTheme}
+          className="theme-toggle"
+          aria-label="Переключить тему"
+        >
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+        <button
+          className={`header__burger ${isMenuOpen ? "open" : ""}`}
+          onClick={toggleMenu}
+          aria-label="Меню"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav className={`header__nav ${isMenuOpen ? "active" : ""}`}>
+          <Link
+            to="/orders/new"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            📝 Новый заказ
+          </Link>
+          <Link
+            to="/orders"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            📋 Журнал
+          </Link>
+          <Link
+            to="/installers"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            👨‍🔧 Мастера
+          </Link>
+          <Link
+            to="/installers/new"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            ➕ Добавить мастера
+          </Link>
+          <Link
+            to="/finance"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            📊 Финансы
+          </Link>
+          <Link
+            to="/map"
+            className="header__link"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            🗺️ Карта
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
+
+--- frontend/src/components/Footer.jsx ---
+import React from 'react';
+import '../styles/footer.css';
+
+const Footer = () => {
+  return (
+    <footer className="footer">
+      <div className="footer__container">
+        <p className="footer__copyright">&copy; 2026 Система контроля климата</p>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
+--- frontend/src/components/OrderMap.jsx ---
+import React from 'react';
+import { Map, Placemark } from '@pbe/react-yandex-maps';
+
+const OrderMap = ({ orders }) => {
+  // Фильтруем заказы, у которых есть координаты
+  const points = orders.filter(order => order.lat && order.lon);
+
+  if (points.length === 0) {
+    return <div>Нет заказов с координатами для отображения на карте</div>;
+  }
+
+  return (
+    <Map
+      defaultState={{
+        center: [55.751244, 37.618423], // Москва, Кремль
+        zoom: 9,
+      }}
+      width="100%"
+      height="400px"
+    >
+      {points.map(order => (
+        <Placemark
+          key={order.id}
+          geometry={[order.lat, order.lon]}
+          properties={{
+            balloonContent: `
+              <strong>${order.service_type}</strong><br/>
+              ${order.address_text}<br/>
+              Статус: ${order.status}
+            `,
+          }}
+        />
+      ))}
+    </Map>
+  );
+};
+
+export default OrderMap;
+=== 7. ФРОНТЕНД: СТРАНИЦЫ (ключевые) ===
+--- frontend/src/pages/Login.jsx ---
+import React, { useState } from "react";
+import { Link } from 'react-router-dom';
+import api from "../services/api";
+import "../styles/login.css"; // если есть отдельный CSS для логина
+
+const Login = () => {
+  // Состояния для полей ввода
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await api.login(username, password);
+      // Предполагаем, что ответ содержит поле access_token
+      localStorage.setItem("access_token", data.access_token);
+      // Перенаправляем на главную страницу (например, /dashboard)
+      window.location.href = "/orders/new"; // или используем useNavigate
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <h2>Вход в CRM Олега</h2>
+      {error && <div className="error">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="username">Имя пользователя</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Пароль</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? "Вход..." : "Войти"}
+        </button>
+        <p style={{ marginTop: "1rem", textAlign: "center" }}>
+          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        </p>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
+
+--- frontend/src/pages/Dashboard.jsx ---
+import React from 'react';
+
+const Dashboard = () => {
+  return (
+    <div>
+      <h1>Добро пожаловать в CRM</h1>
+      <p>Здесь будет сводка по заказам, клиентам и монтажникам</p>
+      <a href="/orders/new">Создать новый заказ</a>
+    </div>
+  );
+};
+
+export default Dashboard;
+--- frontend/src/pages/OrdersList.jsx ---
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Select from "react-select";
+
+import api from "../services/api";
+import Header from "../components/Header";
+import Loader from "../components/Loader"; // импорт компонента-лоадера
+import Footer from "../components/Footer";
+import "../styles/orders-list.css";
+
+const OrdersList = () => {
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [filters, setFilters] = useState({
+    client: "",
+    address: "",
+    status: "",
+  });
+
+  const statusOptions = [
+    { value: "", label: "Все статусы" },
+    { value: "Новый", label: "Новый" },
+    { value: "Ждет установщика", label: "Ждет установщика" },
+    { value: "Выполнен", label: "Выполнен" },
+    { value: "Завершено", label: "Завершено" },
+  ];
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: "var(--input-bg)",
+      borderColor: state.isFocused
+        ? "var(--accent-color)"
+        : "var(--border-color)",
+      boxShadow: state.isFocused ? "0 0 0 3px rgba(59, 130, 246, 0.1)" : "none",
+      "&:hover": {
+        borderColor: "var(--accent-color)",
+      },
+      padding: "2px",
+      borderRadius: "8px",
+      minHeight: "42px",
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--input-bg)",
+      borderRadius: "8px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "var(--accent-color)"
+        : state.isFocused
+          ? "var(--border-color)"
+          : "var(--input-bg)",
+      color: state.isSelected ? "white" : "var(--text-primary)",
+      cursor: "pointer",
+      padding: "10px 12px",
+      "&:active": {
+        backgroundColor: "var(--accent-hover)",
+      },
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "var(--text-primary)",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "var(--text-primary)",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+      "&:hover": {
+        color: "var(--text-primary)",
+      },
+    }),
+    indicatorSeparator: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--border-color)",
+    }),
+  };
+
+  // ... в JSX, вместо <select>:
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await api.getOrders();
+        setOrders(data);
+        setFilteredOrders(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const filtered = orders.filter((order) => {
+      const clientMatch =
+        order.client?.full_name
+          ?.toLowerCase()
+          .includes(filters.client.toLowerCase()) ?? true;
+      const addressMatch =
+        order.address_text
+          ?.toLowerCase()
+          .includes(filters.address.toLowerCase()) ?? true;
+      const statusMatch =
+        filters.status === "" || order.status === filters.status;
+      return clientMatch && addressMatch && statusMatch;
+    });
+    setFilteredOrders(filtered);
+  }, [filters, orders]);
+
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Новый":
+      case "Новая заявка":
+        return "status-novaya-zayavka";
+      case "Ждет установщика":
+        return "status-zhdet-ustanovshchika";
+      case "Завершено":
+      case "Выполнен":
+        return "status-zaversheno";
+      default:
+        return "";
+    }
+  };
+
+  // Если идёт загрузка – показываем лоадер с шапкой и подвалом
+  if (loading) {
+    return (
+      <div className="page">
+        <Header />
+        <main className="page__main">
+          <Loader /> {/* красивый спиннер вместо обычного текста */}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Если ошибка – показываем сообщение
+  if (error) return <div>Ошибка: {error}</div>;
+
+  return (
+    <div className="page">
+      <Header />
+      <main className="page__main">
+        <section className="orders-list">
+          <div className="orders-list__container">
+            <h2 className="orders-list__title">Журнал заказов</h2>
+
+            <div className="orders-filter">
+              <div className="filter-group">
+                <label htmlFor="filterClient">Клиент</label>
+                <input
+                  type="text"
+                  id="filterClient"
+                  name="client"
+                  className="filter-input"
+                  placeholder="Поиск по ФИО..."
+                  value={filters.client}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="filterAddress">Адрес</label>
+                <input
+                  type="text"
+                  id="filterAddress"
+                  name="address"
+                  className="filter-input"
+                  placeholder="Поиск по адресу..."
+                  value={filters.address}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="filterStatus">Статус</label>
+                <Select
+                  id="filterStatus"
+                  name="status"
+                  options={statusOptions}
+                  value={statusOptions.find(
+                    (option) => option.value === filters.status,
+                  )}
+                  onChange={(selected) =>
+                    setFilters({
+                      ...filters,
+                      status: selected ? selected.value : "",
+                    })
+                  }
+                  styles={customSelectStyles}
+                  isClearable
+                  placeholder="Все статусы"
+                  className="filter-select"
+                  classNamePrefix="filter-select"
+                />
+              </div>
+            </div>
+
+            {filteredOrders.length === 0 ? (
+              <div className="no-orders">📭 Заказов на данный момент нет</div>
+            ) : (
+              <table className="orders-table">
+                <thead className="orders-table__head">
+                  <tr className="orders-table__row">
+                    <th className="orders-table__th">Клиент</th>
+                    <th className="orders-table__th">Адрес</th>
+                    <th className="orders-table__th">Модель</th>
+                    <th className="orders-table__th">Цена</th>
+                    <th className="orders-table__th">Статус</th>
+                  </tr>
+                </thead>
+                <tbody className="orders-table__body">
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id} className="orders-table__row">
+                      <td className="orders-table__td" data-label="Клиент">
+                        <Link to={`/orders/${order.id}`}>
+                          {order.client?.full_name || "—"}
+                        </Link>
+                      </td>
+                      <td className="orders-table__td" data-label="Адрес">
+                        {order.address_text || "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Модель">
+                        {order.service_type || "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Цена">
+                        {order.finance?.sale_price_client
+                          ? `${order.finance.sale_price_client} ₽`
+                          : "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Статус">
+                        <span
+                          className={`status-badge ${getStatusClass(order.status)}`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default OrdersList;
+
+--- frontend/src/pages/NewOrder.jsx ---
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import Loader from "../components/Loader";
+import AddressSuggest from "../components/AddressSuggest";
+import PhoneField from "../components/PhoneField";
+import Footer from "../components/Footer";
+import "../styles/order-form.css";
+
+const NewOrder = () => {
+  const navigate = useNavigate();
+
+  // Состояния для формы
+  const [formData, setFormData] = useState({
+    fio: "",
+    phone: "",
+    backup_phone: "",
+    address: "",
+    model: "",
+    service_datetime: "",
+    delivery_datetime: "",
+    appointment_date: "",
+    warehouse: "Основной",
+    buy_price: "",
+    sell_price_ac: "",
+    price_install: "",
+    my_commission: "",
+    status: "Новый",
+    promises: "",
+    installer_opinion: "",
+    installer_id: "",
+    marker_color: "blue",
+  });
+
+  // Состояния для загрузки списков
+  const [clients, setClients] = useState([]);
+  const [installers, setInstallers] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState("");
+  const [isNewClient, setIsNewClient] = useState(true);
+  const [loadingLists, setLoadingLists] = useState(true);
+
+  // Общие состояния
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Загружаем клиентов и монтажников при монтировании
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoadingLists(true);
+        const [clientsData, installersData] = await Promise.all([
+          api.getClients(),
+          api.getInstallers(),
+        ]);
+        setClients(clientsData);
+        setInstallers(installersData);
+      } catch (err) {
+        console.error("Ошибка загрузки списков:", err);
+        setError("Не удалось загрузить клиентов или монтажников");
+      } finally {
+        setLoadingLists(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      // 1. Определяем client_id
+      let clientId;
+      if (isNewClient) {
+        if (!formData.fio || !formData.phone || !formData.address) {
+          throw new Error("Заполните ФИО, телефон и адрес нового клиента");
+        }
+        const clientData = {
+          full_name: formData.fio,
+          phone: formData.phone,
+          backup_phone: formData.backup_phone || "",
+          address: formData.address,
+          comments: formData.installer_opinion || "",
+        };
+        console.log("Sending client data:", clientData);
+        const client = await api.createClient(clientData);
+        clientId = client.id;
+      } else {
+        if (!selectedClientId) {
+          throw new Error("Выберите клиента из списка");
+        }
+        clientId = selectedClientId;
+      }
+
+      // 2. Подготавливаем даты
+      const service_datetime = formData.service_datetime
+        ? new Date(formData.service_datetime).toISOString()
+        : new Date().toISOString();
+
+      const delivery_datetime = formData.delivery_datetime
+        ? new Date(formData.delivery_datetime).toISOString()
+        : null;
+
+      // 3. Создаём заказ
+      const orderData = {
+        client_id: clientId,
+        installer_id: formData.installer_id || null,
+        service_type: formData.model || "Установка кондиционера",
+        service_datetime: service_datetime,
+        delivery_datetime: delivery_datetime,
+        status: formData.status,
+        address_text: formData.address,
+        warehouse: formData.warehouse,
+        promise: formData.promises || "",
+        marker_color: formData.marker_color,
+      };
+      const order = await api.createOrder(orderData);
+
+      // 4. Создаём финансовую запись
+      const financeData = {
+        order_id: order.id,
+        purchase_price: parseFloat(formData.buy_price) || 0,
+        sale_price_client: parseFloat(formData.sell_price_ac) || 0,
+        installer_pay: parseFloat(formData.price_install) || 0,
+        my_commission: parseFloat(formData.my_commission) || 0,
+        payment_state: "Не оплачен",
+      };
+      await api.createFinance(financeData);
+
+      // 5. Перенаправляем на список заказов
+      navigate("/orders");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="page">
+      <Header />
+      <main className="page__main">
+        <form id="orderForm" className="crm-form" onSubmit={handleSubmit}>
+          <h1>Новый заказ</h1>
+          {error && <div className="error">{error}</div>}
+          {loadingLists && (
+            <div style={{ textAlign: "center", margin: "20px 0" }}>
+              <Loader size="small" text="Загрузка клиентов и монтажников..." />
+            </div>
+          )}
+
+          {/* Карточка клиента */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">👤 Карточка клиента</legend>
+
+            {/* Переключатель новый/существующий */}
+            <div className="crm-form__toggle" style={{ marginBottom: "15px" }}>
+              <label style={{ marginRight: "20px" }}>
+                <input
+                  type="radio"
+                  name="clientType"
+                  value="new"
+                  checked={isNewClient}
+                  onChange={() => setIsNewClient(true)}
+                />{" "}
+                Новый клиент
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="clientType"
+                  value="existing"
+                  checked={!isNewClient}
+                  onChange={() => setIsNewClient(false)}
+                />{" "}
+                Существующий клиент
+              </label>
+            </div>
+
+            {isNewClient ? (
+              <div className="crm-form__grid">
+                <div className="crm-form__field">
+                  <label className="crm-form__label">ФИО клиента</label>
+                  <input
+                    type="text"
+                    name="fio"
+                    value={formData.fio}
+                    onChange={handleChange}
+                    required
+                    className="crm-form__input"
+                    placeholder="Иванов Иван"
+                  />
+                </div>
+                <div className="crm-form__field">
+                  <PhoneField
+                    id="client_phone"
+                    name="phone"
+                    label="Номер телефона"
+                    value={formData.phone}
+                    onChange={(value) =>
+                      setFormData({ ...formData, phone: value })
+                    }
+                  />
+                </div>
+                <div className="crm-form__field">
+                  <PhoneField
+                    id="client_backup_phone"
+                    name="backup_phone"
+                    label="Резервный телефон"
+                    value={formData.backup_phone}
+                    onChange={(value) =>
+                      setFormData({ ...formData, backup_phone: value })
+                    }
+                  />
+                </div>
+                <div className="crm-form__field crm-form__field--full">
+                  <label className="crm-form__label">Адрес</label>
+                  <AddressSuggest
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className="crm-form__input"
+                    placeholder="Начните вводить адрес..."
+                  />
+                </div>
+                <div className="crm-form__field crm-form__field--full">
+                  <label className="crm-form__label">Модель кондиционера</label>
+                  <input
+                    type="text"
+                    name="model"
+                    value={formData.model}
+                    onChange={handleChange}
+                    className="crm-form__input"
+                    placeholder="Haier Coral AS25H"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="crm-form__field crm-form__field--full">
+                <label className="crm-form__label">Выберите клиента</label>
+                <select
+                  name="clientId"
+                  value={selectedClientId}
+                  onChange={(e) => setSelectedClientId(e.target.value)}
+                  className="crm-form__input"
+                  required={!isNewClient}
+                >
+                  <option value="">-- Выберите клиента --</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.full_name} ({client.phone}) — {client.address}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </fieldset>
+
+          {/* Планирование и Логистика */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">
+              📅 Планирование и Логистика
+            </legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field">
+                <label className="crm-form__label">
+                  Дата и время обслуживания
+                </label>
+                <input
+                  type="datetime-local"
+                  name="service_datetime"
+                  value={formData.service_datetime}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">
+                  Дата и время доставки (склад)
+                </label>
+                <input
+                  type="datetime-local"
+                  name="delivery_datetime"
+                  value={formData.delivery_datetime}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">Установка (договор)</label>
+                <input
+                  type="date"
+                  name="appointment_date"
+                  value={formData.appointment_date}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">Склад</label>
+                <select
+                  name="warehouse"
+                  value={formData.warehouse}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="Основной">Основной</option>
+                  <option value="Транзит">Транзит</option>
+                </select>
+              </div>
+
+              {/* Выбор монтажника */}
+              <div className="crm-form__field">
+                <label className="crm-form__label">Монтажник</label>
+                <select
+                  name="installer_id"
+                  value={formData.installer_id}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="">-- Не назначен --</option>
+                  {installers.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.full_name}{" "}
+                      {inst.nickname ? `(${inst.nickname})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Цвет маркера */}
+              <div className="crm-form__field">
+                <label className="crm-form__label">
+                  Цвет маркера (для карты)
+                </label>
+                <select
+                  name="marker_color"
+                  value={formData.marker_color}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="blue">Синий</option>
+                  <option value="red">Красный</option>
+                  <option value="green">Зелёный</option>
+                  <option value="yellow">Жёлтый</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          {/* Финансы */}
+          <fieldset className="crm-form__section crm-form__section--finance">
+            <legend className="crm-form__legend">💰 Финансы</legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field">
+                <label className="crm-form__label">Закупка (₽)</label>
+                <input
+                  type="number"
+                  name="buy_price"
+                  value={formData.buy_price}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="0"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">Продажа (₽)</label>
+                <input
+                  type="number"
+                  name="sell_price_ac"
+                  value={formData.sell_price_ac}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="0"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">Монтажнику (₽)</label>
+                <input
+                  type="number"
+                  name="price_install"
+                  value={formData.price_install}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="0"
+                />
+              </div>
+              <div className="crm-form__field">
+                <label className="crm-form__label">Моя комиссия (₽)</label>
+                <input
+                  type="number"
+                  name="my_commission"
+                  value={formData.my_commission}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          {/* Статус и Заметки */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">📝 Статус и Заметки</legend>
+            <div className="crm-form__grid">
+              <div className="crm-form__field crm-form__field--full">
+                <label className="crm-form__label">Текущий статус</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="Новый">Новый</option>
+                  <option value="Ждет установщика">Ждет установщика</option>
+                  <option value="Выполнен">Выполнен</option>{" "}
+                  {/* Было "Завершено" */}
+                </select>
+              </div>
+              <div className="crm-form__field crm-form__field--full">
+                <label className="crm-form__label">Обещания клиенту</label>
+                <textarea
+                  name="promises"
+                  value={formData.promises}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="Уточнить время за час..."
+                />
+              </div>
+              <div className="crm-form__field crm-form__field--full">
+                <label className="crm-form__label">Мнение монтажника</label>
+                <textarea
+                  name="installer_opinion"
+                  value={formData.installer_opinion}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                  placeholder="Сложный доступ к блоку..."
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <div className="crm-form__actions">
+            <button
+              type="submit"
+              className="crm-form__button crm-form__button--submit"
+              disabled={loading || loadingLists}
+            >
+              {loading ? "Сохранение..." : "🚀 Создать карточку заказа"}
+            </button>
+          </div>
+        </form>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default NewOrder;
+
+--- frontend/src/pages/InstallersList.jsx ---
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import "../styles/installers.css";
+import Loader from "../components/Loader";
+import Footer from "../components/Footer";
+
+const InstallersList = () => {
+  const [installers, setInstallers] = useState([]);
+  const [filteredInstallers, setFilteredInstallers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchSpec, setSearchSpec] = useState("");
+  const [filterDebt, setFilterDebt] = useState(false);
+
+  useEffect(() => {
+    const fetchInstallers = async () => {
+      try {
+        const data = await api.getInstallers();
+        setInstallers(data);
+        setFilteredInstallers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInstallers();
+  }, []);
+
+  useEffect(() => {
+    let filtered = installers;
+
+    if (searchName) {
+      filtered = filtered.filter((inst) =>
+        inst.full_name?.toLowerCase().includes(searchName.toLowerCase()),
+      );
+    }
+
+    if (searchSpec) {
+      filtered = filtered.filter((inst) =>
+        inst.specialization?.some((spec) =>
+          spec.toLowerCase().includes(searchSpec.toLowerCase()),
+        ),
+      );
+    }
+
+    if (filterDebt) {
+      filtered = filtered.filter((inst) => inst.is_debtor);
+    }
+
+    setFilteredInstallers(filtered);
+  }, [searchName, searchSpec, filterDebt, installers]);
+
+  const handleSearchName = (e) => setSearchName(e.target.value);
+  const handleSearchSpec = (e) => setSearchSpec(e.target.value);
+  const handleFilterDebt = (e) => setFilterDebt(e.target.checked);
+
+  if (loading)
+    return (
+      <div className="page">
+        <Header />
+        <main className="content">
+          <Loader />
+        </main>
+        <Footer />
+      </div>
+    );
+  if (error) return <div className="error">Ошибка: {error}</div>;
+
+  return (
+    <div className="page">
+      <Header />
+      <main className="content">
+        <div className="page-header">
+          <h1>Список мастеров</h1>
+          <Link to="/installers/new" className="btn-primary">
+            <span>+</span> Добавить мастера
+          </Link>
+        </div>
+
+        <div className="search-filters">
+          <div className="search-group">
+            <div className="input-wrapper">
+              <input
+                type="text"
+                id="searchName"
+                placeholder="Поиск по ФИО..."
+                className="search-input"
+                value={searchName}
+                onChange={handleSearchName}
+              />
+              <span className="search-icon">🔍</span>
+            </div>
+          </div>
+
+          <div className="search-group">
+            <div className="input-wrapper">
+              <input
+                type="text"
+                id="searchSpec"
+                placeholder="Поиск по специализации..."
+                className="search-input"
+                value={searchSpec}
+                onChange={handleSearchSpec}
+              />
+              <span className="search-icon">🔍</span>
+            </div>
+          </div>
+
+          <div className="search-group checkbox-group">
+            <input
+              type="checkbox"
+              id="filterDebt"
+              className="custom-checkbox"
+              checked={filterDebt}
+              onChange={handleFilterDebt}
+            />
+            <label htmlFor="filterDebt">Только должники</label>
+          </div>
+        </div>
+
+        <div className="table-responsive">
+          <table className="orders-table">
+            <thead>
+              <tr>
+                <th>ФИО / Ник</th>
+                <th>Телефон</th>
+                <th>Специализация</th>
+                <th>Рейтинг</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInstallers.map((inst) => (
+                <tr key={inst.id} className="orders-table__row">
+                  <td className="orders-table__td" data-label="ФИО / Ник">
+                    <div className="name-wrapper">
+                      <Link to={`/installers/${inst.id}`}>
+                        {inst.full_name}
+                      </Link>
+                      {inst.nickname && (
+                        <span className="nickname-tag">{inst.nickname}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="orders-table__td" data-label="Телефон">
+                    {inst.phone}
+                  </td>
+                  <td className="orders-table__td" data-label="Специализация">
+                    {inst.specialization?.join(", ")}
+                  </td>
+                  <td className="orders-table__td" data-label="Рейтинг">
+                    {inst.rating}
+                  </td>
+                  <td className="orders-table__td" data-label="Статус">
+                    {inst.is_debtor ? "Должник" : "Активен"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default InstallersList;
+
+=== 8. ФРОНТЕНД: API-ИНТЕГРАЦИЯ ===
+--- frontend/src/services/api.js ---
+// src/services/api.js
+
+// Базовый URL бэкенда. В разработке он на localhost:8000.
+// Если будем деплоить через nginx, здесь может быть относительный путь '/api'.
+//const BASE_URL = '/api';
+const BASE_URL = 'http://localhost:8000';
+
+// Функция для выполнения запросов с учётом авторизации
+async function apiFetch(endpoint, options = {}) {
+  // Формируем полный URL
+  const url = `${BASE_URL}${endpoint}`;
+
+  // По умолчанию указываем заголовки для JSON
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  // Если в localStorage есть токен, добавляем его в заголовок Authorization
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Выполняем fetch
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  // Если ответ не успешный (код не 2xx), бросаем ошибку с текстом
+  if (!response.ok) {
+    let errorText = `Ошибка ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorText = errorData.detail || errorText;
+    } catch (e) {
+      // игнорируем
+    }
+    throw new Error(errorText);
+  }
+
+  // Если ответ пустой (204), возвращаем null, иначе JSON
+  if (response.status === 204) {
+    return null;
+  }
+  return await response.json();
+}
+
+// Методы для работы с API
+const api = {
+  // Авторизация
+  login: (username, password) =>
+    apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+
+  // Регистрация (пока не нужна, но добавим для полноты)
+  register: (username, password) =>
+    apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+
+  // Получить информацию о текущем пользователе
+  getMe: () => apiFetch('/auth/me'),
+
+  // Примеры для других сущностей (добавим позже)
+  getInstallers: () => apiFetch('/installers/'),
+  getInstaller: (id) => apiFetch(`/installers/${id}`),
+  createInstaller: (data) => apiFetch('/installers/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  deleteInstaller: (id) => apiFetch(`/installers/${id}`, {
+    method: 'DELETE',
+  }),
+  getOrders: () => apiFetch('/orders/'),
+  getOrder: (id) => apiFetch(`/orders/${id}`),
+  updateOrder: (id, data) => apiFetch(`/orders/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  deleteOrder: (id) => apiFetch(`/orders/${id}`, {
+    method: 'DELETE',
+  }),
+  getClients: () => apiFetch('/clients/'),
+
+  createClient: (data) => apiFetch('/clients/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  updateClient: (id, data) => apiFetch(`/clients/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  createOrder: (data) => apiFetch('/orders/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  createFinance: (data) => apiFetch('/finance/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  updateFinance: (id, data) => apiFetch(`/finance/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  getFinanceSummary: () => apiFetch('/finance/summary'),
+  getMonthlyFinance: () => apiFetch('/finance/monthly'),
+};
+
+
+export default api;
+
+=== 9. БАЗА ДАННЫХ: СХЕМА ===
+--- database/init.sql ---
+
+-- =====================================================
+-- ПРОЕКТ LUMEN ALPHA: ПОЛНАЯ СХЕМА БАЗЫ ДАННЫХ (HVAC CRM)
+-- Версия: 3.1 (ФИНАЛЬНАЯ, С ДОРАБОТКАМИ)
+-- Режим: Идемпотентный — безопасен для повторного запуска
+-- =====================================================
+
+BEGIN;
+
+-- -----------------------------------------------------------------
+-- 1. ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ (создаём, если не существуют)
+-- -----------------------------------------------------------------
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE order_status AS ENUM (
+            'Новый', 'Ждет установщика', 'В работе', 'Выполнен', 'Отменен'
+        );
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+        CREATE TYPE payment_status AS ENUM (
+            'Не оплачен', 'Частично', 'Оплачен'
+        );
+    END IF;
+END
+$$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'incident_type') THEN
+        CREATE TYPE incident_type AS ENUM (
+            'poor_work',        -- некачественная работа (брак/переделка)
+            'warranty_visit'    -- гарантийный выезд (любой)
+        );
+    END IF;
+END
+$$;
+
+-- -----------------------------------------------------------------
+-- 2. ТАБЛИЦА АДМИНИСТРАТОРОВ
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS admins (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL CHECK (LENGTH(password_hash) >= 60),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------------------
+-- 3. ТАБЛИЦА МОНТАЖНИКОВ (с расширенной статистикой качества)
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS installers (
+    id SERIAL PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    nickname TEXT,
+    phone VARCHAR(20) UNIQUE NOT NULL,
+    backup_phone VARCHAR(20),
+    specialization TEXT[] NOT NULL,
+    rating NUMERIC(3,1) DEFAULT 10.0 CHECK (rating >= 0 AND rating <= 10),
+    base_price NUMERIC(10,2) DEFAULT 0 CHECK (base_price >= 0),
+    is_debtor BOOLEAN DEFAULT FALSE,
+    comments TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_in_funnel BOOLEAN DEFAULT TRUE,
+    total_orders INTEGER DEFAULT 0 CHECK (total_orders >= 0),
+    poor_work_count INTEGER DEFAULT 0 CHECK (poor_work_count >= 0),
+    warranty_visits_count INTEGER DEFAULT 0 CHECK (warranty_visits_count >= 0),
+    last_incident_date TIMESTAMP,
+    quality_score NUMERIC(4,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN total_orders > 0 
+            THEN (total_orders - poor_work_count - warranty_visits_count)::NUMERIC / total_orders::NUMERIC
+            ELSE 10.0
+        END
+    ) STORED,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ DEFAULT NULL
+);
+
+-- -----------------------------------------------------------------
+-- 4. ТАБЛИЦА КЛИЕНТОВ
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS clients (
+    id SERIAL PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    backup_phone VARCHAR(20),
+    address TEXT NOT NULL,
+    coordinates POINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_contact TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comments TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ DEFAULT NULL
+);
+
+-- -----------------------------------------------------------------
+-- 5. ТАБЛИЦА ГЕОДАННЫХ (КЭШ ДЛЯ ЯНДЕКС.КАРТ)
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS address_cache (
+    address TEXT PRIMARY KEY,
+    lat NUMERIC(10,7) NOT NULL,
+    lon NUMERIC(10,7) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------------------
+-- 6. ТАБЛИЦА ЗАКАЗОВ (с денормализованным адресом)
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    client_id INTEGER REFERENCES clients(id) ON DELETE RESTRICT,
+    installer_id INTEGER REFERENCES installers(id) ON DELETE SET NULL,
+    status order_status DEFAULT 'Новый',
+    service_type VARCHAR(100) NOT NULL,
+    warehouse TEXT,
+    service_datetime TIMESTAMP NOT NULL,
+    delivery_datetime TIMESTAMP,
+    promise TEXT,
+    marker_color VARCHAR(10),
+    address_id TEXT REFERENCES address_cache(address) ON DELETE RESTRICT,
+    address_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON COLUMN orders.address_text IS 'Денормализованный адрес для сохранения при очистке кэша';
+
+-- -----------------------------------------------------------------
+-- 7. ИСТОРИЯ СТАТУСОВ ЗАКАЗОВ
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS order_status_history (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    status order_status NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------------------
+-- 8. ФИНАНСОВАЯ ТАБЛИЦА
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS finance (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+    purchase_price NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (purchase_price >= 0),
+    sale_price_client NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (sale_price_client >= 0),
+    installer_pay NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (installer_pay >= 0),
+    my_commission NUMERIC(10,2) DEFAULT 0 CHECK (my_commission >= 0),
+    profit NUMERIC(10,2) GENERATED ALWAYS AS (
+        sale_price_client - purchase_price - installer_pay - my_commission
+    ) STORED,
+    margin NUMERIC(10,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN sale_price_client > 0 
+            THEN ((sale_price_client - purchase_price) / sale_price_client) * 100
+            ELSE 0
+        END
+    ) STORED,
+    profit_percent NUMERIC(10,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN sale_price_client > 0 
+            THEN ((sale_price_client - purchase_price - installer_pay - my_commission) / sale_price_client) * 100
+            ELSE 0
+        END
+    ) STORED,
+    installer_returned_money BOOLEAN DEFAULT FALSE,
+    payment_state payment_status DEFAULT 'Не оплачен',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+-- -----------------------------------------------------------------
+-- 9. ЖУРНАЛ ИНЦИДЕНТОВ (брак / гарантийные выезды) с аудитом
+-- -----------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS installer_incidents (
+    id SERIAL PRIMARY KEY,
+    installer_id INTEGER REFERENCES installers(id) ON DELETE CASCADE,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+    incident_type incident_type NOT NULL,
+    description TEXT,
+    reported_by INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+    resolution TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP,
+    updated_by INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+    updated_at TIMESTAMP,
+    resolved_by INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+    CONSTRAINT unique_incident_per_order UNIQUE (order_id, incident_type)
+);
+
+-- Таблица для хранения погодных данных
+CREATE TABLE IF NOT EXISTS weather (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    lat NUMERIC(10,7),
+    lon NUMERIC(10,7),
+    temperature_avg NUMERIC(4,1),
+    temperature_min NUMERIC(4,1),
+    temperature_max NUMERIC(4,1),
+    humidity INTEGER,
+    pressure INTEGER,
+    wind_speed NUMERIC(4,1),
+    precipitation NUMERIC(5,2),
+    weather_condition VARCHAR(50),
+    source VARCHAR(20) DEFAULT 'open-meteo',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(date, location)
+);
+
+-- -----------------------------------------------------------------
+-- 10. ИНДЕКСЫ (с проверкой существования)
+-- -----------------------------------------------------------------
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_orders_status') THEN
+        CREATE INDEX idx_orders_status ON orders(status);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_orders_date') THEN
+        CREATE INDEX idx_orders_date ON orders(service_datetime);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_clients_phone') THEN
+        CREATE INDEX idx_clients_phone ON clients(phone);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_finance_payment') THEN
+        CREATE INDEX idx_finance_payment ON finance(payment_state);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_orders_location') THEN
+        CREATE INDEX idx_orders_location ON orders(address_id) INCLUDE (marker_color);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_incidents_installer') THEN
+        CREATE INDEX idx_incidents_installer ON installer_incidents(installer_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_incidents_type') THEN
+        CREATE INDEX idx_incidents_type ON installer_incidents(incident_type);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_incidents_date') THEN
+        CREATE INDEX idx_incidents_date ON installer_incidents(created_at);
+    END IF;
+END
+$$;
+
+-- -----------------------------------------------------------------
+-- 11. ФУНКЦИЯ ДЛЯ АВТООБНОВЛЕНИЯ updated_at
+-- -----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- -----------------------------------------------------------------
+-- 12. ТРИГГЕРЫ updated_at (с проверкой существования)
+-- -----------------------------------------------------------------
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_installers_updated_at') THEN
+        CREATE TRIGGER trg_installers_updated_at 
+            BEFORE UPDATE ON installers
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_clients_updated_at') THEN
+        CREATE TRIGGER trg_clients_updated_at 
+            BEFORE UPDATE ON clients
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_orders_updated_at') THEN
+        CREATE TRIGGER trg_orders_updated_at 
+            BEFORE UPDATE ON orders
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_finance_updated_at') THEN
+        CREATE TRIGGER trg_finance_updated_at 
+            BEFORE UPDATE ON finance
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_address_cache_updated_at') THEN
+        CREATE TRIGGER trg_address_cache_updated_at 
+            BEFORE UPDATE ON address_cache
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_incidents_updated_at') THEN
+        CREATE TRIGGER trg_incidents_updated_at
+            BEFORE UPDATE ON installer_incidents
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+    
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_weather_updated_at') THEN
+        CREATE TRIGGER trg_weather_updated_at 
+            BEFORE UPDATE ON weather
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END
+$$;
+-- -----------------------------------------------------------------
+-- 13. ФУНКЦИЯ И ТРИГГЕР ДЛЯ ПОДСЧЁТА total_orders
+-- -----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION update_installer_total_orders()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'Выполнен' AND (OLD.status IS DISTINCT FROM 'Выполнен' OR TG_OP = 'INSERT') THEN
+        UPDATE installers SET total_orders = total_orders + 1
+        WHERE id = NEW.installer_id;
+    END IF;
+    IF OLD.status = 'Выполнен' AND NEW.status != 'Выполнен' AND OLD.installer_id IS NOT NULL THEN
+        UPDATE installers SET total_orders = total_orders - 1
+        WHERE id = OLD.installer_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_completed') THEN
+        CREATE TRIGGER trg_order_completed
+            AFTER INSERT OR UPDATE OF installer_id, status ON orders
+            FOR EACH ROW
+            EXECUTE FUNCTION update_installer_total_orders();
+    END IF;
+END
+$$;
+
+-- -----------------------------------------------------------------
+-- 14. ФУНКЦИЯ И ТРИГГЕР ДЛЯ СТАТИСТИКИ ИНЦИДЕНТОВ
+-- -----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION update_installer_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        IF NEW.incident_type = 'poor_work' THEN
+            UPDATE installers SET 
+                poor_work_count = poor_work_count + 1,
+                last_incident_date = NEW.created_at
+            WHERE id = NEW.installer_id;
+        ELSIF NEW.incident_type = 'warranty_visit' THEN
+            UPDATE installers SET 
+                warranty_visits_count = warranty_visits_count + 1,
+                last_incident_date = NEW.created_at
+            WHERE id = NEW.installer_id;
+        END IF;
+    END IF;
+    IF TG_OP = 'DELETE' THEN
+        IF OLD.incident_type = 'poor_work' THEN
+            UPDATE installers SET 
+                poor_work_count = poor_work_count - 1
+            WHERE id = OLD.installer_id;
+        ELSIF OLD.incident_type = 'warranty_visit' THEN
+            UPDATE installers SET 
+                warranty_visits_count = warranty_visits_count - 1
+            WHERE id = OLD.installer_id;
+        END IF;
+    END IF;
+    RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_incident_stats') THEN
+        CREATE TRIGGER trg_incident_stats
+            AFTER INSERT OR DELETE ON installer_incidents
+            FOR EACH ROW
+            EXECUTE FUNCTION update_installer_stats();
+    END IF;
+END
+$$;
+
+-- -----------------------------------------------------------------
+-- 15. ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
+-- -----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION recalc_all_quality_scores()
+RETURNS VOID AS $$
+BEGIN
+    UPDATE installers SET quality_score = 
+        CASE 
+            WHEN total_orders > 0 
+            THEN (total_orders - poor_work_count - warranty_visits_count)::NUMERIC / total_orders::NUMERIC
+            ELSE 10.0 
+        END;
+END;
+$$ LANGUAGE plpgsql;
+
+-- -----------------------------------------------------------------
+-- 16. ФУНКЦИЯ И ТРИГГЕР ДЛЯ ИСТОРИИ СТАТУСОВ
+-- -----------------------------------------------------------------
+CREATE OR REPLACE FUNCTION log_order_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' AND OLD.status IS DISTINCT FROM NEW.status THEN
+        INSERT INTO order_status_history (order_id, status, changed_at)
+        VALUES (NEW.id, NEW.status, CURRENT_TIMESTAMP);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_status_history') THEN
+        CREATE TRIGGER trg_order_status_history
+            AFTER UPDATE OF status ON orders
+            FOR EACH ROW
+            EXECUTE FUNCTION log_order_status_change();
+    END IF;
+END
+$$;
+
+-- -----------------------------------------------------------------
+-- 17. КОММЕНТАРИИ (ДОКУМЕНТИРОВАНИЕ)
+-- -----------------------------------------------------------------
+COMMENT ON TABLE installers IS 'Монтажники, включая рейтинг и статистику брака/гарантии';
+COMMENT ON COLUMN installers.poor_work_count IS 'Количество заказов с некачественной установкой (брак/переделка)';
+COMMENT ON COLUMN installers.warranty_visits_count IS 'Количество гарантийных выездов по вине монтажника';
+COMMENT ON COLUMN installers.quality_score IS 'Доля успешных заказов (без брака и гарантии)';
+COMMENT ON TABLE installer_incidents IS 'Журнал всех инцидентов: брак и гарантийные выезды с привязкой к заказу';
+COMMENT ON COLUMN installer_incidents.incident_type IS 'poor_work — некачественная работа, warranty_visit — гарантийный выезд';
+
+-- -----------------------------------------------------------------
+COMMIT;
+-- =====================================================
+-- ГОТОВО: СХЕМА ПОЛНОСТЬЮ РАЗВЁРНУТА
+-- =====================================================
+
+=== 10. ИНФРАСТРУКТУРА: ДОКЕР И ДЕПЛОЙ ===
+--- docker-compose.yml ---
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: crm_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: oleg_crm
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  backend:
+    build: .
+    container_name: crm_backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  ml:
+    build:
+      context: ./backend
+      dockerfile: ml_service/Dockerfile.ml
+    container_name: crm_ml
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    restart: unless-stopped
+    volumes:
+      - ./backend/ml_service/models:/app/ml_service/models
+      - ./backend/models:/app/models
+
+volumes:
+  postgres_data:
+
+--- Dockerfile ---
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONPATH=/app/backend
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend ./backend
+COPY database ./database
+CMD ["uvicorn", "backend.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+=== 11. ML-СЕРВИС: ОСНОВНЫЕ МОДУЛИ ===
+--- backend/ml_service/app.py ---
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import numpy as np
+from tensorflow.keras.models import load_model
+import joblib
+import os
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI()
+
+# Флаги доступности модели и препроцессора
+model_available = False
+scaler_available = False
+
+# Глобальные переменные для модели и скалера
+model = None
+scaler = None
+
+# Функция загрузки модели и препроцессора
+def load_components():
+    global model, scaler, model_available, scaler_available
+    
+    try:
+        model_path = "ml_service/models/demand_model.h5"
+        scaler_path = "models/scaler.pkl"
+        
+        if os.path.exists(model_path):
+            logger.info("Загрузка модели...")
+            model = load_model(model_path)
+            model_available = True
+        else:
+            logger.warning("Модель не найдена")
+            model_available = False
+            
+        if os.path.exists(scaler_path):
+            logger.info("Загрузка скалера...")
+            scaler = joblib.load(scaler_path)
+            scaler_available = True
+        else:
+            logger.warning("Скалер не найден")
+            scaler_available = False
+            
+    except Exception as e:
+        logger.error(f"Ошибка при загрузке компонентов: {str(e)}")
+        model_available = False
+        scaler_available = False
+
+# Загружаем компоненты при старте
+load_components()
+
+class Features(BaseModel):
+    day_of_week: int
+    month: int
+    temperature: float
+    precipitation: float
+    # ... другие признаки
+
+@app.post("/predict")
+def predict(features: Features):
+    if not model_available:
+        raise HTTPException(status_code=400, detail="Модель прогнозирования недоступна")
+    
+    if not scaler_available:
+        raise HTTPException(status_code=400, detail="Препроцессор масштабирования недоступен")
+    
+    try:
+        # Проверка типов данных
+        if not isinstance(features.day_of_week, int):
+            raise ValueError("day_of_week должен быть целым числом")
+        if not isinstance(features.month, int):
+            raise ValueError("month должен быть целым числом")
+        if not isinstance(features.temperature, float):
+            raise ValueError("temperature должен быть числом с плавающей точкой")
+        if not isinstance(features.precipitation, float):
+            raise ValueError("precipitation должен быть числом с плавающей точкой")
+        
+        # Преобразуем в массив и масштабируем
+        X = np.array([[features.day_of_week, features.month, features.temperature, features.precipitation]])
+        X_scaled = scaler.transform(X)
+        pred = model.predict(X_scaled)
+        return {"demand": float(pred[0][0])}
+    
+    except Exception as e:
+        logger.error(f"Ошибка при предсказании: {str(e)}")
+        raise HTTPException(status_code=500, detail="Ошибка при обработке запроса")
+
+@app.get("/health")
+def health_check():
+    return {
+        "model_available": model_available,
+        "scaler_available": scaler_available
+    }
+
+@app.get("/check-paths")
+def check_paths():
+    return {
+        "ml_service_models_exists": os.path.exists("ml_service/models"),
+        "models_exists": os.path.exists("models"),
+        "current_working_directory": os.getcwd()
+    }
+
+--- backend/ml_service/train.py ---
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
+import joblib
+
+# Загружаем датасет
+df = pd.read_csv('dataset.csv')
+
+# Пример: прогноз количества заказов в день по городу
+# Группируем по дате и локации
+daily = df.groupby(['date', 'location']).size().reset_index(name='orders_count')
+# Добавляем погодные признаки (берём среднее за день)
+weather_cols = ['temp_avg', 'precipitation']
+daily = daily.merge(
+    df[['date', 'location', 'temp_avg', 'precipitation']].drop_duplicates(),
+    on=['date', 'location'],
+    how='left'
+)
+
+# Признаки
+daily['date'] = pd.to_datetime(daily['date'])
+daily['day_of_week'] = daily['date'].dt.dayofweek
+daily['month'] = daily['date'].dt.month
+
+features = ['day_of_week', 'month', 'temp_avg', 'precipitation']
+X = daily[features]
+y = daily['orders_count']
+
+# Удаляем строки с пропусками
+X = X.dropna()
+y = y[X.index]
+
+# Разделение на train/test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Масштабирование
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Сохраняем scaler
+joblib.dump(scaler, 'models/scaler.pkl')
+
+# Модель
+model = Sequential([
+    Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    Dropout(0.2),
+    Dense(64, activation='relu'),
+    Dropout(0.2),
+    Dense(1)  # регрессия
+])
+model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
+early_stop = EarlyStopping(patience=10, restore_best_weights=True)
+
+history = model.fit(
+    X_train_scaled, y_train,
+    validation_split=0.2,
+    epochs=200,
+    batch_size=32,
+    callbacks=[early_stop],
+    verbose=1
+)
+
+# Оценка
+loss, mae = model.evaluate(X_test_scaled, y_test)
+print(f'Test MAE: {mae}')
+
+# Сохраняем модель
+model.save('models/demand_model.h5')
+print("Модель сохранена в models/demand_model.h5")
+--- backend/ml_service/run_weather.py ---
+import asyncio
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent / 'src'))
+from services.weather_service import daily_weather_collection
+
+asyncio.run(daily_weather_collection())
+print("Сбор погоды завершён")
+--- backend/ml_service/build_features.py ---
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent / 'src'))
+
+import asyncio
+import pandas as pd
+from sqlalchemy import select, func, text
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from core.config import settings
+from models.orders import Order
+from models.finance import Finance
+from models.weather import Weather
+from models.address_cache import AddressCache
+from models.installers import Installer
+
+async def build_dataset():
+    engine = create_async_engine(settings.DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://'))
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with async_session() as db:
+        # SQL-запрос с объединением всех таблиц
+        stmt = select(
+            Order.id.label('order_id'),
+            func.date(Order.created_at).label('date'),
+            func.extract('year', Order.created_at).label('year'),
+            func.extract('month', Order.created_at).label('month'),
+            func.extract('day', Order.created_at).label('day'),
+            func.extract('dow', Order.created_at).label('day_of_week'),
+            Order.service_type,
+            Order.status,
+            AddressCache.lat,
+            AddressCache.lon,
+            Weather.temperature_avg,
+            Weather.temperature_min,
+            Weather.temperature_max,
+            Weather.precipitation,
+            Weather.weather_condition,
+            Finance.sale_price_client,
+            Finance.profit,
+            Finance.payment_state,
+            Installer.rating.label('installer_rating'),
+            Installer.total_orders.label('installer_total_orders')
+        ).join(
+            Finance, Finance.order_id == Order.id, isouter=True
+        ).join(
+            AddressCache, AddressCache.address == Order.address_text, isouter=True
+        ).join(
+            Weather, (Weather.date == func.date(Order.created_at)) & (Weather.location == Order.address_text), isouter=True
+        ).join(
+            Installer, Installer.id == Order.installer_id, isouter=True
+        ).where(
+            Order.status.in_(["Выполнен", "Оплачен"])  # только релевантные заказы
+        )
+
+        result = await db.execute(stmt)
+        rows = result.all()
+
+    df = pd.DataFrame(rows, columns=result.keys())
+    return df
+
+if __name__ == '__main__':
+    df = asyncio.run(build_dataset())
+    print(f"Собрано {len(df)} строк")
+    df.to_csv('dataset.csv', index=False)
+    print("Датасет сохранён в dataset.csv")
+=== 12. ЛОГИ (последний файл) ===
+2026-02-14 17:25:10,403 - core.logging - INFO - Starting CRM application
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Added job "send_daily_reminder" to job store "default"
+2026-02-14 17:25:10,403 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-14 17:25:10,403 - core.logging - INFO - Scheduler started
