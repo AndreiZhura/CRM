@@ -9,41 +9,35 @@ from src.services.geocoding import get_coordinates
 from src.services.address_cache import get_or_create_address_cache
 
 async def create_order(db: AsyncSession, order_data: OrderCreate):
-    # Сначала создаём заказ без address_id
+    # Преобразуем данные в словарь
     order_dict = order_data.model_dump()
-    address_text = order_dict.pop('address_text', None)
     
-    order = Order(**order_dict)
-    db.add(order)
-    await db.flush()  # чтобы получить id заказа
+    # Убираем часовой пояс у datetime полей
+    for field in ['service_datetime', 'delivery_datetime']:
+        if order_dict.get(field) and hasattr(order_dict[field], 'tzinfo'):
+            order_dict[field] = order_dict[field].replace(tzinfo=None)
     
-    # Если есть адрес, пытаемся получить координаты
+    # Геокодинг адреса
+    address_text = order_dict.get('address_text')
     if address_text:
         coords = await get_coordinates(address_text)
         if coords:
             lat, lon = coords
-            # Сохраняем в кэш
             cache_entry = await get_or_create_address_cache(db, address_text, lat, lon)
-            order.address_id = cache_entry.address
-            order.address_text = address_text
+            order_dict['address_id'] = cache_entry.address
         else:
-            order.address_text = address_text
+            order_dict['address_id'] = None
     else:
-        order.address_text = None
+        order_dict['address_id'] = None
 
+    order = Order(**order_dict)
+    db.add(order)
+    await db.flush()  # получаем id
+
+    # Загружаем все связанные объекты для сериализации
+    await db.refresh(order, attribute_names=['client', 'installer', 'finance'])
     await db.commit()
-    
-    # Перезагружаем заказ со всеми нужными связями
-    result = await db.execute(
-        select(Order)
-        .where(Order.id == order.id)
-        .options(
-            selectinload(Order.client),
-            selectinload(Order.installer),
-            selectinload(Order.finance)
-        )
-    )
-    return result.scalar_one()
+    return order
 
 async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     result = await db.execute(
@@ -79,24 +73,18 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
             order.address_id = cache_entry.address
             order.address_text = address_text
         else:
-            # Если координаты не получены, очищаем address_id и сохраняем текст
             order.address_id = None
             order.address_text = address_text
+
     # Применяем остальные обновления
     for key, value in update_data.items():
         if key != 'address_text':
             setattr(order, key, value)
 
     await db.commit()
-    await db.refresh(order)
-    
-    # После обновления перезагружаем со связями
-    result = await db.execute(
-        select(Order)
-        .where(Order.id == order.id)
-        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
-    )
-    return result.scalar_one()
+    # Перезагружаем связи после коммита
+    await db.refresh(order, attribute_names=['client', 'installer', 'finance'])
+    return order
 
 async def delete_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     order = await get_order(db, order_id)

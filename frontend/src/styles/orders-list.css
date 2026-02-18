@@ -150,6 +150,24 @@
 }
 
 /* --- 4. ЕДИНЫЙ АДАПТИВ (Планшеты и Смартфоны) --- */
+.no-orders {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+  margin: 20px 0;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .no-orders {
+    padding: 40px 15px;
+    font-size: 1rem;
+  }
+}
 @media (max-width: 768px) {
     .orders-list {
         padding: 15px 10px;

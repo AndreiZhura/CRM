@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/phone.css';
 
-const PhoneField = ({ value, onChange, id, name, label = "Телефон / Связь" }) => {
+const PhoneField = ({ value, onChange, id, name, label = "Телефон / Связь", required = false }) => {
   const [phoneDigits, setPhoneDigits] = useState('');
 
   // Извлечение цифр из пропса
@@ -10,11 +10,12 @@ const PhoneField = ({ value, onChange, id, name, label = "Телефон / Св�
       const digits = value.replace(/\D/g, '');
       setPhoneDigits(digits.startsWith('8') ? '7' + digits.substring(1) : digits.substring(0, 11));
     } else {
-      setPhoneDigits('7');
+      setPhoneDigits(''); // если value пустое, не ставим '7' по умолчанию
     }
   }, [value]);
 
   const formatPhone = (digits) => {
+    if (!digits) return ''; // если цифр нет, возвращаем пустую строку
     let formatted = '+7';
     if (digits.length > 1) formatted += ' (' + digits.substring(1, 4);
     if (digits.length > 4) formatted += ') ' + digits.substring(4, 7);
@@ -33,7 +34,7 @@ const PhoneField = ({ value, onChange, id, name, label = "Телефон / Св�
   };
 
   const handleFocus = () => {
-    if (!phoneDigits) setPhoneDigits('7');
+    if (!phoneDigits) setPhoneDigits('7'); // при фокусе ставим '7', чтобы начать ввод
   };
 
   const isValid = phoneDigits.length === 11;
@@ -54,12 +55,11 @@ const PhoneField = ({ value, onChange, id, name, label = "Телефон / Св�
           onFocus={handleFocus}
           placeholder="+7 (999) 000-00-00"
           maxLength={18}
-          required
+          required={required}
         />
         <div className="phone-actions">
           <a
             href={callLink}
-            id={`call_${id}`}
             className={`action-btn ${isValid ? '' : 'hidden'}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -68,7 +68,6 @@ const PhoneField = ({ value, onChange, id, name, label = "Телефон / Св�
           </a>
           <a
             href={tgLink}
-            id={`tg_${id}`}
             className={`action-btn ${isValid ? '' : 'hidden'}`}
             target="_blank"
             rel="noopener noreferrer"

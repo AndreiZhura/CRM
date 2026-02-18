@@ -24,7 +24,7 @@ class Order(Base):
     delivery_datetime = Column(DateTime(timezone=False), nullable=True)
     promise = Column(Text, nullable=True)
     marker_color = Column(String(10), nullable=True)
-    #address_id = Column(String, ForeignKey('address_cache.address', ondelete='RESTRICT'), nullable=True)
+    address_id = Column(String, ForeignKey('address_cache.address', ondelete='RESTRICT'), nullable=True)
     address_text = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=False), server_default=func.now())
     updated_at = Column(DateTime(timezone=False), onupdate=func.now(), server_default=func.now())

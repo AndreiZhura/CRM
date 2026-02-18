@@ -32,7 +32,6 @@ const OrdersList = () => {
   }, []);
 
   useEffect(() => {
-    // Фильтрация при изменении фильтров или заказов
     const filtered = orders.filter((order) => {
       const clientMatch =
         order.client?.full_name
@@ -127,47 +126,50 @@ const OrdersList = () => {
               </div>
             </div>
 
-            <table className="orders-table">
-              <thead className="orders-table__head">
-                <tr className="orders-table__row">
-                  <th className="orders-table__th">Клиент</th>
-                  <th className="orders-table__th">Адрес</th>
-                  <th className="orders-table__th">Модель</th>
-                  <th className="orders-table__th">Цена</th>
-                  <th className="orders-table__th">Статус</th>
-                </tr>
-              </thead>
-              <tbody className="orders-table__body">
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className="orders-table__row">
-                    <td className="orders-table__td" data-label="Клиент">
-                      <Link to={`/orders/${order.id}`}>
-                        {order.client?.full_name || "—"}
-                      </Link>
-                    </td>
-                    <td className="orders-table__td" data-label="Адрес">
-                      {order.address_text || "—"}
-                    </td>
-                    <td className="orders-table__td" data-label="Модель">
-                      {order.service_type || "—"}
-                    </td>
-                    <td className="orders-table__td" data-label="Цена">
-                      {order.finance?.sale_price_client
-                        ? `${order.finance.sale_price_client} ₽`
-                        : "—"}
-                    </td>
-
-                    <td className="orders-table__td" data-label="Статус">
-                      <span
-                        className={`status-badge ${getStatusClass(order.status)}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
+            {filteredOrders.length === 0 ? (
+              <div className="no-orders">📭 Заказов на данный момент нет</div>
+            ) : (
+              <table className="orders-table">
+                <thead className="orders-table__head">
+                  <tr className="orders-table__row">
+                    <th className="orders-table__th">Клиент</th>
+                    <th className="orders-table__th">Адрес</th>
+                    <th className="orders-table__th">Модель</th>
+                    <th className="orders-table__th">Цена</th>
+                    <th className="orders-table__th">Статус</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="orders-table__body">
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id} className="orders-table__row">
+                      <td className="orders-table__td" data-label="Клиент">
+                        <Link to={`/orders/${order.id}`}>
+                          {order.client?.full_name || "—"}
+                        </Link>
+                      </td>
+                      <td className="orders-table__td" data-label="Адрес">
+                        {order.address_text || "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Модель">
+                        {order.service_type || "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Цена">
+                        {order.finance?.sale_price_client
+                          ? `${order.finance.sale_price_client} ₽`
+                          : "—"}
+                      </td>
+                      <td className="orders-table__td" data-label="Статус">
+                        <span
+                          className={`status-badge ${getStatusClass(order.status)}`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </section>
       </main>

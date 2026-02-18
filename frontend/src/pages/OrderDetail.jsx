@@ -18,6 +18,7 @@ const OrderDetail = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+
   // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
@@ -28,6 +29,7 @@ const OrderDetail = () => {
         ]);
         setOrder(orderData);
         setClient(orderData.client || null);
+        console.log('Client data:', orderData.client);
         setFinance(orderData.finance || null);
         setInstallers(installersData);
       } catch (err) {
@@ -62,51 +64,50 @@ const OrderDetail = () => {
     }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSaving(true);
-  setError("");
-  try {
-    // Обновляем клиента (один раз, со всеми полями)
-    if (client?.id) {
-      await api.updateClient(client.id, {
-        full_name: client.full_name,
-        phone: client.phone,
-        backup_phone: client.backup_phone,
-        address: client.address,
-        comments: client.comments,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      // Обновляем клиента (один раз, со всеми полями)
+      if (client?.id) {
+        await api.updateClient(client.id, {
+          full_name: client.full_name,
+          phone: client.phone,
+          backup_phone: client.backup_phone,
+          address: client.address,
+          comments: client.comments,
+        });
+      }
+      // Обновляем заказ
+      await api.updateOrder(order.id, {
+        client_id: client?.id,
+        installer_id: order.installer_id || null,
+        service_type: order.service_type,
+        service_datetime: order.service_datetime,
+        status: order.status,
+        address_text: client?.address || "",
+        warehouse: order.warehouse,
+        promise: order.promise,
       });
+      // Обновляем финансы
+      if (finance?.id) {
+        await api.updateFinance(finance.id, {
+          purchase_price: parseFloat(finance.purchase_price) || 0,
+          sale_price_client: parseFloat(finance.sale_price_client) || 0,
+          installer_pay: parseFloat(finance.installer_pay) || 0,
+          my_commission: parseFloat(finance.my_commission) || 0,
+          payment_state: finance.payment_state,
+          installer_returned_money: finance.installer_returned_money,
+        });
+      }
+      alert("Заказ обновлён");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
-    // Обновляем заказ
-    await api.updateOrder(order.id, {
-      client_id: client?.id,
-      installer_id: order.installer_id || null,
-      service_type: order.service_type,
-      service_datetime: order.service_datetime,
-      status: order.status,
-      address_text: client?.address || "",
-      warehouse: order.warehouse,
-      promise: order.promise,
-    });
-    // Обновляем финансы
-    if (finance?.id) {
-      await api.updateFinance(finance.id, {
-        purchase_price: parseFloat(finance.purchase_price) || 0,
-        sale_price_client: parseFloat(finance.sale_price_client) || 0,
-        installer_pay: parseFloat(finance.installer_pay) || 0,
-        my_commission: parseFloat(finance.my_commission) || 0,
-        payment_state: finance.payment_state,
-        installer_returned_money: finance.installer_returned_money,
-      });
-    }
-    alert("Заказ обновлён");
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setSaving(false);
-  }
-};
-
+  };
 
   const handleDelete = async () => {
     if (window.confirm("Удалить заказ?")) {
@@ -331,7 +332,8 @@ const handleSubmit = async (e) => {
                   <option value="Новая заявка">Новая заявка</option>
                   <option value="Ждет установщика">Ждет установщика</option>
                   <option value="В работе">В работе</option>
-                  <option value="Завершено">Завершено</option>
+                  <option value="Выполнен">Выполнен</option>{" "}
+                  {/* было "Завершено" */}
                   <option value="Отказ">Отказ</option>
                 </select>
               </div>
@@ -384,3 +386,4 @@ const handleSubmit = async (e) => {
 };
 
 export default OrderDetail;
+

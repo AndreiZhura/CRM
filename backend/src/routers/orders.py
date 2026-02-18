@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.core.db import get_db
 from src.services.orders import (
     create_order, get_order, get_orders,
@@ -22,7 +23,7 @@ async def read_orders(
     limit: int = 100,
     db: AsyncSession = Depends(get_db)
 ):
-    return await get_orders(db, skip=skip, limit=limit)
+    return await get_orders(db, skip, limit)
 
 @router.get("/{order_id}", response_model=OrderOut)
 async def read_order(

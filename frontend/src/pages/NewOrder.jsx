@@ -1,31 +1,67 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import '../styles/order-form.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import PhoneField from "../components/PhoneField";
+import Footer from "../components/Footer";
+import "../styles/order-form.css";
 
 const NewOrder = () => {
   const navigate = useNavigate();
+
+  // Состояния для формы
   const [formData, setFormData] = useState({
-    fio: '',
-    phone: '',
-    address: '',
-    model: '',
-    service_date: '',
-    delivery_date: '',
-    appointment_date: '',
-    warehouse: 'Основной',
-    buy_price: '',
-    sell_price_ac: '',
-    price_install: '',
-    my_commission: '',
-    status: 'Новый',
-    promises: '',
-    installer_opinion: ''
+    fio: "",
+    phone: "",
+    backup_phone: "",
+    address: "",
+    model: "",
+    service_datetime: "",
+    delivery_datetime: "",
+    appointment_date: "",
+    warehouse: "Основной",
+    buy_price: "",
+    sell_price_ac: "",
+    price_install: "",
+    my_commission: "",
+    status: "Новый",
+    promises: "",
+    installer_opinion: "",
+    installer_id: "",
+    marker_color: "blue",
   });
+
+  // Состояния для загрузки списков
+  const [clients, setClients] = useState([]);
+  const [installers, setInstallers] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState("");
+  const [isNewClient, setIsNewClient] = useState(true);
+  const [loadingLists, setLoadingLists] = useState(true);
+
+  // Общие состояния
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  // Загружаем клиентов и монтажников при монтировании
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoadingLists(true);
+        const [clientsData, installersData] = await Promise.all([
+          api.getClients(),
+          api.getInstallers(),
+        ]);
+        setClients(clientsData);
+        setInstallers(installersData);
+      } catch (err) {
+        console.error("Ошибка загрузки списков:", err);
+        setError("Не удалось загрузить клиентов или монтажников");
+      } finally {
+        setLoadingLists(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,44 +70,68 @@ const NewOrder = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      // 1. Создаём клиента
-      const clientData = {
-        full_name: formData.fio,
-        phone: formData.phone,
-        address: formData.address,
-        comments: formData.installer_opinion || '',
-      };
-      const client = await api.createClient(clientData);
+      // 1. Определяем client_id
+      let clientId;
+      if (isNewClient) {
+        if (!formData.fio || !formData.phone || !formData.address) {
+          throw new Error("Заполните ФИО, телефон и адрес нового клиента");
+        }
+        const clientData = {
+          full_name: formData.fio,
+          phone: formData.phone,
+          backup_phone: formData.backup_phone || '',
+          address: formData.address,
+          comments: formData.installer_opinion || "",
+        };
+        const client = await api.createClient(clientData);
+        clientId = client.id;
+      } else {
+        if (!selectedClientId) {
+          throw new Error("Выберите клиента из списка");
+        }
+        clientId = selectedClientId;
+      }
 
-      // 2. Создаём заказ
+      // 2. Подготавливаем даты
+      const service_datetime = formData.service_datetime
+        ? new Date(formData.service_datetime).toISOString()
+        : new Date().toISOString();
+
+      const delivery_datetime = formData.delivery_datetime
+        ? new Date(formData.delivery_datetime).toISOString()
+        : null;
+
+      // 3. Создаём заказ
       const orderData = {
-        client_id: client.id,
-        installer_id: null, // пока не выбираем монтажника
-        service_type: formData.model || 'Установка кондиционера',
-        service_datetime: formData.service_date || new Date().toISOString(),
+        client_id: clientId,
+        installer_id: formData.installer_id || null,
+        service_type: formData.model || "Установка кондиционера",
+        service_datetime: service_datetime,
+        delivery_datetime: delivery_datetime,
         status: formData.status,
         address_text: formData.address,
         warehouse: formData.warehouse,
-        promise: formData.promises || '',
+        promise: formData.promises || "",
+        marker_color: formData.marker_color,
       };
       const order = await api.createOrder(orderData);
 
-      // 3. Создаём финансовую запись
+      // 4. Создаём финансовую запись
       const financeData = {
         order_id: order.id,
         purchase_price: parseFloat(formData.buy_price) || 0,
         sale_price_client: parseFloat(formData.sell_price_ac) || 0,
         installer_pay: parseFloat(formData.price_install) || 0,
         my_commission: parseFloat(formData.my_commission) || 0,
-        payment_state: 'Не оплачен',
+        payment_state: "Не оплачен",
       };
       await api.createFinance(financeData);
 
-      // 4. Перенаправляем на список заказов
-      navigate('/orders');
+      // 5. Перенаправляем на список заказов
+      navigate("/orders");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,80 +146,143 @@ const NewOrder = () => {
         <form id="orderForm" className="crm-form" onSubmit={handleSubmit}>
           <h1>Новый заказ</h1>
           {error && <div className="error">{error}</div>}
+          {loadingLists && <div className="loading">Загрузка данных...</div>}
+
+          {/* Карточка клиента */}
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">👤 Карточка клиента</legend>
-            <div className="crm-form__grid">
-              <div className="crm-form__field">
-                <label className="crm-form__label">ФИО клиента</label>
+
+            {/* Переключатель новый/существующий */}
+            <div className="crm-form__toggle" style={{ marginBottom: "15px" }}>
+              <label style={{ marginRight: "20px" }}>
                 <input
-                  type="text"
-                  name="fio"
-                  value={formData.fio}
-                  onChange={handleChange}
-                  required
-                  className="crm-form__input"
-                  placeholder="Иванов Иван"
-                />
-              </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Номер телефона</label>
-                <div className="phone-input-container">
+                  type="radio"
+                  name="clientType"
+                  value="new"
+                  checked={isNewClient}
+                  onChange={() => setIsNewClient(true)}
+                />{" "}
+                Новый клиент
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="clientType"
+                  value="existing"
+                  checked={!isNewClient}
+                  onChange={() => setIsNewClient(false)}
+                />{" "}
+                Существующий клиент
+              </label>
+            </div>
+
+            {isNewClient ? (
+              <div className="crm-form__grid">
+                <div className="crm-form__field">
+                  <label className="crm-form__label">ФИО клиента</label>
                   <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
+                    type="text"
+                    name="fio"
+                    value={formData.fio}
                     onChange={handleChange}
-                    className="crm-form__input phone-mask"
-                    placeholder="+7 (___) ___-__-__"
                     required
+                    className="crm-form__input"
+                    placeholder="Иванов Иван"
+                  />
+                </div>
+                <div className="crm-form__field">
+                  <PhoneField
+                    id="client_phone"
+                    name="phone"
+                    label="Номер телефона"
+                    value={formData.phone}
+                    onChange={(value) =>
+                      setFormData({ ...formData, phone: value })
+                    }
+                  />
+                </div>
+                <div className="crm-form__field">
+                  <PhoneField
+                    id="client_backup_phone"
+                    name="backup_phone"
+                    label="Резервный телефон"
+                    value={formData.backup_phone}
+                    onChange={(value) =>
+                      setFormData({ ...formData, backup_phone: value })
+                    }
+                  />
+                </div>
+                <div className="crm-form__field crm-form__field--full">
+                  <label className="crm-form__label">Адрес</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className="crm-form__input"
+                    placeholder="ул. Пушкина, д. Колотушкина"
+                  />
+                </div>
+                <div className="crm-form__field crm-form__field--full">
+                  <label className="crm-form__label">Модель кондиционера</label>
+                  <input
+                    type="text"
+                    name="model"
+                    value={formData.model}
+                    onChange={handleChange}
+                    className="crm-form__input"
+                    placeholder="Haier Coral AS25H"
                   />
                 </div>
               </div>
+            ) : (
               <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">Адрес (Проживания)</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  required
+                <label className="crm-form__label">Выберите клиента</label>
+                <select
+                  name="clientId"
+                  value={selectedClientId}
+                  onChange={(e) => setSelectedClientId(e.target.value)}
                   className="crm-form__input"
-                  placeholder="ул. Пушкина, д. Колотушкина"
-                />
+                  required={!isNewClient}
+                >
+                  <option value="">-- Выберите клиента --</option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.full_name} ({client.phone}) — {client.address}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">Модель кондиционера</label>
-                <input
-                  type="text"
-                  name="model"
-                  value={formData.model}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                  placeholder="Haier Coral AS25H"
-                />
-              </div>
-            </div>
+            )}
           </fieldset>
 
+          {/* Планирование и Логистика */}
           <fieldset className="crm-form__section">
-            <legend className="crm-form__legend">📅 Планирование и Логистика</legend>
+            <legend className="crm-form__legend">
+              📅 Планирование и Логистика
+            </legend>
             <div className="crm-form__grid">
               <div className="crm-form__field">
-                <label className="crm-form__label">Дата обслуживания</label>
+                <label className="crm-form__label">
+                  Дата и время обслуживания
+                </label>
                 <input
-                  type="date"
-                  name="service_date"
-                  value={formData.service_date}
+                  type="datetime-local"
+                  name="service_datetime"
+                  value={formData.service_datetime}
                   onChange={handleChange}
                   className="crm-form__input"
                 />
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">Дата доставки (склад)</label>
+                <label className="crm-form__label">
+                  Дата и время доставки (склад)
+                </label>
                 <input
-                  type="date"
-                  name="delivery_date"
-                  value={formData.delivery_date}
+                  type="datetime-local"
+                  name="delivery_datetime"
+                  value={formData.delivery_datetime}
                   onChange={handleChange}
                   className="crm-form__input"
                 />
@@ -186,9 +309,47 @@ const NewOrder = () => {
                   <option value="Транзит">Транзит</option>
                 </select>
               </div>
+
+              {/* Выбор монтажника */}
+              <div className="crm-form__field">
+                <label className="crm-form__label">Монтажник</label>
+                <select
+                  name="installer_id"
+                  value={formData.installer_id}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="">-- Не назначен --</option>
+                  {installers.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.full_name}{" "}
+                      {inst.nickname ? `(${inst.nickname})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Цвет маркера */}
+              <div className="crm-form__field">
+                <label className="crm-form__label">
+                  Цвет маркера (для карты)
+                </label>
+                <select
+                  name="marker_color"
+                  value={formData.marker_color}
+                  onChange={handleChange}
+                  className="crm-form__input"
+                >
+                  <option value="blue">Синий</option>
+                  <option value="red">Красный</option>
+                  <option value="green">Зелёный</option>
+                  <option value="yellow">Жёлтый</option>
+                </select>
+              </div>
             </div>
           </fieldset>
 
+          {/* Финансы */}
           <fieldset className="crm-form__section crm-form__section--finance">
             <legend className="crm-form__legend">💰 Финансы</legend>
             <div className="crm-form__grid">
@@ -239,6 +400,7 @@ const NewOrder = () => {
             </div>
           </fieldset>
 
+          {/* Статус и Заметки */}
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">📝 Статус и Заметки</legend>
             <div className="crm-form__grid">
@@ -252,7 +414,8 @@ const NewOrder = () => {
                 >
                   <option value="Новый">Новый</option>
                   <option value="Ждет установщика">Ждет установщика</option>
-                  <option value="Завершено">Завершено</option>
+                  <option value="Выполнен">Выполнен</option>{" "}
+                  {/* Было "Завершено" */}
                 </select>
               </div>
               <div className="crm-form__field crm-form__field--full">
@@ -277,14 +440,14 @@ const NewOrder = () => {
               </div>
             </div>
           </fieldset>
-          
+
           <div className="crm-form__actions">
             <button
               type="submit"
               className="crm-form__button crm-form__button--submit"
-              disabled={loading}
+              disabled={loading || loadingLists}
             >
-              {loading ? 'Сохранение...' : '🚀 Создать карточку заказа'}
+              {loading ? "Сохранение..." : "🚀 Создать карточку заказа"}
             </button>
           </div>
         </form>
