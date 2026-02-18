@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
-import Loader from '../components/Loader'; // импорт компонента-лоадера
+import Loader from "../components/Loader"; // импорт компонента-лоадера
 import Footer from "../components/Footer";
 import "../styles/orders-list.css";
 

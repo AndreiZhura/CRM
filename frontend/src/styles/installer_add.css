@@ -3,14 +3,14 @@
     max-width: 650px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #ffffff;
+    background: var(--card-bg);
     border-radius: 1rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .form-container h1 {
     margin-bottom: 1.5rem;
-    color: #1e293b;
+    color: var(--text-primary);
     font-size: 1.5rem;
 }
 
@@ -24,7 +24,7 @@
 .form-group label {
     font-weight: 600;
     font-size: 0.9rem;
-    color: #475569;
+    color: var(--text-secondary);
     margin-bottom: 0.4rem;
 }
 
@@ -32,22 +32,22 @@
 .form-group select, 
 .textarea-group {
     padding: 0.6rem 0.8rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     font-size: 1rem;
-    background-color: #f8fafc;
+    background-color: var(--input-bg);
     transition: border-color 0.2s;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #3b82f6;
-    background-color: #fff;
+    border-color: var(--accent-color);
+    background-color: var(--bg-primary);
 }
 
 /* Подсказки */
 .helper-text {
-    color: #64748b;
+    color: var(--text-secondary);
     margin-top: 0.3rem;
 }
 
@@ -100,7 +100,7 @@
 .btn-save {
     width: 100%;
     padding: 1rem;
-    background: #2563eb;
+    background: var(--accent-color);
     color: white;
     border: none;
     border-radius: 0.6rem;
@@ -111,7 +111,7 @@
 }
 
 .btn-save:hover {
-    background: #1d4ed8;
+    background: var(--accent-hover);
 }
 
 .btn-save:disabled {

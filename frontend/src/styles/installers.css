@@ -12,7 +12,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
     color: #ffffff !important;
     font-size: 14px;
     font-weight: 600;
@@ -33,13 +33,13 @@
 /* --- 2. БЛОК ПОИСКА (ФИЛЬТРЫ) --- */
 .search-filters {
     display: flex;
-    flex-wrap: wrap;         /* чтобы на мобильных переносилось */
-    justify-content: center; /* выравнивание элементов внутри по центру */
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 20px;
-    margin: 20px auto;       /* центрирование блока по горизонтали */
-    max-width: 900px;        /* ограничение ширины (по желанию) */
-    width: 100%;             /* занимает всю доступную ширину до max-width */
+    margin: 20px auto;
+    max-width: 900px;
+    width: 100%;
 }
 
 .search-group {
@@ -56,17 +56,17 @@
     width: 100%;
     padding: 10px 40px 10px 15px;
     font-size: 0.9rem;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    background-color: #ffffff;
+    background-color: var(--input-bg);
     transition: all 0.2s;
 }
 
 .search-input:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-btn {
@@ -85,48 +85,48 @@
     width: 100%;
     overflow-x: auto;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .orders-table {
     width: 90%;
     border-collapse: collapse;
-    background: #ffffff;
+    background: var(--card-bg);
 }
 
 .orders-table th {
-    background-color: #f8fafc;
+    background-color: var(--bg-secondary);
     padding: 14px 16px;
     text-align: left;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #64748b;
-    border-bottom: 2px solid #e2e8f0;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
     text-transform: uppercase;
     letter-spacing: 0.025em;
 }
 
 .orders-table__td {
     padding: 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .orders-table__row:hover {
-    background-color: #f8fafc;
+    background-color: var(--table-row-hover);
 }
 
 /* Элементы внутри ячеек */
 .installer-link {
     text-decoration: none;
-    color: #2563eb;
+    color: var(--accent-color);
     transition: color 0.2s;
 }
 
 .installer-link:hover {
-    color: #1d4ed8;
+    color: var(--accent-hover);
     text-decoration: underline;
 }
 
@@ -158,7 +158,6 @@
     position: fixed;
     inset: 0;
     background: rgba(15, 23, 42, 0.7);
-    /* Более глубокий цвет */
     backdrop-filter: blur(4px);
     z-index: 2000;
     justify-content: center;
@@ -167,7 +166,7 @@
 }
 
 .modal-content {
-    background: #ffffff;
+    background: var(--card-bg);
     padding: 2.5rem;
     border-radius: 16px;
     width: 100%;
@@ -175,15 +174,10 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* --- 5. АДАПТИВНОСТЬ ПОД ТЕЛЕФОНЫ (Katana Control) --- */
-/* Специально для Журнала заказов на мобилках */
-/* --- АДАПТИВНОСТЬ ДЛЯ МАСТЕРОВ --- */
+/* --- 5. АДАПТИВНОСТЬ ПОД ТЕЛЕФОНЫ --- */
 @media screen and (max-width: 768px) {
-
-    /* Принудительно отключаем табличный режим */
     .table-responsive {
         overflow-x: visible !important;
-        /* Убираем скролл обертки */
         border: none !important;
     }
 
@@ -194,7 +188,6 @@
 
     .orders-table thead {
         display: none !important;
-        /* Прячем шапку */
     }
 
     .orders-table tbody {
@@ -202,29 +195,26 @@
         width: 100% !important;
     }
 
-    /* Каждая строка — это отдельный блок-карточка */
     .orders-table__row {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
         margin-bottom: 20px !important;
         padding: 15px !important;
-        background: #fff !important;
-        border: 1px solid #6facfb !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--accent-color) !important;
         border-radius: 12px !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* Каждая ячейка — это строка внутри карточки */
     .orders-table__td {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
         padding: 10px 0 !important;
-        border-bottom: 1px solid #f1f5f9 !important;
+        border-bottom: 1px solid var(--border-color) !important;
         white-space: normal !important;
-        /* РАЗРЕШАЕМ ПЕРЕНОС ТЕКСТА */
         text-align: right !important;
     }
 
@@ -232,11 +222,10 @@
         border-bottom: none !important;
     }
 
-    /* Названия полей слева */
     .orders-table__td::before {
         content: attr(data-label);
         font-weight: 800;
-        color: #64748b;
+        color: var(--text-secondary);
         text-transform: uppercase;
         font-size: 0.7rem;
         flex-shrink: 0;
@@ -244,23 +233,20 @@
         text-align: left;
     }
 
-    /* Фикс для клички, чтобы не убегала */
     .installer-info {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         max-width: 70%;
-        /* Чтобы длинное ФИО не выталкивало label */
     }
 
     .nickname-tag {
         font-size: 0.8rem;
-        color: #2563eb;
-        background: #eff6ff;
+        color: var(--accent-color);
+        background: var(--bg-secondary);
         padding: 2px 6px;
         border-radius: 4px;
         word-break: break-word;
-        /* Если кличка слишком длинная */
     }
 }
 
@@ -271,14 +257,11 @@
 
     .page-header {
         flex-direction: column !important;
-        /* Стекинг: заголовок сверху, кнопка снизу */
-
         gap: 15px;
     }
 
     .btn-primary {
         justify-content: center;
-        /* Кнопка на всю ширину для удобства тапа */
         width: 95%;
     }
 }

@@ -5,13 +5,13 @@
 
 .orders-list {
     padding: 30px 20px;
-    background: #f8fafc;
+    background: var(--bg-secondary);
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .orders-list__title {
-    color: #1e293b;
+    color: var(--text-primary);
     text-align: center;
     font-size: 1.8rem;
     font-weight: 800;
@@ -26,36 +26,35 @@
     margin: 0 auto;
     border-collapse: separate;
     border-spacing: 0;
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
-
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 .orders-table__th {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     padding: 16px 20px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--border-color);
     text-align: left;
 }
 
 .orders-table__td {
     padding: 16px 20px;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
 }
 
 .orders-table__row:hover {
-    background: #f8fafc;
+    background: var(--table-row-hover);
 }
 
-/* --- 3. СТАТУСЫ --- */
+/* --- 3. СТАТУСЫ (оставляем цвета неизменными) --- */
 .status-badge {
     padding: 6px 12px;
     border-radius: 8px;
@@ -86,37 +85,36 @@
 
 .filters-row th {
     padding: 8px;
-    background: #f1f5f9;
-    /* Светлый фон для зоны фильтров */
-    border-bottom: 2px solid #e2e8f0;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-color);
 }
 
 .filter-input {
     width: 100%;
     padding: 6px 10px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.85rem;
-    color: #1e293b;
+    color: var(--text-primary);
     box-sizing: border-box;
 }
 
 .filter-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .orders-filter {
     display: flex;
-    flex-wrap: wrap; /* Чтобы на телефонах фильтры переносились */
+    flex-wrap: wrap;
     max-width: 1000px;
     gap: 15px;
-    background: #f8fafc;
+    background: var(--bg-secondary);
     padding: 1.5rem;
     border-radius: 12px;
     margin-bottom: 20px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     margin-left: auto;
     margin-right: auto;
 }
@@ -125,19 +123,19 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-width: 200px; /* Чтобы не были слишком узкими */
+    min-width: 200px;
 }
 
 .filter-group label {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-secondary);
     margin-bottom: 5px;
 }
 
 .filter-input {
     padding: 10px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
     transition: all 0.2s;
@@ -145,7 +143,7 @@
 
 .filter-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -154,10 +152,10 @@
   text-align: center;
   padding: 60px 20px;
   font-size: 1.2rem;
-  color: #94a3b8;
-  background: #f8fafc;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
   border-radius: 16px;
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--border-color);
   margin: 20px 0;
 }
 
@@ -168,6 +166,7 @@
     font-size: 1rem;
   }
 }
+
 @media (max-width: 768px) {
     .orders-list {
         padding: 15px 10px;
@@ -180,8 +179,6 @@
     .orders-table__head {
         display: none;
     }
-
-    /* Скрываем шапку */
 
     .orders-table,
     .orders-table__body,
@@ -197,12 +194,12 @@
     }
 
     .orders-table__row {
-        background: white;
+        background: var(--card-bg);
         margin-bottom: 16px;
         border-radius: 16px;
         padding: 12px 16px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
     }
 
     .orders-table__td {
@@ -210,27 +207,24 @@
         flex-direction: row;
         justify-content: space-between;
         padding: 12px 0;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color);
     }
 
     .orders-table__td:last-child {
         border-bottom: none;
     }
 
-    /* Генерация подписей слева */
     .orders-table__td::before {
         content: attr(data-label);
         font-weight: 700;
-        color: #94a3b8;
+        color: var(--text-secondary);
         font-size: 0.7rem;
         text-transform: uppercase;
         margin-right: 15px;
         flex-shrink: 0;
-        /* Чтобы заголовок не сжимался */
         text-align: left;
     }
 
-    /* Адаптация содержимого ячейки */
     .orders-table__td>span,
     .orders-table__td>div,
     .orders-table__td>strong {
@@ -246,18 +240,9 @@
         align-items: flex-start;
     }
 
-    .orders-table__td:nth-child(3) {
-
-        flex-direction: column-reverse;
-
-
-    }
-
+    .orders-table__td:nth-child(3),
     .orders-table__td:nth-child(4) {
-
         flex-direction: column-reverse;
-
-
     }
 
     .orders-table__td::before {

@@ -3,13 +3,11 @@
 }
 
 .installer-container {
-
-    /* Сужаем для удобства чтения сверху вниз */
     margin: 40px auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
-   max-width: 800px;
+    max-width: 800px;
 }
 
 /* Шапка с кнопками */
@@ -18,17 +16,17 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 10px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .installer-top-bar h1 {
     font-size: 1.5rem;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 /* Карточки секций */
 .installer-card {
-    background: #fff;
+    background: var(--card-bg);
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -37,8 +35,8 @@
 .installer-card__title {
     margin-bottom: 20px;
     font-size: 1.1rem;
-    color: #475569;
-    border-left: 4px solid #3b82f6;
+    color: var(--text-secondary);
+    border-left: 4px solid var(--accent-color);
     padding-left: 12px;
 }
 
@@ -64,23 +62,24 @@
 .field-group label {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
 }
 
 /* Инпуты */
 input, textarea {
     padding: 12px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
-    background: #f8fafc;
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .input-large {
     font-size: 1.2rem;
     font-weight: 600;
-    border-color: #94a3b8;
+    border-color: var(--border-color);
 }
 
 textarea {
@@ -96,15 +95,16 @@ textarea {
 
 .installer-table th {
     text-align: left;
-    background: #f1f5f9;
+    background: var(--bg-secondary);
     padding: 12px;
     font-size: 0.8rem;
-    color: #475569;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
 }
 
 .installer-table td {
     padding: 12px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 /* Кнопки */
@@ -119,7 +119,7 @@ textarea {
 }
 
 .btn-delete {
-    background: #fff;
+    background: var(--card-bg);
     color: #ef4444;
     border: 1px solid #fecaca;
     padding: 10px 20px;
@@ -127,12 +127,7 @@ textarea {
     cursor: pointer;
 }
 
-
-
-
-/* На мобилках делаем колонкой */
-
-
+/* Опасная зона */
 .installer-danger-zone {
     margin-top: 50px;
     padding: 20px;
@@ -176,6 +171,7 @@ textarea {
     color: white;
 }
 
+/* Фильтры */
 .card-header-flex {
     display: flex;
     justify-content: space-between;
@@ -184,7 +180,7 @@ textarea {
 }
 
 .status-filter {
-    background: #f1f5f9;
+    background: var(--bg-secondary);
     padding: 4px;
     border-radius: 8px;
     display: flex;
@@ -199,13 +195,13 @@ textarea {
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-secondary);
     transition: all 0.2s;
 }
 
 .filter-btn.active {
-    background: #fff;
-    color: #3b82f6;
+    background: var(--card-bg);
+    color: var(--accent-color);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -217,57 +213,51 @@ textarea {
     width: 100%;
     margin-top: 15px;
     padding: 10px;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    color: #64748b;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    color: var(--text-secondary);
     cursor: pointer;
 }
 
-
+/* Адаптивность */
 @media (max-width: 768px) {
-    /* 1. Контейнер: на телефоне нам не нужны 60% или 80%, берем всё пространство */
     .installer-container {
-        width: 100% !important; 
+        width: 100% !important;
         max-width: 100% !important;
-        margin: 15px 0 !important; /* Убираем авто-отступы по бокам */
+        margin: 15px 0 !important;
         padding: 0 10px !important;
     }
 
-    /* 2. Шапка: кнопка под заголовком */
     .installer-top-bar {
         flex-direction: column;
         gap: 15px;
         text-align: center;
     }
 
-    /* 3. Ряды полей: превращаем в одну колонку */
     .field-row {
         flex-direction: column !important;
         gap: 15px !important;
     }
 
-    /* 4. Карточки: чуть меньше внутренние отступы */
     .installer-card {
         padding: 15px !important;
     }
 
-    /* 5. Инпуты: важный размер 16px, чтобы iOS не приближала экран (zoom) при клике */
     input, textarea, select {
         font-size: 16px !important;
     }
 
-    /* 6. Таблица: превращаем строки в отдельные блоки-карточки */
     .installer-table thead {
-        display: none; /* Прячем заголовки на мобилке */
+        display: none;
     }
 
     .installer-table tr {
         display: block;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
         border-radius: 10px;
         margin-bottom: 12px;
         padding: 10px;
-        background: #f8fafc;
+        background: var(--bg-secondary);
     }
 
     .installer-table td {
@@ -275,23 +265,21 @@ textarea {
         justify-content: space-between;
         align-items: center;
         padding: 8px 0 !important;
-        border-bottom: 1px dashed #cbd5e1;
+        border-bottom: 1px dashed var(--border-color);
     }
 
     .installer-table td:last-child {
         border-bottom: none;
     }
 
-    /* Показываем заголовки колонок слева (если в HTML есть data-label) */
     .installer-table td::before {
         content: attr(data-label);
         font-weight: 700;
-        color: #64748b;
+        color: var(--text-secondary);
         font-size: 0.7rem;
         text-transform: uppercase;
     }
 
-    /* 7. Кнопки: на всю ширину для удобства нажатия пальцем */
     .btn-save, .btn-delete-safe {
         width: 100%;
         padding: 14px;

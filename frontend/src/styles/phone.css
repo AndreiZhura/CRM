@@ -9,7 +9,7 @@
 /* 2. Лейбл (Заголовок поля) */
 .field-group label {
     font-size: 0.9rem;
-    color: #475569;
+    color: var(--text-secondary);
     font-weight: 600;
     margin-bottom: 0.5rem;
     display: block;
@@ -30,12 +30,12 @@
     padding: 0.625rem 0.875rem;
     padding-right: 90px !important; /* Гарантированный зазор под две кнопки */
     
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     
     font-size: 1rem; /* 16px на iPhone предотвращает авто-зум при наборе */
-    color: #1e293b;
+    color: var(--text-primary);
     box-sizing: border-box;
     transition: all 0.2s ease;
 }
@@ -43,8 +43,8 @@
 /* Эффект фокуса */
 .phone-mask:focus {
     outline: none;
-    background-color: #ffffff;
-    border-color: #3b82f6;
+    background-color: var(--bg-primary);
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -67,6 +67,11 @@
     line-height: 1;
     display: flex;
     align-items: center;
+    color: var(--text-secondary);
+}
+
+.action-btn:hover {
+    color: var(--text-primary);
 }
 
 /* Эффект нажатия на iPhone */
@@ -98,4 +103,13 @@
     font-size: 0.75rem;
     margin-top: 0.25rem;
     font-weight: 500;
+}
+
+/* Цвет текста для состояний валидации */
+.phone-mask.invalid {
+    color: #991b1b; /* тёмно-красный, чтобы читался на светлом фоне */
+}
+
+.phone-mask.valid {
+    color: #065f46; /* тёмно-зелёный */
 }

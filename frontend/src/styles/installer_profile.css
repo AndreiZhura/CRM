@@ -11,7 +11,7 @@
 
 /* Левая карточка */
 .profile-sidebar {
-    background: #ffffff;
+    background: var(--card-bg);
     padding: 24px;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -28,7 +28,7 @@
 }
 
 .dossier-section, .orders-section {
-    background: #ffffff;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -45,7 +45,7 @@
 .info-group label {
     display: block;
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-secondary);
     text-transform: uppercase;
     font-weight: 700;
     margin-bottom: 6px;
@@ -54,15 +54,16 @@
 .info-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    background: #f8fafc;
+    background: var(--input-bg);
     transition: all 0.2s;
+    color: var(--text-primary);
 }
 
 .info-group input:focus {
-    border-color: #4f46e5;
-    background: #fff;
+    border-color: var(--accent-color);
+    background: var(--bg-primary);
     outline: none;
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
@@ -70,7 +71,7 @@
 /* Кнопки */
 .btn-save {
     width: 100%;
-    background: #22c55e;
+    background: #22c55e; /* зелёный акцент – оставляем */
     color: white;
     padding: 12px;
     border: none;
@@ -83,7 +84,7 @@
 .btn-outline {
     width: 100%;
     background: transparent;
-    border: 1px solid #ef4444;
+    border: 1px solid #ef4444; /* красный – оставляем */
     color: #ef4444;
     padding: 12px;
     border-radius: 10px;

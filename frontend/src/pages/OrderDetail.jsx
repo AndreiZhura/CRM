@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
-import Loader from '../components/Loader/Loader';
+import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 import PhoneField from "../components/PhoneField"; // новый импорт
 import "../styles/order-form.css";
@@ -19,7 +19,6 @@ const OrderDetail = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-
   // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +29,7 @@ const OrderDetail = () => {
         ]);
         setOrder(orderData);
         setClient(orderData.client || null);
-        console.log('Client data:', orderData.client);
+        console.log("Client data:", orderData.client);
         setFinance(orderData.finance || null);
         setInstallers(installersData);
       } catch (err) {
@@ -121,15 +120,16 @@ const OrderDetail = () => {
     }
   };
 
-  if (loading) return (
-  <div className="page">
-    <Header />
-    <main className="content">
-      <Loader />
-    </main>
-    <Footer />
-  </div>
-);
+  if (loading)
+    return (
+      <div className="page">
+        <Header />
+        <main className="content">
+          <Loader />
+        </main>
+        <Footer />
+      </div>
+    );
   if (error) return <div>Ошибка: {error}</div>;
   if (!order || !client) return <div>Заказ не найден</div>;
 
@@ -395,4 +395,3 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
-

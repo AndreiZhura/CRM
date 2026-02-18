@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
-import Loader from "../components/Loader/Loader";
+import Loader from "../components/Loader";
 import PhoneField from "../components/PhoneField";
 import Footer from "../components/Footer";
 import "../styles/order-form.css";
