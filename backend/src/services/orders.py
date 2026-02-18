@@ -8,15 +8,16 @@ from src.schemas.orders import OrderCreate, OrderUpdate
 from src.services.geocoding import get_coordinates
 from src.services.address_cache import get_or_create_address_cache
 
+
 async def create_order(db: AsyncSession, order_data: OrderCreate):
     # Преобразуем данные в словарь
     order_dict = order_data.model_dump()
-    
+
     # Убираем часовой пояс у datetime полей
     for field in ['service_datetime', 'delivery_datetime']:
         if order_dict.get(field) and hasattr(order_dict[field], 'tzinfo'):
             order_dict[field] = order_dict[field].replace(tzinfo=None)
-    
+
     # Геокодинг адреса
     address_text = order_dict.get('address_text')
     if address_text:
@@ -35,26 +36,39 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
     await db.flush()  # получаем id
 
     # Загружаем все связанные объекты для сериализации
-    await db.refresh(order, attribute_names=['client', 'installer', 'finance'])
+    await db.refresh(order, attribute_names=['client', 'installer', 'finance', 'address_cache'])
     await db.commit()
     return order
+
 
 async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     result = await db.execute(
         select(Order)
         .where(Order.id == order_id)
-        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installer),
+            selectinload(Order.finance),
+            selectinload(Order.address_cache)   # добавь
+        )
     )
     return result.scalar_one_or_none()
+
 
 async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
     result = await db.execute(
         select(Order)
         .offset(skip)
         .limit(limit)
-        .options(selectinload(Order.client), selectinload(Order.installer), selectinload(Order.finance))
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installer),
+            selectinload(Order.finance),
+            selectinload(Order.address_cache)   # добавь
+        )
     )
     return result.scalars().all()
+
 
 async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate) -> Optional[Order]:
     order = await get_order(db, order_id)
@@ -85,6 +99,7 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
     # Перезагружаем связи после коммита
     await db.refresh(order, attribute_names=['client', 'installer', 'finance'])
     return order
+
 
 async def delete_order(db: AsyncSession, order_id: int) -> Optional[Order]:
     order = await get_order(db, order_id)

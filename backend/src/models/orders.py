@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from src.core.db import Base
+from typing import Optional
 import enum
 
 class OrderStatus(str, enum.Enum):
@@ -33,3 +34,12 @@ class Order(Base):
     installer = relationship("Installer", back_populates="orders")
     
     finance = relationship("Finance", back_populates="order", uselist=False)
+    address_cache = relationship("AddressCache", foreign_keys=[address_id])
+    
+    @property
+    def lat(self) -> Optional[float]:
+        return float(self.address_cache.lat) if self.address_cache else None
+
+    @property
+    def lon(self) -> Optional[float]:
+        return float(self.address_cache.lon) if self.address_cache else None

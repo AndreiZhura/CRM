@@ -60,4 +60,19 @@ class OrderOut(OrderBase):
     client: Optional[ClientOut] = None
     installer: Optional[InstallerOut] = None
     finance: Optional[FinanceOut] = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+
     model_config = ConfigDict(from_attributes=True)
+
+ 
+    @classmethod
+    def get_coords_from_address_cache(cls, value, info):
+        # info.data содержит словарь полей модели
+        address_cache = info.data.get('address_cache')
+        if address_cache:
+            if info.field_name == 'lat':
+                return float(address_cache.lat)
+            elif info.field_name == 'lon':
+                return float(address_cache.lon)
+        return None

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
+import AddressSuggest from "../components/AddressSuggest";
 import PhoneField from "../components/PhoneField";
 import Footer from "../components/Footer";
 import "../styles/order-form.css";
@@ -220,14 +221,13 @@ const NewOrder = () => {
                 </div>
                 <div className="crm-form__field crm-form__field--full">
                   <label className="crm-form__label">Адрес</label>
-                  <input
-                    type="text"
+                  <AddressSuggest
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
                     required
                     className="crm-form__input"
-                    placeholder="ул. Пушкина, д. Колотушкина"
+                    placeholder="Начните вводить адрес..."
                   />
                 </div>
                 <div className="crm-form__field crm-form__field--full">
