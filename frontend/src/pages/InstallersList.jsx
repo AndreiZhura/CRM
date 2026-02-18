@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
+import "../styles/installers.css";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import "../styles/installers.css";
 
 const InstallersList = () => {
   const [installers, setInstallers] = useState([]);
@@ -135,15 +135,29 @@ const InstallersList = () => {
             </thead>
             <tbody>
               {filteredInstallers.map((inst) => (
-                <tr key={inst.id}>
-                  <td>
-                    <Link to={`/installers/${inst.id}`}>{inst.full_name}</Link>
-                    {inst.nickname && <span> ({inst.nickname})</span>}
+                <tr key={inst.id} className="orders-table__row">
+                  <td className="orders-table__td" data-label="ФИО / Ник">
+                    <div className="name-wrapper">
+                      <Link to={`/installers/${inst.id}`}>
+                        {inst.full_name}
+                      </Link>
+                      {inst.nickname && (
+                        <span className="nickname-tag">{inst.nickname}</span>
+                      )}
+                    </div>
                   </td>
-                  <td>{inst.phone}</td>
-                  <td>{inst.specialization?.join(", ")}</td>
-                  <td>{inst.rating}</td>
-                  <td>{inst.is_debtor ? "Должник" : "Активен"}</td>
+                  <td className="orders-table__td" data-label="Телефон">
+                    {inst.phone}
+                  </td>
+                  <td className="orders-table__td" data-label="Специализация">
+                    {inst.specialization?.join(", ")}
+                  </td>
+                  <td className="orders-table__td" data-label="Рейтинг">
+                    {inst.rating}
+                  </td>
+                  <td className="orders-table__td" data-label="Статус">
+                    {inst.is_debtor ? "Должник" : "Активен"}
+                  </td>
                 </tr>
               ))}
             </tbody>

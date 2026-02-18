@@ -80,11 +80,11 @@
     transition: opacity 0.2s;
 }
 
-/* --- 3. ТАБЛИЦА МАСТЕРОВ --- */
+/* --- 3. ТАБЛИЦА МАСТЕРОВ (ДЕСКТОП) --- */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    border-radius: 12px;
+    border-radius: 20px; /* увеличили скругление */
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -93,6 +93,7 @@
     width: 90%;
     border-collapse: collapse;
     background: var(--card-bg);
+    border-radius: 20px; /* чтобы углы таблицы тоже были скруглены */
 }
 
 .orders-table th {
@@ -107,6 +108,13 @@
     letter-spacing: 0.025em;
 }
 
+.orders-table th:first-child {
+    border-top-left-radius: 20px;
+}
+.orders-table th:last-child {
+    border-top-right-radius: 20px;
+}
+
 .orders-table__td {
     padding: 16px;
     border-bottom: 1px solid var(--border-color);
@@ -118,7 +126,20 @@
     background-color: var(--table-row-hover);
 }
 
-/* Элементы внутри ячеек */
+/* Ссылки на имена монтажников (десктоп) */
+.orders-table__td a {
+    text-decoration: none;
+    color: var(--accent-color); /* делаем акцентным цветом, но без подчёркивания */
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.orders-table__td a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline; /* при наведении можно подчеркнуть */
+}
+
+/* Элементы внутри ячеек (для мобильных они переопределятся) */
 .installer-link {
     text-decoration: none;
     color: var(--accent-color);
@@ -184,6 +205,7 @@
     .orders-table {
         display: block !important;
         border: none !important;
+        width: 100% !important;
     }
 
     .orders-table thead {
@@ -200,22 +222,22 @@
         flex-direction: column !important;
         width: 100% !important;
         margin-bottom: 20px !important;
-        padding: 15px !important;
+        padding: 20px !important;
         background: var(--card-bg) !important;
         border: 1px solid var(--accent-color) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
     }
 
     .orders-table__td {
         display: flex !important;
+        flex-direction: row !important;
         justify-content: space-between !important;
-        align-items: center !important;
+        align-items: flex-start !important;
         width: 100% !important;
-        padding: 10px 0 !important;
+        padding: 12px 0 !important;
         border-bottom: 1px solid var(--border-color) !important;
-        white-space: normal !important;
-        text-align: right !important;
+        gap: 15px;
     }
 
     .orders-table__td:last-child {
@@ -224,44 +246,61 @@
 
     .orders-table__td::before {
         content: attr(data-label);
-        font-weight: 800;
+        font-weight: 700;
         color: var(--text-secondary);
         text-transform: uppercase;
-        font-size: 0.7rem;
+        font-size: 0.8rem;
         flex-shrink: 0;
-        margin-right: 10px;
+        width: 35%;
         text-align: left;
     }
 
-    .installer-info {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        max-width: 70%;
-    }
-
-    .nickname-tag {
-        font-size: 0.8rem;
-        color: var(--accent-color);
-        background: var(--bg-secondary);
-        padding: 2px 6px;
-        border-radius: 4px;
+    /* Значение (всё, кроме псевдоэлемента) */
+    .orders-table__td > *:not(::before) {
+        width: 65%;
+        text-align: right;
         word-break: break-word;
     }
-}
 
-@media screen and (max-width: 480px) {
-    .search-filters {
-        flex-direction: column;
+    /* Убираем подчёркивание и синий цвет у ссылок на мобильных */
+    .orders-table__td a {
+        text-decoration: none !important;
+        color: var(--text-primary) !important;
+        font-weight: 600;
     }
 
-    .page-header {
-        flex-direction: column !important;
-        gap: 15px;
+    /* Обёртка для имени и ника */
+    .name-wrapper {
+        width: 65%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+        text-align: right;
     }
 
-    .btn-primary {
-        justify-content: center;
-        width: 95%;
+    /* Тег ника */
+    .nickname-tag {
+        display: inline-block;
+        background: var(--bg-secondary);
+        color: var(--accent-color);
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    /* Выделяем рейтинг жирным */
+    .orders-table__td[data-label="Рейтинг"] > *:not(::before) {
+        font-weight: 700;
+        color: var(--accent-color);
+    }
+
+    /* Статус должника можно выделить цветом */
+    .orders-table__td[data-label="Статус"] > *:not(::before) {
+        font-weight: 600;
+        color: #ef4444; /* для должника будет красный, но если активен, то чёрный — нужно уточнить */
     }
 }

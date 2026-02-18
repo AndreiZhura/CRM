@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import PhoneField from '../components/PhoneField';
-import '../styles/installer_profile.css';
-import '../styles/installer_detail.css';
-import '../styles/phone.css';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import PhoneField from "../components/PhoneField";
+import "../styles/installer_profile.css";
+import "../styles/installer_detail.css";
+import "../styles/phone.css";
 
 const InstallerDetail = () => {
   const { id } = useParams();
@@ -14,8 +14,8 @@ const InstallerDetail = () => {
   const [installer, setInstaller] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('active'); // 'active' или 'history'
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("active"); // 'active' или 'history'
 
   // Загрузка данных монтажника и всех заказов
   useEffect(() => {
@@ -41,7 +41,7 @@ const InstallerDetail = () => {
     const { id, value, type, checked } = e.target;
     setInstaller((prev) => ({
       ...prev,
-      [id]: type === 'checkbox' ? checked : value,
+      [id]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -57,14 +57,17 @@ const InstallerDetail = () => {
     try {
       // Преобразуем specialization из строки в массив (если поле ввода)
       const specializationArray = installer.specialization
-        ? installer.specialization.split(',').map((s) => s.trim()).filter((s) => s)
+        ? installer.specialization
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s)
         : [];
       const dataToSend = {
         ...installer,
         specialization: specializationArray,
       };
       await api.updateInstaller(id, dataToSend);
-      alert('Данные сохранены');
+      alert("Данные сохранены");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,10 +77,10 @@ const InstallerDetail = () => {
 
   // Удаление монтажника
   const handleDelete = async () => {
-    if (window.confirm('Вы уверены, что хотите удалить мастера?')) {
+    if (window.confirm("Вы уверены, что хотите удалить мастера?")) {
       try {
         await api.deleteInstaller(id);
-        navigate('/installers');
+        navigate("/installers");
       } catch (err) {
         setError(err.message);
       }
@@ -85,15 +88,17 @@ const InstallerDetail = () => {
   };
 
   // Фильтрация заказов по монтажнику и статусу
-  const installerOrders = orders.filter((order) => order.installer_id === installer?.id);
+  const installerOrders = orders.filter(
+    (order) => order.installer_id === installer?.id,
+  );
   const activeOrders = installerOrders.filter(
-    (order) => order.status !== 'Выполнен' && order.status !== 'Отменен'
+    (order) => order.status !== "Выполнен" && order.status !== "Отменен",
   );
   const historyOrders = installerOrders.filter(
-    (order) => order.status === 'Выполнен' || order.status === 'Отменен'
+    (order) => order.status === "Выполнен" || order.status === "Отменен",
   );
 
-  const displayedOrders = activeTab === 'active' ? activeOrders : historyOrders;
+  const displayedOrders = activeTab === "active" ? activeOrders : historyOrders;
 
   if (loading) return <div className="loading">Загрузка...</div>;
   if (error) return <div className="error">Ошибка: {error}</div>;
@@ -107,12 +112,17 @@ const InstallerDetail = () => {
           <header className="installer-top-bar">
             <h1>Профиль мастера</h1>
             <div className="installer-top-bar__actions">
-              <button className="btn-save" onClick={handleSubmit} disabled={loading}>
-                {loading ? 'Сохранение...' : '💾 Сохранить всё'}
+              <button
+                className="btn-save"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Сохранение..." : "💾 Сохранить всё"}
               </button>
             </div>
           </header>
 
+          {/* Личные данные */}
           {/* Личные данные */}
           <section className="installer-card">
             <h3 className="installer-card__title">👤 Личные данные</h3>
@@ -123,7 +133,7 @@ const InstallerDetail = () => {
                   type="text"
                   id="full_name"
                   className="input-large"
-                  value={installer.full_name || ''}
+                  value={installer.full_name || ""}
                   onChange={handleInputChange}
                   placeholder="Иванов Иван Иванович"
                 />
@@ -134,7 +144,7 @@ const InstallerDetail = () => {
                   <input
                     type="text"
                     id="nickname"
-                    value={installer.nickname || ''}
+                    value={installer.nickname || ""}
                     onChange={handleInputChange}
                     placeholder="Напр: Снежный Барс"
                   />
@@ -143,10 +153,24 @@ const InstallerDetail = () => {
                 <PhoneField
                   id="phone"
                   name="phone"
-                  value={installer.phone || ''}
+                  value={installer.phone || ""}
                   onChange={handlePhoneChange}
                   label="Телефон"
                 />
+              </div>
+              {/* Резервный телефон слева с пустой колонкой справа */}
+              <div className="field-row">
+                <PhoneField
+                  id="backup_phone"
+                  name="backup_phone"
+                  value={installer.backup_phone || ""}
+                  onChange={(value) =>
+                    setInstaller((prev) => ({ ...prev, backup_phone: value }))
+                  }
+                  label="Резервный телефон (необязательно)"
+                />
+                <div className="field-group"></div>{" "}
+                {/* пустая колонка для отступа справа */}
               </div>
             </div>
           </section>
@@ -155,21 +179,28 @@ const InstallerDetail = () => {
           <section className="installer-card card-debt">
             <h3 className="installer-card__title">💰 Финансовое состояние</h3>
             <div className="installer-form-linear">
-              <div className="field-row" style={{ alignItems: 'center', gap: '20px' }}>
+              <div
+                className="field-row"
+                style={{ alignItems: "center", gap: "20px" }}
+              >
                 <div
                   className="field-group-checkbox"
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
                   <input
                     type="checkbox"
                     id="is_debtor"
-                    style={{ width: '22px', height: '22px', cursor: 'pointer' }}
+                    style={{ width: "22px", height: "22px", cursor: "pointer" }}
                     checked={installer.is_debtor || false}
                     onChange={handleInputChange}
                   />
                   <label
                     htmlFor="is_debtor"
-                    style={{ fontWeight: 'bold', color: '#e11d48', cursor: 'pointer' }}
+                    style={{
+                      fontWeight: "bold",
+                      color: "#e11d48",
+                      cursor: "pointer",
+                    }}
                   >
                     Мастер в долгу
                   </label>
@@ -180,7 +211,9 @@ const InstallerDetail = () => {
 
           {/* Профессиональные данные */}
           <section className="installer-card">
-            <h3 className="installer-card__title">🛠 Профессиональные данные</h3>
+            <h3 className="installer-card__title">
+              🛠 Профессиональные данные
+            </h3>
             <div className="installer-form-linear">
               <div className="field-row">
                 <div className="field-group">
@@ -188,7 +221,7 @@ const InstallerDetail = () => {
                   <input
                     type="text"
                     id="specialization"
-                    value={installer.specialization?.join(', ') || ''}
+                    value={installer.specialization?.join(", ") || ""}
                     onChange={handleInputChange}
                     placeholder="Установка, чистка..."
                   />
@@ -209,7 +242,7 @@ const InstallerDetail = () => {
                 <textarea
                   id="comments"
                   rows="6"
-                  value={installer.comments || ''}
+                  value={installer.comments || ""}
                   onChange={handleInputChange}
                   placeholder="Опишите опыт..."
                 ></textarea>
@@ -223,14 +256,14 @@ const InstallerDetail = () => {
               <h3 className="installer-card__title">🚀 Заказы мастера</h3>
               <div className="status-filter">
                 <button
-                  className={`filter-btn ${activeTab === 'active' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('active')}
+                  className={`filter-btn ${activeTab === "active" ? "active" : ""}`}
+                  onClick={() => setActiveTab("active")}
                 >
                   В работе ({activeOrders.length})
                 </button>
                 <button
-                  className={`filter-btn ${activeTab === 'history' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('history')}
+                  className={`filter-btn ${activeTab === "history" ? "active" : ""}`}
+                  onClick={() => setActiveTab("history")}
                 >
                   История ({historyOrders.length})
                 </button>
@@ -251,14 +284,14 @@ const InstallerDetail = () => {
                     displayedOrders.map((order) => (
                       <tr key={order.id}>
                         <td>{order.id}</td>
-                        <td>{order.client?.full_name || '—'}</td>
-                        <td>{order.address_text || '—'}</td>
+                        <td>{order.client?.full_name || "—"}</td>
+                        <td>{order.address_text || "—"}</td>
                         <td>{order.status}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" style={{ textAlign: 'center' }}>
+                      <td colSpan="4" style={{ textAlign: "center" }}>
                         Нет заказов
                       </td>
                     </tr>

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Select from "react-select";
+
 import api from "../services/api";
 import Header from "../components/Header";
 import Loader from "../components/Loader"; // импорт компонента-лоадера
@@ -17,6 +19,74 @@ const OrdersList = () => {
     status: "",
   });
 
+  const statusOptions = [
+    { value: "", label: "Все статусы" },
+    { value: "Новый", label: "Новый" },
+    { value: "Ждет установщика", label: "Ждет установщика" },
+    { value: "Выполнен", label: "Выполнен" },
+    { value: "Завершено", label: "Завершено" },
+  ];
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: "var(--input-bg)",
+      borderColor: state.isFocused
+        ? "var(--accent-color)"
+        : "var(--border-color)",
+      boxShadow: state.isFocused ? "0 0 0 3px rgba(59, 130, 246, 0.1)" : "none",
+      "&:hover": {
+        borderColor: "var(--accent-color)",
+      },
+      padding: "2px",
+      borderRadius: "8px",
+      minHeight: "42px",
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--input-bg)",
+      borderRadius: "8px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "var(--accent-color)"
+        : state.isFocused
+          ? "var(--border-color)"
+          : "var(--input-bg)",
+      color: state.isSelected ? "white" : "var(--text-primary)",
+      cursor: "pointer",
+      padding: "10px 12px",
+      "&:active": {
+        backgroundColor: "var(--accent-hover)",
+      },
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "var(--text-primary)",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "var(--text-primary)",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+      "&:hover": {
+        color: "var(--text-primary)",
+      },
+    }),
+    indicatorSeparator: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--border-color)",
+    }),
+  };
+
+  // ... в JSX, вместо <select>:
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -124,19 +194,25 @@ const OrdersList = () => {
 
               <div className="filter-group">
                 <label htmlFor="filterStatus">Статус</label>
-                <select
+                <Select
                   id="filterStatus"
                   name="status"
-                  className="filter-input"
-                  value={filters.status}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">Все статусы</option>
-                  <option value="Новый">Новый</option>
-                  <option value="Ждет установщика">Ждет установщика</option>
-                  <option value="Выполнен">Выполнен</option>
-                  <option value="Завершено">Завершено</option>
-                </select>
+                  options={statusOptions}
+                  value={statusOptions.find(
+                    (option) => option.value === filters.status,
+                  )}
+                  onChange={(selected) =>
+                    setFilters({
+                      ...filters,
+                      status: selected ? selected.value : "",
+                    })
+                  }
+                  styles={customSelectStyles}
+                  isClearable
+                  placeholder="Все статусы"
+                  className="filter-select"
+                  classNamePrefix="filter-select"
+                />
               </div>
             </div>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PhoneField from '../components/PhoneField'; // ← добавили импорт
 import '../styles/installer_add.css';
 import '../styles/phone.css';
 
@@ -52,7 +53,6 @@ const AddInstaller = () => {
 
     try {
       await api.createInstaller(dataToSend);
-      // Перенаправляем на страницу списка монтажников (создадим позже)
       navigate('/installers');
     } catch (err) {
       setError(err.message);
@@ -69,6 +69,7 @@ const AddInstaller = () => {
           <h1>Добавить мастера</h1>
           {error && <div className="error">{error}</div>}
           <form onSubmit={handleSubmit}>
+            {/* ФИО */}
             <div className="form-group">
               <label htmlFor="full_name">ФИО *</label>
               <input
@@ -82,6 +83,7 @@ const AddInstaller = () => {
               />
             </div>
 
+            {/* Кличка */}
             <div className="form-group">
               <label htmlFor="nickname">Кликуха (Nickname)</label>
               <input
@@ -94,37 +96,31 @@ const AddInstaller = () => {
               />
             </div>
 
+            {/* Основной телефон */}
             <div className="form-group">
-              <label htmlFor="phone">Телефон *</label>
-              <div className="phone-input-container">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="phone-mask"
-                  placeholder="+7 (___) ___-__-__"
-                  required
-                />
-              </div>
+              <PhoneField
+                id="phone"
+                name="phone"
+                label="Телефон *"
+                value={formData.phone}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
+                required={true}
+              />
             </div>
 
+            {/* Резервный телефон */}
             <div className="form-group">
-              <label htmlFor="backup_phone">Резервный телефон</label>
-              <div className="phone-input-container">
-                <input
-                  type="tel"
-                  id="backup_phone"
-                  name="backup_phone"
-                  value={formData.backup_phone}
-                  onChange={handleChange}
-                  className="phone-mask"
-                  placeholder="+7 (___) ___-__-__"
-                />
-              </div>
+              <PhoneField
+                id="backup_phone"
+                name="backup_phone"
+                label="Резервный телефон"
+                value={formData.backup_phone}
+                onChange={(value) => setFormData({ ...formData, backup_phone: value })}
+                required={false}
+              />
             </div>
 
+            {/* Специализация */}
             <div className="form-group">
               <label htmlFor="specialization">Специализация *</label>
               <input
@@ -139,6 +135,7 @@ const AddInstaller = () => {
               <small className="helper-text">Введите через запятую</small>
             </div>
 
+            {/* Рейтинг */}
             <div className="form-group">
               <label htmlFor="rating">Рейтинг (1-10)</label>
               <input
@@ -153,6 +150,7 @@ const AddInstaller = () => {
               />
             </div>
 
+            {/* Финансовый статус */}
             <div className="debt-banner">
               <h3 className="debt-title">💰 Финансовый статус</h3>
               <div className="debt-row">
@@ -166,10 +164,10 @@ const AddInstaller = () => {
                   />
                   <label htmlFor="is_debtor">В долгу</label>
                 </div>
-                {/* Поле суммы долга пока убрано, так как его нет в модели */}
               </div>
             </div>
 
+            {/* Базовая ставка */}
             <div className="form-group">
               <label htmlFor="base_price">Цена за монтаж (базовая)</label>
               <input
@@ -183,6 +181,7 @@ const AddInstaller = () => {
               />
             </div>
 
+            {/* Статус в воронке */}
             <div className="form-group">
               <label htmlFor="is_in_funnel">Статус в воронке</label>
               <select
@@ -197,6 +196,7 @@ const AddInstaller = () => {
               <small className="helper-text">"Проверен" — монтажник не показывается в активной воронке</small>
             </div>
 
+            {/* Заметки */}
             <div className="form-group">
               <label htmlFor="comments">Досье / Заметки</label>
               <textarea
