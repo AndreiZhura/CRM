@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from "../services/api";
 import Header from "../components/Header";
+import Loader from '../components/Loader'; // импорт компонента-лоадера
 import Footer from "../components/Footer";
 import "../styles/orders-list.css";
 
@@ -70,7 +71,20 @@ const OrdersList = () => {
     }
   };
 
-  if (loading) return <div>Загрузка...</div>;
+  // Если идёт загрузка – показываем лоадер с шапкой и подвалом
+  if (loading) {
+    return (
+      <div className="page">
+        <Header />
+        <main className="page__main">
+          <Loader /> {/* красивый спиннер вместо обычного текста */}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Если ошибка – показываем сообщение
   if (error) return <div>Ошибка: {error}</div>;
 
   return (

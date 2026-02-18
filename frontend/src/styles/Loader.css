@@ -1,0 +1,44 @@
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loader {
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid #2563eb;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+.loader--small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.loader--medium {
+  width: 40px;
+  height: 40px;
+}
+
+.loader--large {
+  width: 60px;
+  height: 60px;
+  border-width: 4px;
+}
+
+.loader-text {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

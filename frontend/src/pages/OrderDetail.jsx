@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
+import Loader from '../components/Loader/Loader';
 import Footer from "../components/Footer";
 import PhoneField from "../components/PhoneField"; // новый импорт
 import "../styles/order-form.css";
@@ -120,7 +121,15 @@ const OrderDetail = () => {
     }
   };
 
-  if (loading) return <div>Загрузка...</div>;
+  if (loading) return (
+  <div className="page">
+    <Header />
+    <main className="content">
+      <Loader />
+    </main>
+    <Footer />
+  </div>
+);
   if (error) return <div>Ошибка: {error}</div>;
   if (!order || !client) return <div>Заказ не найден</div>;
 

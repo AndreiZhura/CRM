@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Header from "../components/Header";
+import Loader from "../components/Loader/Loader";
 import PhoneField from "../components/PhoneField";
 import Footer from "../components/Footer";
 import "../styles/order-form.css";
@@ -82,11 +83,11 @@ const NewOrder = () => {
         const clientData = {
           full_name: formData.fio,
           phone: formData.phone,
-          backup_phone: formData.backup_phone || '',
+          backup_phone: formData.backup_phone || "",
           address: formData.address,
           comments: formData.installer_opinion || "",
         };
-        console.log('Sending client data:', clientData);
+        console.log("Sending client data:", clientData);
         const client = await api.createClient(clientData);
         clientId = client.id;
       } else {
@@ -147,7 +148,11 @@ const NewOrder = () => {
         <form id="orderForm" className="crm-form" onSubmit={handleSubmit}>
           <h1>Новый заказ</h1>
           {error && <div className="error">{error}</div>}
-          {loadingLists && <div className="loading">Загрузка данных...</div>}
+          {loadingLists && (
+            <div style={{ textAlign: "center", margin: "20px 0" }}>
+              <Loader size="small" text="Загрузка клиентов и монтажников..." />
+            </div>
+          )}
 
           {/* Карточка клиента */}
           <fieldset className="crm-form__section">

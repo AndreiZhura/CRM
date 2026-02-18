@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import '../styles/installers.css';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import Loader from "../components/Loader/Loader";
+import Footer from "../components/Footer";
+import "../styles/installers.css";
 
 const InstallersList = () => {
   const [installers, setInstallers] = useState([]);
   const [filteredInstallers, setFilteredInstallers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchName, setSearchName] = useState('');
-  const [searchSpec, setSearchSpec] = useState('');
+  const [error, setError] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchSpec, setSearchSpec] = useState("");
   const [filterDebt, setFilterDebt] = useState(false);
 
   useEffect(() => {
@@ -33,21 +34,21 @@ const InstallersList = () => {
     let filtered = installers;
 
     if (searchName) {
-      filtered = filtered.filter(inst => 
-        inst.full_name?.toLowerCase().includes(searchName.toLowerCase())
+      filtered = filtered.filter((inst) =>
+        inst.full_name?.toLowerCase().includes(searchName.toLowerCase()),
       );
     }
 
     if (searchSpec) {
-      filtered = filtered.filter(inst => 
-        inst.specialization?.some(spec => 
-          spec.toLowerCase().includes(searchSpec.toLowerCase())
-        )
+      filtered = filtered.filter((inst) =>
+        inst.specialization?.some((spec) =>
+          spec.toLowerCase().includes(searchSpec.toLowerCase()),
+        ),
       );
     }
 
     if (filterDebt) {
-      filtered = filtered.filter(inst => inst.is_debtor);
+      filtered = filtered.filter((inst) => inst.is_debtor);
     }
 
     setFilteredInstallers(filtered);
@@ -57,7 +58,16 @@ const InstallersList = () => {
   const handleSearchSpec = (e) => setSearchSpec(e.target.value);
   const handleFilterDebt = (e) => setFilterDebt(e.target.checked);
 
-  if (loading) return <div className="loading">Загрузка...</div>;
+  if (loading)
+    return (
+      <div className="page">
+        <Header />
+        <main className="content">
+          <Loader />
+        </main>
+        <Footer />
+      </div>
+    );
   if (error) return <div className="error">Ошибка: {error}</div>;
 
   return (
@@ -124,20 +134,16 @@ const InstallersList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredInstallers.map(inst => (
+              {filteredInstallers.map((inst) => (
                 <tr key={inst.id}>
                   <td>
-                    <Link to={`/installers/${inst.id}`}>
-                      {inst.full_name}
-                    </Link>
+                    <Link to={`/installers/${inst.id}`}>{inst.full_name}</Link>
                     {inst.nickname && <span> ({inst.nickname})</span>}
                   </td>
                   <td>{inst.phone}</td>
-                  <td>{inst.specialization?.join(', ')}</td>
+                  <td>{inst.specialization?.join(", ")}</td>
                   <td>{inst.rating}</td>
-                  <td>
-                    {inst.is_debtor ? 'Должник' : 'Активен'}
-                  </td>
+                  <td>{inst.is_debtor ? "Должник" : "Активен"}</td>
                 </tr>
               ))}
             </tbody>
