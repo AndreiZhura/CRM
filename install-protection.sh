@@ -8,7 +8,7 @@ cat > ~/bin/docker-compose << 'EOF'
 for arg in "$@"; do
     if [[ "$arg" == "down" ]]; then
         if [[ "$*" == *"down -v"* ]] || [[ "$*" == *"down --volumes"* ]]; then
-            echo -e "\033[31m🚨 ЗАПРЕЩЕНО: 'docker-compose down -v' удалит ВСЕ ТВОИ ДАННЫЕ!\033[0m"
+            echo -e "\033[31m🚨 ЗАПРЕЩЕНО: 'docker compose down -v' удалит ВСЕ ТВОИ ДАННЫЕ!\033[0m"
             echo -e "Если уверен, используй реальный бинарник: \033[33m/usr/bin/docker-compose\033[0m"
             exit 1
         fi
