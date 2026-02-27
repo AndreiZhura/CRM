@@ -4,14 +4,11 @@ from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.db import get_db
-from src.routers import clients, installers, orders, finance
-from src.routers import reminders,finance
 from src.core.scheduler import start_scheduler
 from src.core.logging import logger
 from src.core.logging import LoggingMiddleware
 from src.core.scheduler import scheduler
-from src.routers import auth
-from src.routers import order_items  # импорт
+from src.routers import clients, installers, orders, finance, reminders, auth, order_items, order_installers, order_expenses, warranty_claims, payments
 
 
 app = FastAPI(title="СRM Олега")
@@ -32,6 +29,10 @@ app.include_router(reminders.router)
 app.add_middleware(LoggingMiddleware)
 app.include_router(auth.router)
 app.include_router(order_items.router)
+app.include_router(order_installers.router)
+app.include_router(order_expenses.router)
+app.include_router(warranty_claims.router)
+app.include_router(payments.router)
 
 @app.on_event("startup")
 async def startup_event():

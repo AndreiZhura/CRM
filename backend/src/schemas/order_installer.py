@@ -7,6 +7,7 @@ from datetime import datetime
 PaymentField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
 
 class OrderInstallerBase(BaseModel):
+    order_id: int
     installer_id: int
     role: str
     base_payment: PaymentField = Decimal(0)

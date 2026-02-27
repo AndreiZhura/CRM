@@ -7,6 +7,7 @@ from datetime import date, datetime
 AmountField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
 
 class OrderExpenseBase(BaseModel):
+    order_id: int
     amount: AmountField
     description: Optional[str] = None
     expense_date: date

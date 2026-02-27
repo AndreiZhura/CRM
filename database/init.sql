@@ -413,6 +413,7 @@ DECLARE
     v_installer_id INTEGER;
     v_order_id INTEGER;
 BEGIN
+    -- Получаем order_id через order_item
     SELECT order_id INTO v_order_id FROM order_items WHERE id = NEW.order_item_id;
 
     IF TG_OP = 'INSERT' THEN
@@ -458,7 +459,6 @@ BEGIN
             EXECUTE FUNCTION update_installer_stats_from_claims();
     END IF;
 END $$;
-
 -- -----------------------------------------------------------------
 -- 19. ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
 -- -----------------------------------------------------------------
@@ -569,11 +569,23 @@ RETURNS TRIGGER AS $$
 DECLARE
     affected_order_id INTEGER;
 BEGIN
-    IF TG_OP = 'DELETE' THEN
-        affected_order_id := OLD.order_id;
+    -- Определяем, из какой таблицы пришёл вызов
+    IF TG_TABLE_NAME = 'warranty_claims' THEN
+        -- Для гарантийных случаев order_id получаем через order_items
+        IF TG_OP = 'DELETE' THEN
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = OLD.order_item_id;
+        ELSE
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = NEW.order_item_id;
+        END IF;
     ELSE
-        affected_order_id := NEW.order_id;
+        -- Для остальных таблиц есть прямое поле order_id
+        IF TG_OP = 'DELETE' THEN
+            affected_order_id := OLD.order_id;
+        ELSE
+            affected_order_id := NEW.order_id;
+        END IF;
     END IF;
+
     PERFORM recalc_order_finance(affected_order_id);
     RETURN COALESCE(NEW, OLD);
 END;
@@ -611,7 +623,6 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
 END $$;
-
 -- -----------------------------------------------------------------
 -- 22. КОММЕНТАРИИ
 -- -----------------------------------------------------------------

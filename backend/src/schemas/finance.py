@@ -1,40 +1,33 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from decimal import Decimal
 
 class FinanceBase(BaseModel):
     order_id: int
-    purchase_price: float = 0
-    sale_price_client: float = 0
-    installer_pay: float = 0
-    my_commission: float = 0
-    installer_returned_money: bool = False
-    payment_state: str = "Не оплачен"
+    revenue: Decimal = Decimal(0)
+    cost_of_goods: Decimal = Decimal(0)
+    installer_payments: Decimal = Decimal(0)
+    expenses: Decimal = Decimal(0)
+    warranty_costs_oleg: Decimal = Decimal(0)
+    warranty_costs_installer: Decimal = Decimal(0)
 
 class FinanceCreate(FinanceBase):
     pass
 
 class FinanceUpdate(FinanceBase):
     order_id: Optional[int] = None
-    purchase_price: Optional[float] = None
-    sale_price_client: Optional[float] = None
-    installer_pay: Optional[float] = None
-    my_commission: Optional[float] = None
-    installer_returned_money: Optional[bool] = None
-    payment_state: Optional[str] = None
+    revenue: Optional[Decimal] = None
+    cost_of_goods: Optional[Decimal] = None
+    installer_payments: Optional[Decimal] = None
+    expenses: Optional[Decimal] = None
+    warranty_costs_oleg: Optional[Decimal] = None
+    warranty_costs_installer: Optional[Decimal] = None
 
-class FinanceOut(BaseModel):
-    order_id: int
-    purchase_price: float
-    sale_price_client: float
-    installer_pay: float
-    my_commission: float
-    profit: float
-    margin: float  # новая метрика
-    profit_percent: float  # новая метрика
-    installer_returned_money: bool
-    payment_state: str
+class FinanceOut(FinanceBase):
     id: int
+    profit: Decimal
     created_at: datetime
     updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

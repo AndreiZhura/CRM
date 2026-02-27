@@ -48,27 +48,27 @@ async def delete_finance(db: AsyncSession, finance_id: int):
     return finance
 
 async def get_finance_summary(db: AsyncSession):
-    """Возвращает сводку по финансам: общая прибыль, выплаты, количество заказов, средняя прибыль"""
+    """Возвращает сводку по финансам: общая прибыль, выплаты монтажникам, количество заказов, средняя прибыль"""
     # Общая прибыль
     result = await db.execute(select(func.sum(Finance.profit)))
     total_profit = result.scalar() or 0.0
 
-    # Сумма выплат монтажникам
-    result = await db.execute(select(func.sum(Finance.installer_pay)))
+    # Сумма выплат монтажникам (используем installer_payments)
+    result = await db.execute(select(func.sum(Finance.installer_payments)))
     total_installer_pay = result.scalar() or 0.0
 
     # Количество заказов
     result = await db.execute(select(func.count(Order.id)))
     total_orders = result.scalar() or 0
 
-    # Средняя прибыль на заказ
+    # Средняя прибыль
     avg_profit = total_profit / total_orders if total_orders > 0 else 0
 
     return {
-        "total_profit": total_profit,
-        "total_installer_pay": total_installer_pay,
+        "total_profit": float(total_profit),
+        "total_installer_pay": float(total_installer_pay),
         "total_orders": total_orders,
-        "avg_profit": avg_profit,
+        "avg_profit": float(avg_profit),
     }
 
 async def get_monthly_profit(db: AsyncSession):

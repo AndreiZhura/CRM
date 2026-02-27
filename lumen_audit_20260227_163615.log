@@ -100,8 +100,12 @@ backend/src
 │   ├── finance.py
 │   ├── __init__.py
 │   ├── installers.py
+│   ├── order_expenses.py
+│   ├── order_installers.py
+│   ├── order_items.py
 │   ├── orders.py
-│   └── reminders.py
+│   ├── reminders.py
+│   └── warranty_claims.py
 ├── schemas
 │   ├── auth.py
 │   ├── clients.py
@@ -124,13 +128,17 @@ backend/src
     ├── geocoding.py
     ├── __init__.py
     ├── installers.py
+    ├── order_expenses.py
+    ├── order_installers.py
+    ├── order_items.py
     ├── orders.py
     ├── reminder_service.py
     ├── training_service.py
+    ├── warranty_claims.py
     ├── weather_service.py
     └── yandex_disk.py
 
-7 directories, 59 files
+7 directories, 67 files
 --- frontend/src ---
 frontend/src
 ├── App.js
@@ -17929,6 +17937,10 @@ from src.core.logging import logger
 from src.core.logging import LoggingMiddleware
 from src.core.scheduler import scheduler
 from src.routers import auth
+from src.routers import order_items  # импорт
+from src.routers import order_installers
+from src.routers import order_expenses
+from src.routers import warranty_claims
 
 
 app = FastAPI(title="СRM Олега")
@@ -17948,6 +17960,10 @@ app.include_router(finance.router)
 app.include_router(reminders.router)
 app.add_middleware(LoggingMiddleware)
 app.include_router(auth.router)
+app.include_router(order_items.router)
+app.include_router(order_installers.router)
+app.include_router(order_expenses.router)
+app.include_router(warranty_claims.router)
 
 @app.on_event("startup")
 async def startup_event():
@@ -18218,6 +18234,7 @@ from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Date, DateT
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.core.db import Base
+from sqlalchemy import CheckConstraint
 
 class OrderExpense(Base):
     __tablename__ = "order_expenses"
@@ -18302,7 +18319,7 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
-    item_type = Column(SQLEnum(ItemType), nullable=False)
+    item_type = Column(SQLEnum(ItemType, name="item_type"), nullable=False)
     name = Column(String, nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
     purchase_price = Column(Numeric(10,2), nullable=False, default=0)
@@ -18445,13 +18462,13 @@ class WarrantyClaim(Base):
     order_item_id = Column(Integer, ForeignKey("order_items.id", ondelete="CASCADE"), nullable=False)
     claim_date = Column(Date, nullable=False)
     description = Column(String)
-    fault_type = Column(SQLEnum(FaultType), nullable=False)
+    fault_type = Column(SQLEnum(FaultType, name="fault_type"), nullable=False)
     responsible_installer_id = Column(Integer, ForeignKey("installers.id", ondelete="SET NULL"))
     resolution = Column(String)
     resolving_installer_id = Column(Integer, ForeignKey("installers.id", ondelete="SET NULL"))
     cost = Column(Numeric(10,2), nullable=False, default=0)
-    cost_covered_by = Column(SQLEnum(CostCoveredBy), nullable=False, default="oleg")
-    status = Column(SQLEnum(ClaimStatus), default="open")
+    cost_covered_by = Column(SQLEnum(CostCoveredBy, name="cost_covered_by"), nullable=False, default="oleg")
+    status = Column(SQLEnum(ClaimStatus, name="claim_status"), default="open")
     closed_at = Column(DateTime)
     created_at = Column(DateTime(timezone=False), server_default=func.now())
     updated_at = Column(DateTime(timezone=False), server_default=func.now(), onupdate=func.now())
@@ -18669,6 +18686,7 @@ async def delete_finance_endpoint(
         raise HTTPException(status_code=404, detail="Finance record not found")
     return None
 --- backend/src/routers/__init__.py ---
+from .warranty_claims import router as warranty_claims_router
 
 --- backend/src/routers/installers.py ---
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18733,6 +18751,231 @@ async def delete_installer_endpoint(
     deleted = await delete_installer(db, installer_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Installer not found")
+    return None
+--- backend/src/routers/order_expenses.py ---
+# backend/src/routers/order_expenses.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.auth import get_current_admin
+from src.schemas.order_expense import OrderExpenseCreate, OrderExpenseUpdate, OrderExpense
+from src.services.order_expenses import (
+    create_order_expense,
+    get_order_expense,
+    get_order_expenses_by_order,
+    update_order_expense,
+    delete_order_expense,
+)
+
+router = APIRouter(prefix="/order-expenses", tags=["Order Expenses"])
+
+@router.post("/", response_model=OrderExpense, status_code=status.HTTP_201_CREATED)
+async def create_order_expense_endpoint(
+    expense: OrderExpenseCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Добавить расход к заказу."""
+    return await create_order_expense(db, expense)
+
+@router.get("/order/{order_id}", response_model=List[OrderExpense])
+async def read_order_expenses_by_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить все расходы заказа."""
+    expenses = await get_order_expenses_by_order(db, order_id)
+    return expenses
+
+@router.get("/{expense_id}", response_model=OrderExpense)
+async def read_order_expense(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить конкретный расход."""
+    expense = await get_order_expense(db, expense_id)
+    if not expense:
+        raise HTTPException(status_code=404, detail="Order expense not found")
+    return expense
+
+@router.put("/{expense_id}", response_model=OrderExpense)
+async def update_order_expense_endpoint(
+    expense_id: int,
+    expense: OrderExpenseUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Обновить расход."""
+    updated = await update_order_expense(db, expense_id, expense)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Order expense not found")
+    return updated
+
+@router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order_expense_endpoint(
+    expense_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Удалить расход."""
+    deleted = await delete_order_expense(db, expense_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Order expense not found")
+    return None
+--- backend/src/routers/order_installers.py ---
+# backend/src/routers/order_installers.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.auth import get_current_admin
+from src.schemas.order_installer import OrderInstallerCreate, OrderInstallerUpdate, OrderInstaller
+from src.services.order_installers import (
+    create_order_installer,
+    get_order_installer,
+    get_order_installers_by_order,
+    update_order_installer,
+    delete_order_installer,
+)
+
+router = APIRouter(prefix="/order-installers", tags=["Order Installers"])
+
+@router.post("/", response_model=OrderInstaller, status_code=status.HTTP_201_CREATED)
+async def create_order_installer_endpoint(
+    item: OrderInstallerCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Назначить монтажника на заказ."""
+    return await create_order_installer(db, item)
+
+@router.get("/order/{order_id}", response_model=List[OrderInstaller])
+async def read_order_installers_by_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить всех монтажников, назначенных на заказ."""
+    installers = await get_order_installers_by_order(db, order_id)
+    return installers
+
+@router.get("/{installer_id}", response_model=OrderInstaller)
+async def read_order_installer(
+    installer_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить конкретную запись о назначении."""
+    item = await get_order_installer(db, installer_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Order installer not found")
+    return item
+
+@router.put("/{installer_id}", response_model=OrderInstaller)
+async def update_order_installer_endpoint(
+    installer_id: int,
+    item: OrderInstallerUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Обновить запись (например, изменить роль или оплату)."""
+    updated = await update_order_installer(db, installer_id, item)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Order installer not found")
+    return updated
+
+@router.delete("/{installer_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order_installer_endpoint(
+    installer_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Снять монтажника с заказа."""
+    deleted = await delete_order_installer(db, installer_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Order installer not found")
+    return None
+--- backend/src/routers/order_items.py ---
+# backend/src/routers/order_items.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.auth import get_current_admin
+from src.schemas.order_item import OrderItemCreate, OrderItemUpdate, OrderItem
+from src.services.order_items import (
+    create_order_item,
+    get_order_item,
+    get_order_items_by_order,
+    update_order_item,
+    delete_order_item,
+)
+
+router = APIRouter(prefix="/order-items", tags=["Order Items"])
+
+@router.post("/", response_model=OrderItem, status_code=status.HTTP_201_CREATED)
+async def create_order_item_endpoint(
+    item: OrderItemCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Создать новую позицию в заказе."""
+    return await create_order_item(db, item)
+
+@router.get("/order/{order_id}", response_model=List[OrderItem])
+async def read_order_items_by_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить все позиции конкретного заказа."""
+    items = await get_order_items_by_order(db, order_id)
+    return items
+
+@router.get("/{item_id}", response_model=OrderItem)
+async def read_order_item(
+    item_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить одну позицию по ID."""
+    item = await get_order_item(db, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Order item not found")
+    return item
+
+@router.put("/{item_id}", response_model=OrderItem)
+async def update_order_item_endpoint(
+    item_id: int,
+    item: OrderItemUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Обновить позицию."""
+    updated = await update_order_item(db, item_id, item)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Order item not found")
+    return updated
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order_item_endpoint(
+    item_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Удалить позицию."""
+    deleted = await delete_order_item(db, item_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Order item not found")
     return None
 --- backend/src/routers/orders.py ---
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18889,6 +19132,82 @@ async def send_reminder_email_endpoint(
         return {"message": f"Письмо отправлено на {recipient}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка отправки: {str(e)}")
+
+--- backend/src/routers/warranty_claims.py ---
+# backend/src/routers/warranty_claims.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+
+from src.core.db import get_db
+from src.models.admins import Admin
+from src.auth import get_current_admin
+from src.schemas.warranty_claim import WarrantyClaimCreate, WarrantyClaimUpdate, WarrantyClaim
+from src.services.warranty_claims import (
+    create_warranty_claim,
+    get_warranty_claim,
+    get_warranty_claims_by_order_item,
+    update_warranty_claim,
+    delete_warranty_claim,
+)
+
+router = APIRouter(prefix="/warranty-claims", tags=["Warranty Claims"])
+
+@router.post("/", response_model=WarrantyClaim, status_code=status.HTTP_201_CREATED)
+async def create_warranty_claim_endpoint(
+    claim: WarrantyClaimCreate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Зарегистрировать гарантийный случай."""
+    return await create_warranty_claim(db, claim)
+
+@router.get("/order-item/{order_item_id}", response_model=List[WarrantyClaim])
+async def read_warranty_claims_by_order_item(
+    order_item_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить все гарантийные случаи для позиции."""
+    claims = await get_warranty_claims_by_order_item(db, order_item_id)
+    return claims
+
+@router.get("/{claim_id}", response_model=WarrantyClaim)
+async def read_warranty_claim(
+    claim_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Получить конкретный гарантийный случай."""
+    claim = await get_warranty_claim(db, claim_id)
+    if not claim:
+        raise HTTPException(status_code=404, detail="Warranty claim not found")
+    return claim
+
+@router.put("/{claim_id}", response_model=WarrantyClaim)
+async def update_warranty_claim_endpoint(
+    claim_id: int,
+    claim: WarrantyClaimUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Обновить гарантийный случай."""
+    updated = await update_warranty_claim(db, claim_id, claim)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Warranty claim not found")
+    return updated
+
+@router.delete("/{claim_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_warranty_claim_endpoint(
+    claim_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Удалить гарантийный случай."""
+    deleted = await delete_warranty_claim(db, claim_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Warranty claim not found")
+    return None
 
 === 7. БЭКЕНД: БИЗНЕС-ЛОГИКА (сервисы) ===
 --- backend/src/services/address_cache.py ---
@@ -19354,6 +19673,151 @@ async def delete_installer(db: AsyncSession, installer_id: int):
         await db.commit()
         await db.refresh(installer)
     return installer
+--- backend/src/services/order_expenses.py ---
+# backend/src/services/order_expenses.py
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import Optional, List
+
+from src.models.order_expense import OrderExpense
+from src.schemas.order_expense import OrderExpenseCreate, OrderExpenseUpdate
+
+async def create_order_expense(db: AsyncSession, expense_data: OrderExpenseCreate) -> OrderExpense:
+    expense = OrderExpense(**expense_data.model_dump())
+    db.add(expense)
+    await db.commit()
+    await db.refresh(expense)
+    return expense
+
+async def get_order_expense(db: AsyncSession, expense_id: int) -> Optional[OrderExpense]:
+    result = await db.execute(
+        select(OrderExpense).where(OrderExpense.id == expense_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_order_expenses_by_order(db: AsyncSession, order_id: int) -> List[OrderExpense]:
+    result = await db.execute(
+        select(OrderExpense).where(OrderExpense.order_id == order_id)
+    )
+    return result.scalars().all()
+
+async def update_order_expense(db: AsyncSession, expense_id: int, expense_data: OrderExpenseUpdate) -> Optional[OrderExpense]:
+    expense = await get_order_expense(db, expense_id)
+    if not expense:
+        return None
+    update_data = expense_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(expense, key, value)
+    await db.commit()
+    await db.refresh(expense)
+    return expense
+
+async def delete_order_expense(db: AsyncSession, expense_id: int) -> bool:
+    expense = await get_order_expense(db, expense_id)
+    if not expense:
+        return False
+    await db.delete(expense)
+    await db.commit()
+    return True
+
+--- backend/src/services/order_installers.py ---
+# backend/src/services/order_installers.py
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import Optional, List
+
+from src.models.order_installer import OrderInstaller
+from src.schemas.order_installer import OrderInstallerCreate, OrderInstallerUpdate
+
+async def create_order_installer(db: AsyncSession, item_data: OrderInstallerCreate) -> OrderInstaller:
+    """Назначить монтажника на заказ."""
+    item = OrderInstaller(**item_data.model_dump())
+    db.add(item)
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+async def get_order_installer(db: AsyncSession, item_id: int) -> Optional[OrderInstaller]:
+    result = await db.execute(
+        select(OrderInstaller).where(OrderInstaller.id == item_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_order_installers_by_order(db: AsyncSession, order_id: int) -> List[OrderInstaller]:
+    result = await db.execute(
+        select(OrderInstaller).where(OrderInstaller.order_id == order_id)
+    )
+    return result.scalars().all()
+
+async def update_order_installer(db: AsyncSession, item_id: int, item_data: OrderInstallerUpdate) -> Optional[OrderInstaller]:
+    item = await get_order_installer(db, item_id)
+    if not item:
+        return None
+    update_data = item_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(item, key, value)
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+async def delete_order_installer(db: AsyncSession, item_id: int) -> bool:
+    item = await get_order_installer(db, item_id)
+    if not item:
+        return False
+    await db.delete(item)
+    await db.commit()
+    return True
+--- backend/src/services/order_items.py ---
+# backend/src/services/order_items.py
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import Optional, List
+
+from src.models.order_item import OrderItem
+from src.schemas.order_item import OrderItemCreate, OrderItemUpdate
+
+async def create_order_item(db: AsyncSession, item_data: OrderItemCreate) -> OrderItem:
+    """Создать новую позицию."""
+    item = OrderItem(**item_data.model_dump())
+    db.add(item)
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+async def get_order_item(db: AsyncSession, item_id: int) -> Optional[OrderItem]:
+    """Получить позицию по ID."""
+    result = await db.execute(
+        select(OrderItem).where(OrderItem.id == item_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_order_items_by_order(db: AsyncSession, order_id: int) -> List[OrderItem]:
+    """Получить все позиции заказа."""
+    result = await db.execute(
+        select(OrderItem).where(OrderItem.order_id == order_id).order_by(OrderItem.sort_order)
+    )
+    return result.scalars().all()
+
+async def update_order_item(db: AsyncSession, item_id: int, item_data: OrderItemUpdate) -> Optional[OrderItem]:
+    """Обновить позицию."""
+    item = await get_order_item(db, item_id)
+    if not item:
+        return None
+    update_data = item_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(item, key, value)
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+async def delete_order_item(db: AsyncSession, item_id: int) -> bool:
+    """Удалить позицию."""
+    item = await get_order_item(db, item_id)
+    if not item:
+        return False
+    await db.delete(item)
+    await db.commit()
+    return True
 --- backend/src/services/orders.py ---
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -19393,7 +19857,7 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
     await db.flush()  # получаем id
 
     # Загружаем все связанные объекты для сериализации
-    await db.refresh(order, attribute_names=['client', 'installer', 'finance', 'address_cache'])
+    await db.refresh(order, attribute_names=['client', 'installers', 'finance', 'address_cache'])
     await db.commit()
     return order
 
@@ -19404,7 +19868,7 @@ async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
         .where(Order.id == order_id)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installer),
+            selectinload(Order.installers),
             selectinload(Order.finance),
             selectinload(Order.address_cache)   # добавь
         )
@@ -19419,7 +19883,7 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[
         .limit(limit)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installer),
+            selectinload(Order.installers),
             selectinload(Order.finance),
             selectinload(Order.address_cache)   # добавь
         )
@@ -19454,7 +19918,7 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
 
     await db.commit()
     # Перезагружаем связи после коммита
-    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installer', 'finance'])
+    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installers', 'finance'])
     return order
 
 
@@ -19549,6 +20013,53 @@ def run_training():
     except subprocess.CalledProcessError as e:
         logger.error(f"Training failed: {e.stderr}")
         return False
+--- backend/src/services/warranty_claims.py ---
+# backend/src/services/warranty_claims.py
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from typing import Optional, List
+
+from src.models.warranty_claim import WarrantyClaim
+from src.schemas.warranty_claim import WarrantyClaimCreate, WarrantyClaimUpdate
+
+async def create_warranty_claim(db: AsyncSession, claim_data: WarrantyClaimCreate) -> WarrantyClaim:
+    claim = WarrantyClaim(**claim_data.model_dump())
+    db.add(claim)
+    await db.commit()
+    await db.refresh(claim)
+    return claim
+
+async def get_warranty_claim(db: AsyncSession, claim_id: int) -> Optional[WarrantyClaim]:
+    result = await db.execute(
+        select(WarrantyClaim).where(WarrantyClaim.id == claim_id)
+    )
+    return result.scalar_one_or_none()
+
+async def get_warranty_claims_by_order_item(db: AsyncSession, order_item_id: int) -> List[WarrantyClaim]:
+    result = await db.execute(
+        select(WarrantyClaim).where(WarrantyClaim.order_item_id == order_item_id)
+    )
+    return result.scalars().all()
+
+async def update_warranty_claim(db: AsyncSession, claim_id: int, claim_data: WarrantyClaimUpdate) -> Optional[WarrantyClaim]:
+    claim = await get_warranty_claim(db, claim_id)
+    if not claim:
+        return None
+    update_data = claim_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(claim, key, value)
+    await db.commit()
+    await db.refresh(claim)
+    return claim
+
+async def delete_warranty_claim(db: AsyncSession, claim_id: int) -> bool:
+    claim = await get_warranty_claim(db, claim_id)
+    if not claim:
+        return False
+    await db.delete(claim)
+    await db.commit()
+    return True
+
 --- backend/src/services/weather_service.py ---
 import aiohttp
 import logging
@@ -19872,6 +20383,7 @@ from datetime import date, datetime
 AmountField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
 
 class OrderExpenseBase(BaseModel):
+    order_id: int
     amount: AmountField
     description: Optional[str] = None
     expense_date: date
@@ -19903,6 +20415,7 @@ from datetime import datetime
 PaymentField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
 
 class OrderInstallerBase(BaseModel):
+    order_id: int
     installer_id: int
     role: str
     base_payment: PaymentField = Decimal(0)
@@ -19965,6 +20478,7 @@ PositiveInt = Annotated[int, Field(gt=0, description="Должно быть бо
 PriceField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2, description="Цена (не может быть отрицательной")]
 
 class OrderItemBase(BaseModel):
+    order_id: int
     item_type: str  # 'product' или 'service' — можно добавить Enum позже
     name: str
     quantity: PositiveInt = 1
@@ -19997,9 +20511,7 @@ from .finance import FinanceOut
 
 class OrderBase(BaseModel):
     client_id: Optional[int] = None
-    installer_id: Optional[int] = None
     status: Optional[str] = "Новый"
-    service_type: str
     warehouse: Optional[str] = None
     service_datetime: datetime
     delivery_datetime: Optional[datetime] = None
@@ -20030,7 +20542,6 @@ class OrderCreate(OrderBase):
     )
 
 class OrderUpdate(OrderBase):
-    service_type: Optional[str] = None
     service_datetime: Optional[datetime] = None
     delivery_datetime: Optional[datetime] = None
 
@@ -20110,6 +20621,7 @@ from datetime import date, datetime
 CostField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
 
 class WarrantyClaimBase(BaseModel):
+    order_item_id: int
     order_item_id: int
     claim_date: date
     description: Optional[str] = None
@@ -26016,6 +26528,7 @@ DECLARE
     v_installer_id INTEGER;
     v_order_id INTEGER;
 BEGIN
+    -- Получаем order_id через order_item
     SELECT order_id INTO v_order_id FROM order_items WHERE id = NEW.order_item_id;
 
     IF TG_OP = 'INSERT' THEN
@@ -26061,7 +26574,6 @@ BEGIN
             EXECUTE FUNCTION update_installer_stats_from_claims();
     END IF;
 END $$;
-
 -- -----------------------------------------------------------------
 -- 19. ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
 -- -----------------------------------------------------------------
@@ -26172,11 +26684,23 @@ RETURNS TRIGGER AS $$
 DECLARE
     affected_order_id INTEGER;
 BEGIN
-    IF TG_OP = 'DELETE' THEN
-        affected_order_id := OLD.order_id;
+    -- Определяем, из какой таблицы пришёл вызов
+    IF TG_TABLE_NAME = 'warranty_claims' THEN
+        -- Для гарантийных случаев order_id получаем через order_items
+        IF TG_OP = 'DELETE' THEN
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = OLD.order_item_id;
+        ELSE
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = NEW.order_item_id;
+        END IF;
     ELSE
-        affected_order_id := NEW.order_id;
+        -- Для остальных таблиц есть прямое поле order_id
+        IF TG_OP = 'DELETE' THEN
+            affected_order_id := OLD.order_id;
+        ELSE
+            affected_order_id := NEW.order_id;
+        END IF;
     END IF;
+
     PERFORM recalc_order_finance(affected_order_id);
     RETURN COALESCE(NEW, OLD);
 END;
@@ -26214,7 +26738,6 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
 END $$;
-
 -- -----------------------------------------------------------------
 -- 22. КОММЕНТАРИИ
 -- -----------------------------------------------------------------
@@ -26339,54 +26862,54 @@ COMMIT;
 ## Структура проекта
 
 === 16. ЛОГИ (последние 50 строк последнего файла) ===
---- Последний лог: backend/logs/app_2026-02-18.log ---
-2026-02-18 21:06:10,615 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
-FROM orders
-2026-02-18 21:06:10,615 - sqlalchemy.engine.Engine - INFO - [cached since 764.3s ago] ()
-2026-02-18 21:06:10,616 - sqlalchemy.engine.Engine - INFO - ROLLBACK
-2026-02-18 21:06:10,616 - sqlalchemy.engine.Engine - INFO - ROLLBACK
-2026-02-18 21:06:10,618 - sqlalchemy.engine.Engine - INFO - ROLLBACK
-2026-02-18 21:06:12,189 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
-2026-02-18 21:06:12,189 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.installer_id, orders.status, orders.service_type, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
-FROM orders 
- LIMIT $1::INTEGER OFFSET $2::INTEGER
-2026-02-18 21:06:12,189 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (100, 0)
-2026-02-18 21:06:12,190 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.purchase_price AS finance_purchase_price, finance.sale_price_client AS finance_sale_price_client, finance.installer_pay AS finance_installer_pay, finance.my_commission AS finance_my_commission, finance.profit AS finance_profit, finance.margin AS finance_margin, finance.profit_percent AS finance_profit_percent, finance.payment_state AS finance_payment_state, finance.installer_returned_money AS finance_installer_returned_money, finance.updated_at AS finance_updated_at, finance.created_at AS finance_created_at 
-FROM finance 
-WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER, $3::INTEGER, $4::INTEGER)
-2026-02-18 21:06:12,190 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (21, 22, 20, 19)
-2026-02-18 21:06:12,191 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
-FROM address_cache 
-WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
-2026-02-18 21:06:12,191 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] ('Московская область г.ивантеевка ул.смурякова д.1', 'Россия, Московская область, Мытищи, улица Карла Маркса, 4', 'Россия, Московская область, городской округ Пушкинский, Ивантеевка, улица Смурякова, 1, подъезд 1, этаж 6, кв. 26')
-2026-02-18 21:06:12,192 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
-FROM clients 
-WHERE clients.id IN ($1::INTEGER, $2::INTEGER, $3::INTEGER, $4::INTEGER)
-2026-02-18 21:06:12,192 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (22, 23, 24, 25)
-2026-02-18 21:06:12,193 - sqlalchemy.engine.Engine - INFO - SELECT installers.id AS installers_id, installers.full_name AS installers_full_name, installers.nickname AS installers_nickname, installers.phone AS installers_phone, installers.backup_phone AS installers_backup_phone, installers.specialization AS installers_specialization, installers.rating AS installers_rating, installers.base_price AS installers_base_price, installers.is_debtor AS installers_is_debtor, installers.comments AS installers_comments, installers.is_active AS installers_is_active, installers.is_in_funnel AS installers_is_in_funnel, installers.total_orders AS installers_total_orders, installers.poor_work_count AS installers_poor_work_count, installers.warranty_visits_count AS installers_warranty_visits_count, installers.last_incident_date AS installers_last_incident_date, installers.updated_at AS installers_updated_at, installers.created_at AS installers_created_at, installers.deleted_at AS installers_deleted_at 
-FROM installers 
-WHERE installers.id IN ($1::INTEGER)
-2026-02-18 21:06:12,193 - sqlalchemy.engine.Engine - INFO - [cached since 742.3s ago] (2,)
-2026-02-18 21:06:12,194 - sqlalchemy.engine.Engine - INFO - ROLLBACK
-2026-02-18 21:06:12,196 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
-2026-02-18 21:06:12,196 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.installer_id, orders.status, orders.service_type, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
-FROM orders 
- LIMIT $1::INTEGER OFFSET $2::INTEGER
-2026-02-18 21:06:12,197 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (100, 0)
-2026-02-18 21:06:12,199 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.purchase_price AS finance_purchase_price, finance.sale_price_client AS finance_sale_price_client, finance.installer_pay AS finance_installer_pay, finance.my_commission AS finance_my_commission, finance.profit AS finance_profit, finance.margin AS finance_margin, finance.profit_percent AS finance_profit_percent, finance.payment_state AS finance_payment_state, finance.installer_returned_money AS finance_installer_returned_money, finance.updated_at AS finance_updated_at, finance.created_at AS finance_created_at 
-FROM finance 
-WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER, $3::INTEGER, $4::INTEGER)
-2026-02-18 21:06:12,199 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (21, 22, 20, 19)
-2026-02-18 21:06:12,201 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
-FROM address_cache 
-WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
-2026-02-18 21:06:12,201 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] ('Московская область г.ивантеевка ул.смурякова д.1', 'Россия, Московская область, Мытищи, улица Карла Маркса, 4', 'Россия, Московская область, городской округ Пушкинский, Ивантеевка, улица Смурякова, 1, подъезд 1, этаж 6, кв. 26')
-2026-02-18 21:06:12,202 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
-FROM clients 
-WHERE clients.id IN ($1::INTEGER, $2::INTEGER, $3::INTEGER, $4::INTEGER)
-2026-02-18 21:06:12,202 - sqlalchemy.engine.Engine - INFO - [cached since 1180s ago] (22, 23, 24, 25)
-2026-02-18 21:06:12,203 - sqlalchemy.engine.Engine - INFO - SELECT installers.id AS installers_id, installers.full_name AS installers_full_name, installers.nickname AS installers_nickname, installers.phone AS installers_phone, installers.backup_phone AS installers_backup_phone, installers.specialization AS installers_specialization, installers.rating AS installers_rating, installers.base_price AS installers_base_price, installers.is_debtor AS installers_is_debtor, installers.comments AS installers_comments, installers.is_active AS installers_is_active, installers.is_in_funnel AS installers_is_in_funnel, installers.total_orders AS installers_total_orders, installers.poor_work_count AS installers_poor_work_count, installers.warranty_visits_count AS installers_warranty_visits_count, installers.last_incident_date AS installers_last_incident_date, installers.updated_at AS installers_updated_at, installers.created_at AS installers_created_at, installers.deleted_at AS installers_deleted_at 
-FROM installers 
-WHERE installers.id IN ($1::INTEGER)
-2026-02-18 21:06:12,203 - sqlalchemy.engine.Engine - INFO - [cached since 742.3s ago] (2,)
-2026-02-18 21:06:12,205 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+--- Последний лог: backend/logs/app_2026-02-27.log ---
+    raise WouldBlock
+anyio.WouldBlock
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 78, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/anyio/streams/memory.py", line 118, in receive
+    raise EndOfStream
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/backend/src/core/logging.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 84, in call_next
+    raise app_exc
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/base.py", line 70, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 79, in __call__
+    raise exc
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 68, in __call__
+    await self.app(scope, receive, sender)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 20, in __call__
+    raise e
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 17, in __call__
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 718, in __call__
+    await route.handle(scope, receive, send)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/starlette/routing.py", line 66, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 292, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andre/Рабочий стол/OLEG_CRM/CRM/venv/lib/python3.12/site-packages/fastapi/routing.py", line 155, in serialize_response
+    raise ResponseValidationError(
+fastapi.exceptions.ResponseValidationError: 3 validation errors:
+  {'type': 'literal_error', 'loc': ('response', 'fault_type'), 'msg': "Input should be 'manufacturer', 'installer' or 'other'", 'input': <FaultType.manufacturer: 'manufacturer'>, 'ctx': {'expected': "'manufacturer', 'installer' or 'other'"}, 'url': 'https://errors.pydantic.dev/2.5/v/literal_error'}
+  {'type': 'literal_error', 'loc': ('response', 'cost_covered_by'), 'msg': "Input should be 'manufacturer', 'installer' or 'oleg'", 'input': <CostCoveredBy.oleg: 'oleg'>, 'ctx': {'expected': "'manufacturer', 'installer' or 'oleg'"}, 'url': 'https://errors.pydantic.dev/2.5/v/literal_error'}
+  {'type': 'literal_error', 'loc': ('response', 'status'), 'msg': "Input should be 'open', 'in_progress', 'closed' or 'rejected'", 'input': <ClaimStatus.open: 'open'>, 'ctx': {'expected': "'open', 'in_progress', 'closed' or 'rejected'"}, 'url': 'https://errors.pydantic.dev/2.5/v/literal_error'}
+
