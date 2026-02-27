@@ -3282,3 +3282,10 @@ FROM finance
 WHERE finance.order_id = $1::INTEGER
 2026-02-27 17:30:57,332 - sqlalchemy.engine.Engine - INFO - [cached since 183.1s ago] (3,)
 2026-02-27 17:30:57,334 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-02-27 17:51:15,477 - src.core.logging - INFO - Starting CRM application
+2026-02-27 17:51:15,477 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-27 17:51:15,477 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-27 17:51:15,477 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-27 17:51:15,477 - apscheduler.scheduler - INFO - Added job "daily_backup_and_report" to job store "default"
+2026-02-27 17:51:15,478 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-27 17:51:15,478 - src.core.logging - INFO - Scheduler started
