@@ -5,7 +5,7 @@
     padding: 30px;
     background: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .crm-form__section:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .crm-form__legend {
@@ -181,15 +181,55 @@ textarea.crm-form__input {
     cursor: pointer;
 }
 
+/* Кнопка "Добавить позицию" */
+.crm-form__button--secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.crm-form__button--secondary:hover {
+    background: var(--border-color);
+}
+
+/* Блок позиции (уже используется инлайн-стили, но лучше вынести) */
+.item-block {
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.item-remove-btn {
+    color: red;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.item-remove-btn:hover {
+    opacity: 0.7;
+}
+
 /* Стили для подсказок Яндекс.Карт */
 .ymaps-2-1-79-suggest {
     background: var(--card-bg) !important;
     border: 1px solid var(--border-color) !important;
     border-radius: 8px !important;
 }
+
 .ymaps-2-1-79-suggest__item {
     color: var(--text-primary) !important;
 }
+
 .ymaps-2-1-79-suggest__item:hover {
     background: var(--accent-color) !important;
     color: white !important;
@@ -278,6 +318,26 @@ textarea.crm-form__input {
     .crm-form__toggle input[type="radio"] {
         width: 22px;
         height: 22px;
+    }
+
+    select.crm-form__input {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        width: 100%;
+        padding-right: 25px;
+        /* место для стрелки */
+        font-size: 14px;
+        /* чуть мельче, чтобы влезало больше */
+    }
+
+    /* Сами опции тоже стараемся переносить (но не все браузеры поддерживают) */
+    select.crm-form__input option {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
     }
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Select from 'react-select';
 import api from "../services/api";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
@@ -11,21 +12,16 @@ import "../styles/order-form.css";
 const NewOrder = () => {
   const navigate = useNavigate();
 
-  // Состояния для формы
+  // Состояния для клиента и заказа
   const [formData, setFormData] = useState({
     fio: "",
     phone: "",
     backup_phone: "",
     address: "",
-    model: "",
     service_datetime: "",
     delivery_datetime: "",
     appointment_date: "",
     warehouse: "Основной",
-    buy_price: "",
-    sell_price_ac: "",
-    price_install: "",
-    my_commission: "",
     status: "Новый",
     promises: "",
     installer_opinion: "",
@@ -33,18 +29,32 @@ const NewOrder = () => {
     marker_color: "blue",
   });
 
-  // Состояния для загрузки списков
+  // Состояния для списков
   const [clients, setClients] = useState([]);
   const [installers, setInstallers] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState("");
   const [isNewClient, setIsNewClient] = useState(true);
   const [loadingLists, setLoadingLists] = useState(true);
 
+  // Состояние для позиций заказа
+  const [items, setItems] = useState([
+    {
+      item_type: "product",
+      name: "",
+      quantity: 1,
+      purchase_price: 0,
+      sale_price: 0,
+      warranty_manufacturer: 0,
+      warranty_master: 0,
+      sort_order: 0,
+    },
+  ]);
+
   // Общие состояния
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Загружаем клиентов и монтажников при монтировании
+  // Загружаем клиентов и монтажников
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,10 +75,80 @@ const NewOrder = () => {
     fetchData();
   }, []);
 
+  // Преобразуем клиентов в формат для react-select
+  const clientOptions = clients.map(client => ({
+    value: client.id,
+    label: `${client.full_name} (${client.phone}) — ${client.address}`
+  }));
+
+  // Стили для react-select (аналогично OrdersList)
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: 'var(--input-bg)',
+      borderColor: state.isFocused ? 'var(--accent-color)' : 'var(--border-color)',
+      boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+      '&:hover': { borderColor: 'var(--accent-color)' },
+      padding: '2px',
+      borderRadius: '8px',
+      minHeight: '42px',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: 'var(--input-bg)',
+      borderRadius: '8px',
+      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+      zIndex: 1000,
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? 'var(--accent-color)' : state.isFocused ? 'var(--border-color)' : 'var(--input-bg)',
+      color: state.isSelected ? 'white' : 'var(--text-primary)',
+      cursor: 'pointer',
+      padding: '10px 12px',
+      whiteSpace: 'normal',        // разрешаем перенос строк
+      wordWrap: 'break-word',
+    }),
+    singleValue: (provided) => ({ ...provided, color: 'var(--text-primary)' }),
+    input: (provided) => ({ ...provided, color: 'var(--text-primary)' }),
+    placeholder: (provided) => ({ ...provided, color: 'var(--text-secondary)' }),
+    dropdownIndicator: (provided) => ({ ...provided, color: 'var(--text-secondary)' }),
+    indicatorSeparator: (provided) => ({ ...provided, backgroundColor: 'var(--border-color)' }),
+  };
+
+  // Обработчики для формы
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Обработчики для позиций
+  const addItem = () => {
+    setItems([
+      ...items,
+      {
+        item_type: "product",
+        name: "",
+        quantity: 1,
+        purchase_price: 0,
+        sale_price: 0,
+        warranty_manufacturer: 0,
+        warranty_master: 0,
+        sort_order: items.length,
+      },
+    ]);
+  };
+
+  const removeItem = (index) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  const handleItemChange = (index, field, value) => {
+    const newItems = [...items];
+    newItems[index][field] = value;
+    setItems(newItems);
+  };
+
+  // Отправка формы
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -88,7 +168,6 @@ const NewOrder = () => {
           address: formData.address,
           comments: formData.installer_opinion || "",
         };
-        console.log("Sending client data:", clientData);
         const client = await api.createClient(clientData);
         clientId = client.id;
       } else {
@@ -111,7 +190,7 @@ const NewOrder = () => {
       const orderData = {
         client_id: clientId,
         installer_id: formData.installer_id || null,
-        service_type: formData.model || "Установка кондиционера",
+        service_type: "Установка кондиционера", // временно, позже уберём
         service_datetime: service_datetime,
         delivery_datetime: delivery_datetime,
         status: formData.status,
@@ -122,16 +201,21 @@ const NewOrder = () => {
       };
       const order = await api.createOrder(orderData);
 
-      // 4. Создаём финансовую запись
-      const financeData = {
-        order_id: order.id,
-        purchase_price: parseFloat(formData.buy_price) || 0,
-        sale_price_client: parseFloat(formData.sell_price_ac) || 0,
-        installer_pay: parseFloat(formData.price_install) || 0,
-        my_commission: parseFloat(formData.my_commission) || 0,
-        payment_state: "Не оплачен",
-      };
-      await api.createFinance(financeData);
+      // 4. Создаём позиции заказа
+      for (const item of items) {
+        if (!item.name) continue; // пропускаем пустые
+        await api.createOrderItem({
+          order_id: order.id,
+          item_type: item.item_type,
+          name: item.name,
+          quantity: item.quantity,
+          purchase_price: item.purchase_price,
+          sale_price: item.sale_price,
+          warranty_manufacturer: item.warranty_manufacturer,
+          warranty_master: 0, // пока оставляем 0
+          sort_order: item.sort_order,
+        });
+      }
 
       // 5. Перенаправляем на список заказов
       navigate("/orders");
@@ -146,11 +230,11 @@ const NewOrder = () => {
     <div className="page">
       <Header />
       <main className="page__main">
-        <form id="orderForm" className="crm-form" onSubmit={handleSubmit}>
+        <form className="crm-form" onSubmit={handleSubmit}>
           <h1>Новый заказ</h1>
           {error && <div className="error">{error}</div>}
           {loadingLists && (
-            <div style={{ textAlign: "center", margin: "20px 0" }}>
+            <div className="loader-wrapper">
               <Loader size="small" text="Загрузка клиентов и монтажников..." />
             </div>
           )}
@@ -159,26 +243,23 @@ const NewOrder = () => {
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">👤 Карточка клиента</legend>
 
-            {/* Переключатель новый/существующий */}
-            <div className="crm-form__toggle" style={{ marginBottom: "15px" }}>
-              <label style={{ marginRight: "20px" }}>
+            <div className="crm-form__toggle">
+              <label>
                 <input
                   type="radio"
                   name="clientType"
-                  value="new"
                   checked={isNewClient}
                   onChange={() => setIsNewClient(true)}
-                />{" "}
+                />
                 Новый клиент
               </label>
               <label>
                 <input
                   type="radio"
                   name="clientType"
-                  value="existing"
                   checked={!isNewClient}
                   onChange={() => setIsNewClient(false)}
-                />{" "}
+                />
                 Существующий клиент
               </label>
             </div>
@@ -230,43 +311,27 @@ const NewOrder = () => {
                     placeholder="Начните вводить адрес..."
                   />
                 </div>
-                <div className="crm-form__field crm-form__field--full">
-                  <label className="crm-form__label">Модель кондиционера</label>
-                  <input
-                    type="text"
-                    name="model"
-                    value={formData.model}
-                    onChange={handleChange}
-                    className="crm-form__input"
-                    placeholder="Haier Coral AS25H"
-                  />
-                </div>
               </div>
             ) : (
               <div className="crm-form__field crm-form__field--full">
                 <label className="crm-form__label">Выберите клиента</label>
-                <select
+                <Select
                   name="clientId"
-                  value={selectedClientId}
-                  onChange={(e) => setSelectedClientId(e.target.value)}
-                  className="crm-form__input"
-                  required={!isNewClient}
-                >
-                  <option value="">-- Выберите клиента --</option>
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.full_name} ({client.phone}) — {client.address}
-                    </option>
-                  ))}
-                </select>
+                  options={clientOptions}
+                  value={clientOptions.find(option => option.value === selectedClientId) || null}
+                  onChange={(selectedOption) => setSelectedClientId(selectedOption ? selectedOption.value : '')}
+                  placeholder="-- Выберите клиента --"
+                  isClearable
+                  styles={customSelectStyles}
+                />
               </div>
             )}
           </fieldset>
 
-          {/* Планирование и Логистика */}
+          {/* Планирование и логистика */}
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">
-              📅 Планирование и Логистика
+              📅 Планирование и логистика
             </legend>
             <div className="crm-form__grid">
               <div className="crm-form__field">
@@ -282,9 +347,7 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Дата и время доставки (склад)
-                </label>
+                <label className="crm-form__label">Дата и время доставки</label>
                 <input
                   type="datetime-local"
                   name="delivery_datetime"
@@ -294,7 +357,9 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">Установка (договор)</label>
+                <label className="crm-form__label">
+                  Дата установки (договор)
+                </label>
                 <input
                   type="date"
                   name="appointment_date"
@@ -315,8 +380,6 @@ const NewOrder = () => {
                   <option value="Транзит">Транзит</option>
                 </select>
               </div>
-
-              {/* Выбор монтажника */}
               <div className="crm-form__field">
                 <label className="crm-form__label">Монтажник</label>
                 <select
@@ -328,18 +391,13 @@ const NewOrder = () => {
                   <option value="">-- Не назначен --</option>
                   {installers.map((inst) => (
                     <option key={inst.id} value={inst.id}>
-                      {inst.full_name}{" "}
-                      {inst.nickname ? `(${inst.nickname})` : ""}
+                      {inst.full_name} {inst.nickname && `(${inst.nickname})`}
                     </option>
                   ))}
                 </select>
               </div>
-
-              {/* Цвет маркера */}
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Цвет маркера (для карты)
-                </label>
+                <label className="crm-form__label">Цвет маркера</label>
                 <select
                   name="marker_color"
                   value={formData.marker_color}
@@ -355,63 +413,162 @@ const NewOrder = () => {
             </div>
           </fieldset>
 
-          {/* Финансы */}
-          <fieldset className="crm-form__section crm-form__section--finance">
-            <legend className="crm-form__legend">💰 Финансы</legend>
-            <div className="crm-form__grid">
-              <div className="crm-form__field">
-                <label className="crm-form__label">Закупка (₽)</label>
-                <input
-                  type="number"
-                  name="buy_price"
-                  value={formData.buy_price}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                  placeholder="0"
-                />
+          {/* Позиции заказа */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">📦 Позиции заказа</legend>
+            {items.map((item, index) => (
+              <div
+                key={index}
+                className="item-block"
+                style={{
+                  border: "1px solid var(--border-color)",
+                  padding: "15px",
+                  marginBottom: "15px",
+                  borderRadius: "8px",
+                }}
+              >
+                <div
+                  className="item-header"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <h4>Позиция #{index + 1}</h4>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="item-remove-btn"
+                      style={{
+                        color: "red",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "1.2rem",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <div className="crm-form__grid">
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Тип</label>
+                    <select
+                      value={item.item_type}
+                      onChange={(e) =>
+                        handleItemChange(index, "item_type", e.target.value)
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="product">Товар</option>
+                      <option value="service">Услуга</option>
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Название</label>
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) =>
+                        handleItemChange(index, "name", e.target.value)
+                      }
+                      className="crm-form__input"
+                      required
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Количество</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          "quantity",
+                          parseInt(e.target.value) || 1,
+                        )
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+
+                  {/* Поле закупки только для товаров */}
+                  {item.item_type === "product" && (
+                    <div className="crm-form__field">
+                      <label className="crm-form__label">Закупка (₽)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.purchase_price}
+                        onChange={(e) =>
+                          handleItemChange(
+                            index,
+                            "purchase_price",
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
+                        className="crm-form__input"
+                      />
+                    </div>
+                  )}
+
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Продажа (₽)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.sale_price}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          "sale_price",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Гарантия (лет)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.warranty_manufacturer}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          "warranty_manufacturer",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Продажа (₽)</label>
-                <input
-                  type="number"
-                  name="sell_price_ac"
-                  value={formData.sell_price_ac}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                  placeholder="0"
-                />
-              </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Монтажнику (₽)</label>
-                <input
-                  type="number"
-                  name="price_install"
-                  value={formData.price_install}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                  placeholder="0"
-                />
-              </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Моя комиссия (₽)</label>
-                <input
-                  type="number"
-                  name="my_commission"
-                  value={formData.my_commission}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                  placeholder="0"
-                />
-              </div>
-            </div>
+            ))}
+            <button
+              type="button"
+              onClick={addItem}
+              className="crm-form__button crm-form__button--secondary"
+            >
+              ➕ Добавить позицию
+            </button>
           </fieldset>
 
-          {/* Статус и Заметки */}
+          {/* Статус и заметки */}
           <fieldset className="crm-form__section">
-            <legend className="crm-form__legend">📝 Статус и Заметки</legend>
+            <legend className="crm-form__legend">📝 Статус и заметки</legend>
             <div className="crm-form__grid">
               <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">Текущий статус</label>
+                <label className="crm-form__label">Статус заказа</label>
                 <select
                   name="status"
                   value={formData.status}
@@ -420,8 +577,7 @@ const NewOrder = () => {
                 >
                   <option value="Новый">Новый</option>
                   <option value="Ждет установщика">Ждет установщика</option>
-                  <option value="Выполнен">Выполнен</option>{" "}
-                  {/* Было "Завершено" */}
+                  <option value="Выполнен">Выполнен</option>
                 </select>
               </div>
               <div className="crm-form__field crm-form__field--full">
@@ -431,17 +587,21 @@ const NewOrder = () => {
                   value={formData.promises}
                   onChange={handleChange}
                   className="crm-form__input"
+                  rows="3"
                   placeholder="Уточнить время за час..."
                 />
               </div>
               <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">Мнение монтажника</label>
+                <label className="crm-form__label">
+                  Заметки (мнение монтажника)
+                </label>
                 <textarea
                   name="installer_opinion"
                   value={formData.installer_opinion}
                   onChange={handleChange}
                   className="crm-form__input"
-                  placeholder="Сложный доступ к блоку..."
+                  rows="3"
+                  placeholder="Особенности доступа..."
                 />
               </div>
             </div>
@@ -453,7 +613,7 @@ const NewOrder = () => {
               className="crm-form__button crm-form__button--submit"
               disabled={loading || loadingLists}
             >
-              {loading ? "Сохранение..." : "🚀 Создать карточку заказа"}
+              {loading ? "Сохранение..." : "🚀 Создать заказ"}
             </button>
           </div>
         </form>
