@@ -3,13 +3,11 @@
 # Имя лога с временной меткой
 LOG_FILE="lumen_audit_$(date +%Y%m%d_%H%M%S).log"
 
-
-echo "=== LUMEN ALPHA AUDIT SCRIPT ==="
+echo "=== LUMEN ALPHA AUDIT SCRIPT (ПОЛНАЯ КАРТИНА) ==="
 echo "Вывод будет сохранён в: $LOG_FILE"
 echo "============================================================================"
 
-
-# Функция для безопасного вывода файла (если существует)
+# Функция для безопасного вывода одного файла
 safe_cat() {
     local file="$1"
     if [[ -f "$file" ]]; then
@@ -23,76 +21,106 @@ safe_cat() {
     fi
 }
 
+# Функция для рекурсивного вывода всех файлов с заданным расширением в директории
+safe_find_cat() {
+    local dir="$1"
+    local ext="$2"
+    if [[ -d "$dir" ]]; then
+        find "$dir" -type f -name "*.$ext" | sort | while read -r f; do
+            safe_cat "$f"
+        done
+    else
+        echo "--- $dir ---"
+        echo "[Директория не найдена]"
+        echo ""
+    fi
+}
+
 # Основной сбор данных
 {
-    echo "=== 1. СТРУКТУРА ПРОЕКТА ==="
-    tree -I 'venv|__pycache__|node_modules|.git|site-packages'
+    echo "=== 1. СТРУКТУРА ПРОЕКТА (деревья) ==="
+    echo "--- Корень проекта ---"
+    tree -I 'venv|__pycache__|node_modules|.git|site-packages|*.log|*.pyc|*.egg-info|build|dist' -L 3
     
-    echo "=== 2. БЭКЕНД: ОСНОВНЫЕ КОНФИГУРАЦИИ ==="
-    safe_cat backend/src/core/config.py
-    safe_cat backend/src/core/db.py
-    safe_cat backend/src/main.py
+    echo "--- backend/src ---"
+    tree backend/src -I '__pycache__|*.pyc' -L 3
+    
+    echo "--- frontend/src ---"
+    tree frontend/src -I 'node_modules' -L 3
 
-    echo "=== 3. БЭКЕНД: МОДЕЛИ БД (SQLAlchemy) ==="
-    safe_cat backend/src/models/clients.py
-    safe_cat backend/src/models/orders.py
-    safe_cat backend/src/models/finance.py
-    safe_cat backend/src/models/installers.py
-    safe_cat backend/src/models/address_cache.py
-    safe_cat backend/src/models/weather.py
+    echo "=== 2. ИНФОРМАЦИЯ О ВЕРСИЯХ И ЗАВИСИМОСТЯХ ==="
+    echo "--- Python зависимости (pip list) ---"
+    pip list 2>/dev/null || echo "pip не найден или не в виртуальном окружении"
+    echo ""
+    echo "--- Node зависимости (npm list --depth=0) ---"
+    if [[ -d frontend ]]; then
+        (cd frontend && npm list --depth=0 2>/dev/null) || echo "npm list не удался"
+    else
+        echo "Папка frontend не найдена"
+    fi
+    echo ""
 
-    echo "=== 4. БЭКЕНД: API-ЭНДПОИНТЫ (роутеры) ==="
-    safe_cat backend/src/routers/clients.py
-    safe_cat backend/src/routers/orders.py
-    safe_cat backend/src/routers/finance.py
-    safe_cat backend/src/routers/auth.py
-    safe_cat backend/src/routers/installers.py
-    safe_cat backend/src/routers/reminders.py
-
-    echo "=== 5. БЭКЕНД: БИЗНЕС-ЛОГИКА (сервисы) ==="
-    safe_cat backend/src/services/clients.py
-    safe_cat backend/src/services/orders.py
-    safe_cat backend/src/services/finance.py
-    safe_cat backend/src/services/geocoding.py
-    safe_cat backend/src/services/weather_service.py
-    safe_cat backend/src/services/reminder_service.py
-
-    echo "=== 6. ФРОНТЕНД: ОСНОВНЫЕ КОМПОНЕНТЫ ==="
-    safe_cat frontend/src/App.js
-    safe_cat frontend/src/components/Header.jsx
-    safe_cat frontend/src/components/Footer.jsx
-    safe_cat frontend/src/components/OrderMap.jsx
-
-    echo "=== 7. ФРОНТЕНД: СТРАНИЦЫ (ключевые) ==="
-    safe_cat frontend/src/pages/Login.jsx
-    safe_cat frontend/src/pages/Dashboard.jsx
-    safe_cat frontend/src/pages/OrdersList.jsx
-    safe_cat frontend/src/pages/NewOrder.jsx
-    safe_cat frontend/src/pages/InstallersList.jsx
-
-
-    echo "=== 8. ФРОНТЕНД: API-ИНТЕГРАЦИЯ ==="
-    safe_cat frontend/src/services/api.js
-
-
-    echo "=== 9. БАЗА ДАННЫХ: СХЕМА ==="
-    safe_cat database/init.sql
-
-    echo "=== 10. ИНФРАСТРУКТУРА: ДОКЕР И ДЕПЛОЙ ==="
+    echo "=== 3. КОНФИГУРАЦИОННЫЕ ФАЙЛЫ ==="
+    safe_cat .gitignore
     safe_cat docker-compose.yml
     safe_cat Dockerfile
+    safe_cat install-protection.sh
+    safe_cat requirements.txt
+    safe_cat frontend/package.json
+    safe_cat frontend/package-lock.json
+    safe_cat pgagent.sql
+    safe_cat test_compatibility.py
 
+    echo "=== 4. БЭКЕНД: ЯДРО И НАСТРОЙКИ ==="
+    safe_find_cat "backend/src/core" "py"
+    safe_cat backend/src/main.py
+    safe_cat backend/src/auth.py
 
-    echo "=== 11. ML-СЕРВИС: ОСНОВНЫЕ МОДУЛИ ==="
-    safe_cat backend/ml_service/app.py
-    safe_cat backend/ml_service/train.py
-    safe_cat backend/ml_service/run_weather.py
-    safe_cat backend/ml_service/build_features.py
+    echo "=== 5. БЭКЕНД: МОДЕЛИ БД (SQLAlchemy) ==="
+    safe_find_cat "backend/src/models" "py"
 
-    echo "=== 12. ЛОГИ (последний файл) ==="
-    last_log=$(ls -t backend/src/logs/app_*.log 2>/dev/null | head -1)
+    echo "=== 6. БЭКЕНД: API-ЭНДПОИНТЫ (роутеры) ==="
+    safe_find_cat "backend/src/routers" "py"
+
+    echo "=== 7. БЭКЕНД: БИЗНЕС-ЛОГИКА (сервисы) ==="
+    safe_find_cat "backend/src/services" "py"
+
+    echo "=== 8. БЭКЕНД: СХЕМЫ PYDANTIC ==="
+    safe_find_cat "backend/src/schemas" "py"
+
+    echo "=== 9. БЭКЕНД: ML-СЕРВИС ==="
+    safe_find_cat "backend/ml_service" "py"
+    safe_cat backend/ml_service/requirements_ml.txt
+    safe_cat backend/ml_service/Dockerfile.ml
+
+    echo "=== 10. ФРОНТЕНД: ОСНОВНЫЕ КОМПОНЕНТЫ ==="
+    safe_cat frontend/src/App.js
+    safe_find_cat "frontend/src/components" "jsx"
+    safe_find_cat "frontend/src/components" "js"
+
+    echo "=== 11. ФРОНТЕНД: СТРАНИЦЫ ==="
+    safe_find_cat "frontend/src/pages" "jsx"
+    safe_find_cat "frontend/src/pages" "js"
+
+    echo "=== 12. ФРОНТЕНД: API-ИНТЕГРАЦИЯ ==="
+    safe_find_cat "frontend/src/services" "js"
+
+    echo "=== 13. ФРОНТЕНД: СТИЛИ И КОНТЕКСТЫ ==="
+    safe_find_cat "frontend/src/styles" "css"
+    safe_find_cat "frontend/src/contexts" "js"
+
+    echo "=== 14. БАЗА ДАННЫХ: СХЕМА ==="
+    safe_cat database/init.sql
+
+    echo "=== 15. ДОКУМЕНТАЦИЯ ==="
+    safe_find_cat "docs" "md"
+    safe_cat README.md
+
+    echo "=== 16. ЛОГИ (последние 50 строк последнего файла) ==="
+    last_log=$(ls -t backend/logs/app_*.log 2>/dev/null | head -1)
     if [[ -n "$last_log" ]]; then
-        cat "$last_log"
+        echo "--- Последний лог: $last_log ---"
+        tail -n 50 "$last_log"
     else
         echo "[Логи не найдены]"
     fi
