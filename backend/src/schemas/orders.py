@@ -7,9 +7,7 @@ from .finance import FinanceOut
 
 class OrderBase(BaseModel):
     client_id: Optional[int] = None
-    installer_id: Optional[int] = None
     status: Optional[str] = "Новый"
-    service_type: str
     warehouse: Optional[str] = None
     service_datetime: datetime
     delivery_datetime: Optional[datetime] = None
@@ -40,7 +38,6 @@ class OrderCreate(OrderBase):
     )
 
 class OrderUpdate(OrderBase):
-    service_type: Optional[str] = None
     service_datetime: Optional[datetime] = None
     delivery_datetime: Optional[datetime] = None
 

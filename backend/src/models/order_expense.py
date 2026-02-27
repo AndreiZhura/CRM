@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Date, DateT
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.core.db import Base
+from sqlalchemy import CheckConstraint
 
 class OrderExpense(Base):
     __tablename__ = "order_expenses"

@@ -11,6 +11,7 @@ from src.core.logging import logger
 from src.core.logging import LoggingMiddleware
 from src.core.scheduler import scheduler
 from src.routers import auth
+from src.routers import order_items  # импорт
 
 
 app = FastAPI(title="СRM Олега")
@@ -30,6 +31,7 @@ app.include_router(finance.router)
 app.include_router(reminders.router)
 app.add_middleware(LoggingMiddleware)
 app.include_router(auth.router)
+app.include_router(order_items.router)
 
 @app.on_event("startup")
 async def startup_event():

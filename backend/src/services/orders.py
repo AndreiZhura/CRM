@@ -36,7 +36,7 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
     await db.flush()  # получаем id
 
     # Загружаем все связанные объекты для сериализации
-    await db.refresh(order, attribute_names=['client', 'installer', 'finance', 'address_cache'])
+    await db.refresh(order, attribute_names=['client', 'installers', 'finance', 'address_cache'])
     await db.commit()
     return order
 
@@ -47,7 +47,7 @@ async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
         .where(Order.id == order_id)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installer),
+            selectinload(Order.installers),
             selectinload(Order.finance),
             selectinload(Order.address_cache)   # добавь
         )
@@ -62,7 +62,7 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[
         .limit(limit)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installer),
+            selectinload(Order.installers),
             selectinload(Order.finance),
             selectinload(Order.address_cache)   # добавь
         )
@@ -97,7 +97,7 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
 
     await db.commit()
     # Перезагружаем связи после коммита
-    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installer', 'finance'])
+    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installers', 'finance'])
     return order
 
 

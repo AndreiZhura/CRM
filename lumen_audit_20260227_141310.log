@@ -108,7 +108,13 @@ backend/src
 │   ├── finance.py
 │   ├── __init__.py
 │   ├── installers.py
-│   └── orders.py
+│   ├── order_expense.py
+│   ├── order_installer.py
+│   ├── order_item_installer.py
+│   ├── order_item.py
+│   ├── orders.py
+│   ├── payment.py
+│   └── warranty_claim.py
 └── services
     ├── address_cache.py
     ├── backup_service.py
@@ -124,7 +130,7 @@ backend/src
     ├── weather_service.py
     └── yandex_disk.py
 
-7 directories, 53 files
+7 directories, 59 files
 --- frontend/src ---
 frontend/src
 ├── App.js
@@ -19798,7 +19804,12 @@ class FinanceOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 --- backend/src/schemas/__init__.py ---
-
+from .order_item import OrderItem, OrderItemCreate, OrderItemUpdate
+from .order_installer import OrderInstaller, OrderInstallerCreate, OrderInstallerUpdate
+from .order_item_installer import OrderItemInstaller, OrderItemInstallerCreate, OrderItemInstallerUpdate
+from .order_expense import OrderExpense, OrderExpenseCreate, OrderExpenseUpdate
+from .warranty_claim import WarrantyClaim, WarrantyClaimCreate, WarrantyClaimUpdate
+from .payment import Payment, PaymentCreate, PaymentUpdate
 --- backend/src/schemas/installers.py ---
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
@@ -19849,6 +19860,131 @@ class InstallerOut(InstallerBase):
     created_at: datetime
     updated_at: datetime
     deleted_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+--- backend/src/schemas/order_expense.py ---
+# backend/src/schemas/order_expense.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated
+from decimal import Decimal
+from datetime import date, datetime
+
+AmountField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
+
+class OrderExpenseBase(BaseModel):
+    amount: AmountField
+    description: Optional[str] = None
+    expense_date: date
+    category: str = "other"
+
+class OrderExpenseCreate(OrderExpenseBase):
+    pass
+
+class OrderExpenseUpdate(OrderExpenseBase):
+    amount: Optional[AmountField] = None
+    description: Optional[str] = None
+    expense_date: Optional[date] = None
+    category: Optional[str] = None
+
+class OrderExpense(OrderExpenseBase):
+    id: int
+    order_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+--- backend/src/schemas/order_installer.py ---
+# backend/src/schemas/order_installer.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated
+from decimal import Decimal
+from datetime import datetime
+
+PaymentField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
+
+class OrderInstallerBase(BaseModel):
+    installer_id: int
+    role: str
+    base_payment: PaymentField = Decimal(0)
+    is_primary: bool = False
+
+class OrderInstallerCreate(OrderInstallerBase):
+    pass
+
+class OrderInstallerUpdate(OrderInstallerBase):
+    installer_id: Optional[int] = None
+    role: Optional[str] = None
+    base_payment: Optional[PaymentField] = None
+    is_primary: Optional[bool] = None
+
+class OrderInstaller(OrderInstallerBase):
+    id: int
+    order_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+--- backend/src/schemas/order_item_installer.py ---
+# backend/src/schemas/order_item_installer.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated
+from decimal import Decimal
+from datetime import datetime
+
+PaymentField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
+
+class OrderItemInstallerBase(BaseModel):
+    installer_id: int
+    payment_amount: PaymentField = Decimal(0)
+    work_description: Optional[str] = None
+
+class OrderItemInstallerCreate(OrderItemInstallerBase):
+    pass
+
+class OrderItemInstallerUpdate(OrderItemInstallerBase):
+    installer_id: Optional[int] = None
+    payment_amount: Optional[PaymentField] = None
+    work_description: Optional[str] = None
+
+class OrderItemInstaller(OrderItemInstallerBase):
+    id: int
+    order_item_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+--- backend/src/schemas/order_item.py ---
+# backend/src/schemas/order_item.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated
+from decimal import Decimal
+from datetime import datetime
+
+# Определяем типы с ограничениями для удобства переиспользования
+PositiveInt = Annotated[int, Field(gt=0, description="Должно быть больше 0")]
+PriceField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2, description="Цена (не может быть отрицательной")]
+
+class OrderItemBase(BaseModel):
+    item_type: str  # 'product' или 'service' — можно добавить Enum позже
+    name: str
+    quantity: PositiveInt = 1
+    purchase_price: PriceField = Decimal(0)
+    sale_price: PriceField = Decimal(0)
+    warranty_manufacturer: int = 0
+    warranty_master: int = 0
+    sort_order: Optional[int] = 0
+
+class OrderItemCreate(OrderItemBase):
+    pass
+
+class OrderItemUpdate(OrderItemBase):
+    pass
+
+class OrderItem(OrderItemBase):
+    id: int
+    order_id: int
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 --- backend/src/schemas/orders.py ---
@@ -19930,6 +20066,84 @@ class OrderOut(OrderBase):
             elif info.field_name == 'lon':
                 return float(address_cache.lon)
         return None
+--- backend/src/schemas/payment.py ---
+# backend/src/schemas/payment.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated, Literal
+from decimal import Decimal
+from datetime import date, datetime
+
+AmountField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
+
+class PaymentBase(BaseModel):
+    order_id: int
+    payment_type: Literal["client", "installer"]
+    installer_id: Optional[int] = None
+    amount: AmountField
+    payment_date: date
+    description: Optional[str] = None
+
+class PaymentCreate(PaymentBase):
+    pass
+
+class PaymentUpdate(PaymentBase):
+    order_id: Optional[int] = None
+    payment_type: Optional[Literal["client", "installer"]] = None
+    installer_id: Optional[int] = None
+    amount: Optional[AmountField] = None
+    payment_date: Optional[date] = None
+    description: Optional[str] = None
+
+class Payment(PaymentBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+--- backend/src/schemas/warranty_claim.py ---
+# backend/src/schemas/warranty_claim.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, Annotated, Literal
+from decimal import Decimal
+from datetime import date, datetime
+
+CostField = Annotated[Decimal, Field(ge=0, max_digits=10, decimal_places=2)]
+
+class WarrantyClaimBase(BaseModel):
+    order_item_id: int
+    claim_date: date
+    description: Optional[str] = None
+    fault_type: Literal["manufacturer", "installer", "other"]
+    responsible_installer_id: Optional[int] = None
+    resolution: Optional[str] = None
+    resolving_installer_id: Optional[int] = None
+    cost: CostField = Decimal(0)
+    cost_covered_by: Literal["manufacturer", "installer", "oleg"] = "oleg"
+    status: Literal["open", "in_progress", "closed", "rejected"] = "open"
+    closed_at: Optional[datetime] = None
+
+class WarrantyClaimCreate(WarrantyClaimBase):
+    pass
+
+class WarrantyClaimUpdate(WarrantyClaimBase):
+    order_item_id: Optional[int] = None
+    claim_date: Optional[date] = None
+    description: Optional[str] = None
+    fault_type: Optional[Literal["manufacturer", "installer", "other"]] = None
+    responsible_installer_id: Optional[int] = None
+    resolution: Optional[str] = None
+    resolving_installer_id: Optional[int] = None
+    cost: Optional[CostField] = None
+    cost_covered_by: Optional[Literal["manufacturer", "installer", "oleg"]] = None
+    status: Optional[Literal["open", "in_progress", "closed", "rejected"]] = None
+    closed_at: Optional[datetime] = None
+
+class WarrantyClaim(WarrantyClaimBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 === 9. БЭКЕНД: ML-СЕРВИС ===
 --- backend/ml_service/app.py ---
 from fastapi import FastAPI, HTTPException

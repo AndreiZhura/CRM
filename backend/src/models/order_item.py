@@ -14,7 +14,7 @@ class OrderItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
-    item_type = Column(SQLEnum(ItemType), nullable=False)
+    item_type = Column(SQLEnum(ItemType, name="item_type"), nullable=False)
     name = Column(String, nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
     purchase_price = Column(Numeric(10,2), nullable=False, default=0)
