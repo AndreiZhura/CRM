@@ -17,8 +17,8 @@ const NewOrder = () => {
     fio: "",
     phone: "",
     backup_phone: "",
-    clientAddress: "",          // адрес клиента (для нового клиента)
-    orderAddress: "",           // адрес заказа (всегда заполняется)
+    clientAddress: "", // адрес клиента (для нового клиента)
+    orderAddress: "", // адрес заказа (всегда заполняется)
     service_datetime: "",
     delivery_datetime: "",
     appointment_date: "",
@@ -89,9 +89,9 @@ const NewOrder = () => {
     const clientId = selectedOption ? selectedOption.value : "";
     setSelectedClientId(clientId);
     if (clientId) {
-      const client = clients.find(c => c.id === clientId);
+      const client = clients.find((c) => c.id === clientId);
       if (client) {
-        setFormData(prev => ({ ...prev, orderAddress: client.address }));
+        setFormData((prev) => ({ ...prev, orderAddress: client.address }));
       }
     }
   };
@@ -148,8 +148,19 @@ const NewOrder = () => {
 
   // Обработчики для формы
   const handleChange = (e) => {
+    console.log("handleChange called with:", e.target.name, e.target.value);
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleClientAddressChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, clientAddress: value }));
+  };
+
+  const handleOrderAddressChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, orderAddress: value }));
   };
 
   // ---------- Работа с позициями ----------
@@ -369,7 +380,7 @@ const NewOrder = () => {
                   <AddressSuggest
                     name="clientAddress"
                     value={formData.clientAddress}
-                    onChange={handleChange}
+                    onChange={handleClientAddressChange}
                     required
                     className="crm-form__input"
                     placeholder="Начните вводить адрес..."
@@ -464,12 +475,15 @@ const NewOrder = () => {
               </div>
             </div>
             {/* Адрес заказа – отдельно */}
-            <div className="crm-form__field crm-form__field--full" style={{ marginTop: '20px' }}>
+            <div
+              className="crm-form__field crm-form__field--full"
+              style={{ marginTop: "20px" }}
+            >
               <label className="crm-form__label">Адрес заказа *</label>
               <AddressSuggest
                 name="orderAddress"
                 value={formData.orderAddress}
-                onChange={handleChange}
+                onChange={handleOrderAddressChange}
                 required
                 className="crm-form__input"
                 placeholder="Начните вводить адрес..."
@@ -577,6 +591,7 @@ const NewOrder = () => {
                         }
                         className="crm-form__input"
                         onFocus={(e) => e.target.select()}
+                        onClick={(e) => e.target.select()}
                       />
                     </div>
                   )}
@@ -596,6 +611,7 @@ const NewOrder = () => {
                       }
                       className="crm-form__input"
                       onFocus={(e) => e.target.select()}
+                      onClick={(e) => e.target.select()}
                     />
                   </div>
                   <div className="crm-form__field">
@@ -613,6 +629,7 @@ const NewOrder = () => {
                       }
                       className="crm-form__input"
                       onFocus={(e) => e.target.select()}
+                      onClick={(e) => e.target.select()}
                     />
                   </div>
                 </div>
@@ -723,6 +740,8 @@ const NewOrder = () => {
                         )
                       }
                       className="crm-form__input"
+                      onFocus={(e) => e.target.select()}
+                      onClick={(e) => e.target.select()}
                     />
                   </div>
                   <div

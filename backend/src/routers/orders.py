@@ -6,7 +6,7 @@ from src.services.orders import (
     create_order, get_order, get_orders,
     update_order, delete_order
 )
-from src.schemas.orders import OrderCreate, OrderUpdate, OrderOut
+from src.schemas.orders import OrderCreate, OrderUpdate, OrderOut,OrderListOut
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -17,7 +17,7 @@ async def create_order_endpoint(
 ):
     return await create_order(db, order)
 
-@router.get("/", response_model=list[OrderOut])
+@router.get("/", response_model=list[OrderListOut])
 async def read_orders(
     skip: int = 0,
     limit: int = 100,

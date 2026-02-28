@@ -43,7 +43,7 @@ async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
         .where(Order.id == order_id)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installers),
+            selectinload(Order.installers),  # это order_installers
             selectinload(Order.finance),
             selectinload(Order.address_cache),
             selectinload(Order.items),

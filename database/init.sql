@@ -518,12 +518,13 @@ BEGIN
     FROM order_items
     WHERE order_id = p_order_id;
 
-    -- Выплаты монтажникам (суммируем base_payment из order_installers + payment_amount из order_item_installers)
+    -- Выплаты монтажникам: суммируем base_payment из order_installers
     SELECT COALESCE(SUM(base_payment), 0) INTO v_installer_payments
     FROM order_installers
     WHERE order_id = p_order_id;
 
-    SELECT COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
+    -- Добавляем выплаты из order_item_installers
+    SELECT v_installer_payments + COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
     FROM order_item_installers oii
     JOIN order_items oi ON oii.order_item_id = oi.id
     WHERE oi.order_id = p_order_id;
@@ -560,34 +561,6 @@ BEGIN
         warranty_costs_oleg = EXCLUDED.warranty_costs_oleg,
         warranty_costs_installer = EXCLUDED.warranty_costs_installer,
         updated_at = CURRENT_TIMESTAMP;
-END;
-$$ LANGUAGE plpgsql;
-
--- Триггеры для автоматического пересчёта finance
-CREATE OR REPLACE FUNCTION trigger_recalc_finance()
-RETURNS TRIGGER AS $$
-DECLARE
-    affected_order_id INTEGER;
-BEGIN
-    -- Определяем, из какой таблицы пришёл вызов
-    IF TG_TABLE_NAME = 'warranty_claims' THEN
-        -- Для гарантийных случаев order_id получаем через order_items
-        IF TG_OP = 'DELETE' THEN
-            SELECT order_id INTO affected_order_id FROM order_items WHERE id = OLD.order_item_id;
-        ELSE
-            SELECT order_id INTO affected_order_id FROM order_items WHERE id = NEW.order_item_id;
-        END IF;
-    ELSE
-        -- Для остальных таблиц есть прямое поле order_id
-        IF TG_OP = 'DELETE' THEN
-            affected_order_id := OLD.order_id;
-        ELSE
-            affected_order_id := NEW.order_id;
-        END IF;
-    END IF;
-
-    PERFORM recalc_order_finance(affected_order_id);
-    RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql;
 

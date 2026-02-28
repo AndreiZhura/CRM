@@ -1,8 +1,11 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from .clients import ClientOut
-from .installers import InstallerOut
+from .order_item import OrderItem
+from .order_installer import OrderInstaller
+from .order_expense import OrderExpense
+from .payment import Payment
 from .finance import FinanceOut
 
 class OrderBase(BaseModel):
@@ -16,7 +19,6 @@ class OrderBase(BaseModel):
     address_text: Optional[str] = None
 
 class OrderCreate(OrderBase):
-    # Валидатор для преобразования aware datetime в naive
     @field_validator('service_datetime', 'delivery_datetime', mode='before')
     @classmethod
     def make_naive(cls, value):
@@ -55,17 +57,20 @@ class OrderOut(OrderBase):
     created_at: datetime
     updated_at: datetime
     client: Optional[ClientOut] = None
-    installer: Optional[InstallerOut] = None
     finance: Optional[FinanceOut] = None
     lat: Optional[float] = None
     lon: Optional[float] = None
+    items: List[OrderItem] = []
+    installers: List[OrderInstaller] = []
+    expenses: List[OrderExpense] = []
+    payments: List[Payment] = []
 
     model_config = ConfigDict(from_attributes=True)
+    
+    
 
- 
     @classmethod
     def get_coords_from_address_cache(cls, value, info):
-        # info.data содержит словарь полей модели
         address_cache = info.data.get('address_cache')
         if address_cache:
             if info.field_name == 'lat':
@@ -73,3 +78,14 @@ class OrderOut(OrderBase):
             elif info.field_name == 'lon':
                 return float(address_cache.lon)
         return None
+
+class OrderListOut(OrderBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    client: Optional[ClientOut] = None
+    finance: Optional[FinanceOut] = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+
+    model_config = ConfigDict(from_attributes=True)
