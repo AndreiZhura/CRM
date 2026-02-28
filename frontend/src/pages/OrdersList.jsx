@@ -101,6 +101,12 @@ const OrdersList = () => {
     };
     fetchOrders();
   }, []);
+  useEffect(() => {
+    console.log(
+      "Order IDs:",
+      orders.map((o) => o.id),
+    );
+  }, [orders]);
 
   useEffect(() => {
     const filtered = orders.filter((order) => {
@@ -153,12 +159,16 @@ const OrdersList = () => {
       </div>
     );
   }
-
+  console.log(
+    "filteredOrders with ids:",
+    filteredOrders.map((o) => ({ id: o.id, name: o.client?.full_name })),
+  );
   // Если ошибка – показываем сообщение
   if (error) return <div>Ошибка: {error}</div>;
-
+  
   return (
     <div className="page">
+      
       <Header />
       <main className="page__main">
         <section className="orders-list">

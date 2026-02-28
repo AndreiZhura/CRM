@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Select from 'react-select';
+import Select from "react-select";
 import api from "../services/api";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
@@ -17,7 +17,8 @@ const NewOrder = () => {
     fio: "",
     phone: "",
     backup_phone: "",
-    address: "",
+    clientAddress: "",          // адрес клиента (для нового клиента)
+    orderAddress: "",           // адрес заказа (всегда заполняется)
     service_datetime: "",
     delivery_datetime: "",
     appointment_date: "",
@@ -25,7 +26,6 @@ const NewOrder = () => {
     status: "Новый",
     promises: "",
     installer_opinion: "",
-    installer_id: "",
     marker_color: "blue",
   });
 
@@ -49,6 +49,9 @@ const NewOrder = () => {
       sort_order: 0,
     },
   ]);
+
+  // Состояние для монтажников в заказе
+  const [orderInstallers, setOrderInstallers] = useState([]);
 
   // Общие состояния
   const [loading, setLoading] = useState(false);
@@ -76,52 +79,80 @@ const NewOrder = () => {
   }, []);
 
   // Преобразуем клиентов в формат для react-select
-  const clientOptions = clients.map(client => ({
+  const clientOptions = clients.map((client) => ({
     value: client.id,
-    label: `${client.full_name} (${client.phone}) — ${client.address}`
+    label: `${client.full_name} (${client.phone}) — ${client.address}`,
   }));
 
-  // Стили для react-select (аналогично OrdersList)
+  // При выборе существующего клиента подставляем его адрес в адрес заказа
+  const handleClientSelect = (selectedOption) => {
+    const clientId = selectedOption ? selectedOption.value : "";
+    setSelectedClientId(clientId);
+    if (clientId) {
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        setFormData(prev => ({ ...prev, orderAddress: client.address }));
+      }
+    }
+  };
+
+  // Стили для react-select
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      backgroundColor: 'var(--input-bg)',
-      borderColor: state.isFocused ? 'var(--accent-color)' : 'var(--border-color)',
-      boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
-      '&:hover': { borderColor: 'var(--accent-color)' },
-      padding: '2px',
-      borderRadius: '8px',
-      minHeight: '42px',
+      backgroundColor: "var(--input-bg)",
+      borderColor: state.isFocused
+        ? "var(--accent-color)"
+        : "var(--border-color)",
+      boxShadow: state.isFocused ? "0 0 0 3px rgba(59, 130, 246, 0.1)" : "none",
+      "&:hover": { borderColor: "var(--accent-color)" },
+      padding: "2px",
+      borderRadius: "8px",
+      minHeight: "42px",
     }),
     menu: (provided) => ({
       ...provided,
-      backgroundColor: 'var(--input-bg)',
-      borderRadius: '8px',
-      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+      backgroundColor: "var(--input-bg)",
+      borderRadius: "8px",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
       zIndex: 1000,
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected ? 'var(--accent-color)' : state.isFocused ? 'var(--border-color)' : 'var(--input-bg)',
-      color: state.isSelected ? 'white' : 'var(--text-primary)',
-      cursor: 'pointer',
-      padding: '10px 12px',
-      whiteSpace: 'normal',        // разрешаем перенос строк
-      wordWrap: 'break-word',
+      backgroundColor: state.isSelected
+        ? "var(--accent-color)"
+        : state.isFocused
+          ? "var(--border-color)"
+          : "var(--input-bg)",
+      color: state.isSelected ? "white" : "var(--text-primary)",
+      cursor: "pointer",
+      padding: "10px 12px",
+      whiteSpace: "normal",
+      wordWrap: "break-word",
     }),
-    singleValue: (provided) => ({ ...provided, color: 'var(--text-primary)' }),
-    input: (provided) => ({ ...provided, color: 'var(--text-primary)' }),
-    placeholder: (provided) => ({ ...provided, color: 'var(--text-secondary)' }),
-    dropdownIndicator: (provided) => ({ ...provided, color: 'var(--text-secondary)' }),
-    indicatorSeparator: (provided) => ({ ...provided, backgroundColor: 'var(--border-color)' }),
+    singleValue: (provided) => ({ ...provided, color: "var(--text-primary)" }),
+    input: (provided) => ({ ...provided, color: "var(--text-primary)" }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+    }),
+    indicatorSeparator: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--border-color)",
+    }),
   };
 
   // Обработчики для формы
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Обработчики для позиций
+  // ---------- Работа с позициями ----------
   const addItem = () => {
     setItems([
       ...items,
@@ -148,6 +179,29 @@ const NewOrder = () => {
     setItems(newItems);
   };
 
+  // ---------- Работа с монтажниками в заказе ----------
+  const addOrderInstaller = () => {
+    setOrderInstallers([
+      ...orderInstallers,
+      {
+        installer_id: "",
+        role: "",
+        base_payment: 0,
+        is_primary: false,
+      },
+    ]);
+  };
+
+  const removeOrderInstaller = (index) => {
+    setOrderInstallers(orderInstallers.filter((_, i) => i !== index));
+  };
+
+  const handleOrderInstallerChange = (index, field, value) => {
+    const newInstallers = [...orderInstallers];
+    newInstallers[index][field] = value;
+    setOrderInstallers(newInstallers);
+  };
+
   // Отправка формы
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -158,14 +212,14 @@ const NewOrder = () => {
       // 1. Определяем client_id
       let clientId;
       if (isNewClient) {
-        if (!formData.fio || !formData.phone || !formData.address) {
+        if (!formData.fio || !formData.phone || !formData.clientAddress) {
           throw new Error("Заполните ФИО, телефон и адрес нового клиента");
         }
         const clientData = {
           full_name: formData.fio,
           phone: formData.phone,
           backup_phone: formData.backup_phone || "",
-          address: formData.address,
+          address: formData.clientAddress,
           comments: formData.installer_opinion || "",
         };
         const client = await api.createClient(clientData);
@@ -186,15 +240,13 @@ const NewOrder = () => {
         ? new Date(formData.delivery_datetime).toISOString()
         : null;
 
-      // 3. Создаём заказ
+      // 3. Создаём заказ (адрес берётся из orderAddress)
       const orderData = {
         client_id: clientId,
-        installer_id: formData.installer_id || null,
-        service_type: "Установка кондиционера", // временно, позже уберём
         service_datetime: service_datetime,
         delivery_datetime: delivery_datetime,
         status: formData.status,
-        address_text: formData.address,
+        address_text: formData.orderAddress, // важно: адрес заказа!
         warehouse: formData.warehouse,
         promise: formData.promises || "",
         marker_color: formData.marker_color,
@@ -203,7 +255,7 @@ const NewOrder = () => {
 
       // 4. Создаём позиции заказа
       for (const item of items) {
-        if (!item.name) continue; // пропускаем пустые
+        if (!item.name) continue;
         await api.createOrderItem({
           order_id: order.id,
           item_type: item.item_type,
@@ -212,12 +264,24 @@ const NewOrder = () => {
           purchase_price: item.purchase_price,
           sale_price: item.sale_price,
           warranty_manufacturer: item.warranty_manufacturer,
-          warranty_master: 0, // пока оставляем 0
+          warranty_master: 0,
           sort_order: item.sort_order,
         });
       }
 
-      // 5. Перенаправляем на список заказов
+      // 5. Создаём монтажников в заказе
+      for (const installer of orderInstallers) {
+        if (!installer.installer_id || !installer.role) continue;
+        await api.createOrderInstaller({
+          order_id: order.id,
+          installer_id: installer.installer_id,
+          role: installer.role,
+          base_payment: installer.base_payment,
+          is_primary: installer.is_primary,
+        });
+      }
+
+      // 6. Перенаправляем на список заказов
       navigate("/orders");
     } catch (err) {
       setError(err.message);
@@ -301,10 +365,10 @@ const NewOrder = () => {
                   />
                 </div>
                 <div className="crm-form__field crm-form__field--full">
-                  <label className="crm-form__label">Адрес</label>
+                  <label className="crm-form__label">Адрес клиента</label>
                   <AddressSuggest
-                    name="address"
-                    value={formData.address}
+                    name="clientAddress"
+                    value={formData.clientAddress}
                     onChange={handleChange}
                     required
                     className="crm-form__input"
@@ -318,8 +382,12 @@ const NewOrder = () => {
                 <Select
                   name="clientId"
                   options={clientOptions}
-                  value={clientOptions.find(option => option.value === selectedClientId) || null}
-                  onChange={(selectedOption) => setSelectedClientId(selectedOption ? selectedOption.value : '')}
+                  value={
+                    clientOptions.find(
+                      (option) => option.value === selectedClientId,
+                    ) || null
+                  }
+                  onChange={handleClientSelect}
                   placeholder="-- Выберите клиента --"
                   isClearable
                   styles={customSelectStyles}
@@ -381,22 +449,6 @@ const NewOrder = () => {
                 </select>
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">Монтажник</label>
-                <select
-                  name="installer_id"
-                  value={formData.installer_id}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                >
-                  <option value="">-- Не назначен --</option>
-                  {installers.map((inst) => (
-                    <option key={inst.id} value={inst.id}>
-                      {inst.full_name} {inst.nickname && `(${inst.nickname})`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="crm-form__field">
                 <label className="crm-form__label">Цвет маркера</label>
                 <select
                   name="marker_color"
@@ -410,6 +462,18 @@ const NewOrder = () => {
                   <option value="yellow">Жёлтый</option>
                 </select>
               </div>
+            </div>
+            {/* Адрес заказа – отдельно */}
+            <div className="crm-form__field crm-form__field--full" style={{ marginTop: '20px' }}>
+              <label className="crm-form__label">Адрес заказа *</label>
+              <AddressSuggest
+                name="orderAddress"
+                value={formData.orderAddress}
+                onChange={handleChange}
+                required
+                className="crm-form__input"
+                placeholder="Начните вводить адрес..."
+              />
             </div>
           </fieldset>
 
@@ -496,8 +560,6 @@ const NewOrder = () => {
                       className="crm-form__input"
                     />
                   </div>
-
-                  {/* Поле закупки только для товаров */}
                   {item.item_type === "product" && (
                     <div className="crm-form__field">
                       <label className="crm-form__label">Закупка (₽)</label>
@@ -514,10 +576,10 @@ const NewOrder = () => {
                           )
                         }
                         className="crm-form__input"
+                        onFocus={(e) => e.target.select()}
                       />
                     </div>
                   )}
-
                   <div className="crm-form__field">
                     <label className="crm-form__label">Продажа (₽)</label>
                     <input
@@ -533,6 +595,7 @@ const NewOrder = () => {
                         )
                       }
                       className="crm-form__input"
+                      onFocus={(e) => e.target.select()}
                     />
                   </div>
                   <div className="crm-form__field">
@@ -549,6 +612,7 @@ const NewOrder = () => {
                         )
                       }
                       className="crm-form__input"
+                      onFocus={(e) => e.target.select()}
                     />
                   </div>
                 </div>
@@ -560,6 +624,139 @@ const NewOrder = () => {
               className="crm-form__button crm-form__button--secondary"
             >
               ➕ Добавить позицию
+            </button>
+          </fieldset>
+
+          {/* Монтажники в заказе */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">👥 Монтажники</legend>
+            {orderInstallers.length === 0 && <p>Нет назначенных монтажников</p>}
+            {orderInstallers.map((oi, index) => (
+              <div
+                key={index}
+                className="item-block"
+                style={{
+                  border: "1px solid var(--border-color)",
+                  padding: "15px",
+                  marginBottom: "15px",
+                  borderRadius: "8px",
+                }}
+              >
+                <div
+                  className="item-header"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <h4>Монтажник #{index + 1}</h4>
+                  <button
+                    type="button"
+                    onClick={() => removeOrderInstaller(index)}
+                    className="item-remove-btn"
+                    style={{
+                      color: "red",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="crm-form__grid">
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Монтажник *</label>
+                    <select
+                      value={oi.installer_id}
+                      onChange={(e) =>
+                        handleOrderInstallerChange(
+                          index,
+                          "installer_id",
+                          e.target.value,
+                        )
+                      }
+                      className="crm-form__input"
+                      required
+                    >
+                      <option value="">-- Выберите монтажника --</option>
+                      {installers.map((inst) => (
+                        <option key={inst.id} value={inst.id}>
+                          {inst.full_name}{" "}
+                          {inst.nickname && `(${inst.nickname})`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Роль *</label>
+                    <input
+                      type="text"
+                      value={oi.role}
+                      onChange={(e) =>
+                        handleOrderInstallerChange(
+                          index,
+                          "role",
+                          e.target.value,
+                        )
+                      }
+                      className="crm-form__input"
+                      required
+                      placeholder="ведущий, помощник, ..."
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label className="crm-form__label">Оплата (₽)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={oi.base_payment}
+                      onChange={(e) =>
+                        handleOrderInstallerChange(
+                          index,
+                          "base_payment",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div
+                    className="crm-form__field"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={oi.is_primary}
+                        onChange={(e) =>
+                          handleOrderInstallerChange(
+                            index,
+                            "is_primary",
+                            e.target.checked,
+                          )
+                        }
+                      />{" "}
+                      Основной
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addOrderInstaller}
+              className="crm-form__button crm-form__button--secondary"
+            >
+              ➕ Назначить монтажника
             </button>
           </fieldset>
 

@@ -10,15 +10,12 @@ from src.services.address_cache import get_or_create_address_cache
 
 
 async def create_order(db: AsyncSession, order_data: OrderCreate):
-    # Преобразуем данные в словарь
     order_dict = order_data.model_dump()
 
-    # Убираем часовой пояс у datetime полей
     for field in ['service_datetime', 'delivery_datetime']:
         if order_dict.get(field) and hasattr(order_dict[field], 'tzinfo'):
             order_dict[field] = order_dict[field].replace(tzinfo=None)
 
-    # Геокодинг адреса
     address_text = order_dict.get('address_text')
     if address_text:
         coords = await get_coordinates(address_text)
@@ -33,9 +30,8 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
 
     order = Order(**order_dict)
     db.add(order)
-    await db.flush()  # получаем id
+    await db.flush()
 
-    # Загружаем все связанные объекты для сериализации
     await db.refresh(order, attribute_names=['client', 'installers', 'finance', 'address_cache'])
     await db.commit()
     return order
@@ -49,7 +45,10 @@ async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
             selectinload(Order.client),
             selectinload(Order.installers),
             selectinload(Order.finance),
-            selectinload(Order.address_cache)   # добавь
+            selectinload(Order.address_cache),
+            selectinload(Order.items),
+            selectinload(Order.expenses),
+            selectinload(Order.payments),
         )
     )
     return result.scalar_one_or_none()
@@ -62,9 +61,8 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[
         .limit(limit)
         .options(
             selectinload(Order.client),
-            selectinload(Order.installers),
             selectinload(Order.finance),
-            selectinload(Order.address_cache)   # добавь
+            selectinload(Order.address_cache),
         )
     )
     return result.scalars().all()
@@ -78,7 +76,6 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
     update_data = order_data.model_dump(exclude_unset=True)
     address_text = update_data.get('address_text')
 
-    # Если адрес обновляется, обрабатываем геокодинг
     if address_text is not None:
         coords = await get_coordinates(address_text)
         if coords:
@@ -90,14 +87,12 @@ async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate)
             order.address_id = None
             order.address_text = address_text
 
-    # Применяем остальные обновления
     for key, value in update_data.items():
         if key != 'address_text':
             setattr(order, key, value)
 
     await db.commit()
-    # Перезагружаем связи после коммита
-    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installers', 'finance'])
+    await db.refresh(order, attribute_names=['updated_at', 'created_at', 'client', 'installers', 'finance', 'items', 'expenses', 'payments'])
     return order
 
 
