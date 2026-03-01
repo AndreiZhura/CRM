@@ -244,6 +244,19 @@ textarea.crm-form__input {
     margin-top: 10px;
 }
 
+.order-map-wrapper {
+    width: 100%;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.order-map-wrapper .ymaps-2-1-79-map {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 @media (max-width: 1024px) {
     .crm-form {
         max-width: 95%;
@@ -350,6 +363,10 @@ textarea.crm-form__input {
     }
 
     .map-container {
+        height: 250px;
+    }
+
+    .order-map-wrapper {
         height: 250px;
     }
 }

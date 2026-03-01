@@ -546,24 +546,18 @@ const OrderDetail = () => {
               </div>
             </fieldset>
           )}
+          
           {/* Карта с меткой заказа */}
           {order.lat && order.lon && (
             <fieldset className="crm-form__section">
               <legend className="crm-form__legend">📍 Карта</legend>
-              <div
-                className="map-container"
-                style={{
-                  width: "100%",
-                  height: "300px",
-                  overflow: "hidden",
-                  borderRadius: "8px",
-                }}
-              >
+              <div className="order-map-wrapper">
                 <YMaps>
                   <Map
                     defaultState={{ center: [order.lat, order.lon], zoom: 15 }}
                     width="100%"
                     height="100%"
+                    options={{ suppressMapOpenBlock: true }} // убираем лишние элементы
                   >
                     <Placemark geometry={[order.lat, order.lon]} />
                   </Map>
