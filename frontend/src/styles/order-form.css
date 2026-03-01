@@ -1,15 +1,17 @@
-/* Основной контейнер формы */
+/* =============================================
+   Основной контейнер формы
+   ============================================= */
 .crm-form {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 30px;
+    max-width: 1400px;          /* достаточно широко, но не бесконечно */
+    margin: 20px 20%;
+    padding: 30px;              /* возвращаем отступы, чтобы форма не прилипала к краям */
     background: var(--card-bg);
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* Секции (Fieldset) */
+/* Секции (fieldset) */
 .crm-form__section {
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -38,6 +40,10 @@
     gap: 20px;
 }
 
+.crm-form__grid .crm-form__field {
+    min-width: 0;   /* предотвращает переполнение в grid */
+}
+
 /* Поля ввода */
 .crm-form__field {
     display: flex;
@@ -45,7 +51,6 @@
     gap: 8px;
 }
 
-/* Поле на всю ширину */
 .crm-form__field--full {
     grid-column: 1 / -1;
 }
@@ -73,11 +78,20 @@
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* Специально для текстовых зон */
+/* Текстовые зоны */
 textarea.crm-form__input {
     min-height: 100px;
     resize: vertical;
     line-height: 1.5;
+}
+
+/* Статичные значения (используются в OrderDetail) */
+.crm-form__static-value {
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 /* Финансовая зона */
@@ -155,11 +169,7 @@ textarea.crm-form__input {
     border-color: #ef4444;
 }
 
-.crm-form__grid .crm-form__field {
-    min-width: 0;
-}
-
-/* === Переключатель "Новый клиент / Существующий клиент" === */
+/* Переключатель "Новый клиент / Существующий клиент" */
 .crm-form__toggle {
     display: flex;
     gap: 30px;
@@ -181,7 +191,7 @@ textarea.crm-form__input {
     cursor: pointer;
 }
 
-/* Кнопка "Добавить позицию" */
+/* Кнопка "Добавить позицию" и подобные вторичные кнопки */
 .crm-form__button--secondary {
     background: var(--bg-secondary);
     color: var(--text-primary);
@@ -192,7 +202,7 @@ textarea.crm-form__input {
     background: var(--border-color);
 }
 
-/* Блок позиции (уже используется инлайн-стили, но лучше вынести) */
+/* Блок позиции */
 .item-block {
     border: 1px solid var(--border-color);
     padding: 15px;
@@ -257,18 +267,13 @@ textarea.crm-form__input {
     height: 100% !important;
 }
 
-@media (max-width: 1024px) {
-    .crm-form {
-        max-width: 95%;
-        padding: 20px;
-    }
-}
-
-/* === Мобильная адаптация (до 768px) === */
+/* =============================================
+   Мобильная адаптация (до 768px)
+   ============================================= */
 @media (max-width: 768px) {
     .crm-form {
         margin: 10px;
-        padding: 15px;
+        padding: 15px;          /* на мобильных отступы уменьшаем */
         border-radius: 12px;
     }
 
@@ -293,7 +298,7 @@ textarea.crm-form__input {
 
     .crm-form__input {
         padding: 14px;
-        font-size: 16px;
+        font-size: 16px; /* предотвращает масштабирование на iPhone */
     }
 
     .crm-form__actions {
@@ -324,7 +329,7 @@ textarea.crm-form__input {
         margin-left: 10px;
     }
 
-    /* === Переключатель на мобильных === */
+    /* Переключатель на мобильных */
     .crm-form__toggle {
         flex-direction: column;
         gap: 12px;
@@ -342,19 +347,17 @@ textarea.crm-form__input {
         height: 22px;
     }
 
+    /* Улучшение читаемости select */
     select.crm-form__input {
         white-space: normal;
         word-wrap: break-word;
         overflow-wrap: break-word;
         max-width: 100%;
         width: 100%;
-        padding-right: 25px;
-        /* место для стрелки */
+        padding-right: 25px; /* место для стрелки */
         font-size: 14px;
-        /* чуть мельче, чтобы влезало больше */
     }
 
-    /* Сами опции тоже стараемся переносить (но не все браузеры поддерживают) */
     select.crm-form__input option {
         white-space: normal;
         word-wrap: break-word;
@@ -362,10 +365,8 @@ textarea.crm-form__input {
         max-width: 100%;
     }
 
-    .map-container {
-        height: 250px;
-    }
-
+    /* Карта на мобильных */
+    .map-container,
     .order-map-wrapper {
         height: 250px;
     }

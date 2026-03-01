@@ -4,7 +4,7 @@ import Select from "react-select";
 
 import api from "../services/api";
 import Header from "../components/Header";
-import Loader from "../components/Loader"; // импорт компонента-лоадера
+import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 import "../styles/orders-list.css";
 
@@ -26,6 +26,7 @@ const OrdersList = () => {
     { value: "Выполнен", label: "Выполнен" },
     { value: "Завершено", label: "Завершено" },
   ];
+
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
@@ -34,9 +35,7 @@ const OrdersList = () => {
         ? "var(--accent-color)"
         : "var(--border-color)",
       boxShadow: state.isFocused ? "0 0 0 3px rgba(59, 130, 246, 0.1)" : "none",
-      "&:hover": {
-        borderColor: "var(--accent-color)",
-      },
+      "&:hover": { borderColor: "var(--accent-color)" },
       padding: "2px",
       borderRadius: "8px",
       minHeight: "42px",
@@ -57,28 +56,15 @@ const OrdersList = () => {
       color: state.isSelected ? "white" : "var(--text-primary)",
       cursor: "pointer",
       padding: "10px 12px",
-      "&:active": {
-        backgroundColor: "var(--accent-hover)",
-      },
+      "&:active": { backgroundColor: "var(--accent-hover)" },
     }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "var(--text-primary)",
-    }),
-    input: (provided) => ({
-      ...provided,
-      color: "var(--text-primary)",
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "var(--text-secondary)",
-    }),
+    singleValue: (provided) => ({ ...provided, color: "var(--text-primary)" }),
+    input: (provided) => ({ ...provided, color: "var(--text-primary)" }),
+    placeholder: (provided) => ({ ...provided, color: "var(--text-secondary)" }),
     dropdownIndicator: (provided) => ({
       ...provided,
       color: "var(--text-secondary)",
-      "&:hover": {
-        color: "var(--text-primary)",
-      },
+      "&:hover": { color: "var(--text-primary)" },
     }),
     indicatorSeparator: (provided) => ({
       ...provided,
@@ -86,7 +72,6 @@ const OrdersList = () => {
     }),
   };
 
-  // ... в JSX, вместо <select>:
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -101,11 +86,9 @@ const OrdersList = () => {
     };
     fetchOrders();
   }, []);
+
   useEffect(() => {
-    console.log(
-      "Order IDs:",
-      orders.map((o) => o.id),
-    );
+    console.log("Order IDs:", orders.map((o) => o.id));
   }, [orders]);
 
   useEffect(() => {
@@ -126,10 +109,7 @@ const OrdersList = () => {
   }, [filters, orders]);
 
   const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const getStatusClass = (status) => {
@@ -147,28 +127,22 @@ const OrdersList = () => {
     }
   };
 
-  // Если идёт загрузка – показываем лоадер с шапкой и подвалом
   if (loading) {
     return (
       <div className="page">
         <Header />
         <main className="page__main">
-          <Loader /> {/* красивый спиннер вместо обычного текста */}
+          <Loader />
         </main>
         <Footer />
       </div>
     );
   }
-  console.log(
-    "filteredOrders with ids:",
-    filteredOrders.map((o) => ({ id: o.id, name: o.client?.full_name })),
-  );
-  // Если ошибка – показываем сообщение
-  if (error) return <div>Ошибка: {error}</div>;
-  
+
+  if (error) return <div className="error">Ошибка: {error}</div>;
+
   return (
     <div className="page">
-      
       <Header />
       <main className="page__main">
         <section className="orders-list">
@@ -209,13 +183,10 @@ const OrdersList = () => {
                   name="status"
                   options={statusOptions}
                   value={statusOptions.find(
-                    (option) => option.value === filters.status,
+                    (option) => option.value === filters.status
                   )}
                   onChange={(selected) =>
-                    setFilters({
-                      ...filters,
-                      status: selected ? selected.value : "",
-                    })
+                    setFilters({ ...filters, status: selected ? selected.value : "" })
                   }
                   styles={customSelectStyles}
                   isClearable
@@ -234,8 +205,7 @@ const OrdersList = () => {
                   <tr className="orders-table__row">
                     <th className="orders-table__th">Клиент</th>
                     <th className="orders-table__th">Адрес</th>
-                    <th className="orders-table__th">Модель</th>
-                    <th className="orders-table__th">Цена</th>
+                    <th className="orders-table__th">Сумма</th>
                     <th className="orders-table__th">Статус</th>
                   </tr>
                 </thead>
@@ -250,12 +220,9 @@ const OrdersList = () => {
                       <td className="orders-table__td" data-label="Адрес">
                         {order.address_text || "—"}
                       </td>
-                      <td className="orders-table__td" data-label="Модель">
-                        {order.service_type || "—"}
-                      </td>
-                      <td className="orders-table__td" data-label="Цена">
-                        {order.finance?.sale_price_client
-                          ? `${order.finance.sale_price_client} ₽`
+                      <td className="orders-table__td" data-label="Сумма">
+                        {order.finance?.revenue
+                          ? `${Number(order.finance.revenue).toLocaleString()} ₽`
                           : "—"}
                       </td>
                       <td className="orders-table__td" data-label="Статус">

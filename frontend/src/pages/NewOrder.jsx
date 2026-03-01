@@ -26,7 +26,6 @@ const NewOrder = () => {
     status: "Новый",
     promises: "",
     installer_opinion: "",
-    marker_color: "blue",
   });
 
   // Состояния для списков
@@ -260,7 +259,6 @@ const NewOrder = () => {
         address_text: formData.orderAddress, // важно: адрес заказа!
         warehouse: formData.warehouse,
         promise: formData.promises || "",
-        marker_color: formData.marker_color,
       };
       const order = await api.createOrder(orderData);
 
@@ -457,20 +455,6 @@ const NewOrder = () => {
                 >
                   <option value="Основной">Основной</option>
                   <option value="Транзит">Транзит</option>
-                </select>
-              </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Цвет маркера</label>
-                <select
-                  name="marker_color"
-                  value={formData.marker_color}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                >
-                  <option value="blue">Синий</option>
-                  <option value="red">Красный</option>
-                  <option value="green">Зелёный</option>
-                  <option value="yellow">Жёлтый</option>
                 </select>
               </div>
             </div>

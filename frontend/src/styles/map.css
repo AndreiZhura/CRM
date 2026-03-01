@@ -50,3 +50,44 @@
     overflow: hidden;
     border: 1px solid var(--border-color);
 }
+
+.custom-balloon {
+  padding: 12px;
+  min-width: 220px;
+  font-family: 'Inter', sans-serif;
+}
+
+.balloon-header {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.balloon-row {
+  margin-bottom: 4px;
+}
+
+.balloon-row span {
+  font-weight: 600;
+}
+
+.balloon-link {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+  background-color: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  margin-top: 8px;
+}
+
+.balloon-link:hover {
+  background-color: #1d4ed8;
+}
