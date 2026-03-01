@@ -31,10 +31,24 @@ async def create_order(db: AsyncSession, order_data: OrderCreate):
     order = Order(**order_dict)
     db.add(order)
     await db.flush()
-
-    await db.refresh(order, attribute_names=['client', 'installers', 'finance', 'address_cache'])
     await db.commit()
-    return order
+
+    # Перезагружаем заказ со всеми необходимыми связями для ответа
+    result = await db.execute(
+        select(Order)
+        .where(Order.id == order.id)
+        .options(
+            selectinload(Order.client),
+            selectinload(Order.installers),
+            selectinload(Order.finance),
+            selectinload(Order.address_cache),
+            selectinload(Order.items),
+            selectinload(Order.expenses),
+            selectinload(Order.payments),
+        )
+    )
+    created_order = result.scalar_one()
+    return created_order
 
 
 async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:

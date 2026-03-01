@@ -12,13 +12,12 @@ import "../styles/order-form.css";
 const NewOrder = () => {
   const navigate = useNavigate();
 
-  // Состояния для клиента и заказа
   const [formData, setFormData] = useState({
     fio: "",
     phone: "",
     backup_phone: "",
-    clientAddress: "", // адрес клиента (для нового клиента)
-    orderAddress: "", // адрес заказа (всегда заполняется)
+    clientAddress: "",
+    orderAddress: "",
     service_datetime: "",
     delivery_datetime: "",
     appointment_date: "",
@@ -28,14 +27,12 @@ const NewOrder = () => {
     installer_opinion: "",
   });
 
-  // Состояния для списков
   const [clients, setClients] = useState([]);
   const [installers, setInstallers] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState("");
   const [isNewClient, setIsNewClient] = useState(true);
   const [loadingLists, setLoadingLists] = useState(true);
 
-  // Состояние для позиций заказа
   const [items, setItems] = useState([
     {
       item_type: "product",
@@ -49,14 +46,10 @@ const NewOrder = () => {
     },
   ]);
 
-  // Состояние для монтажников в заказе
   const [orderInstallers, setOrderInstallers] = useState([]);
-
-  // Общие состояния
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Загружаем клиентов и монтажников
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,6 +63,7 @@ const NewOrder = () => {
       } catch (err) {
         console.error("Ошибка загрузки списков:", err);
         setError("Не удалось загрузить клиентов или монтажников");
+        alert("Не удалось загрузить списки");
       } finally {
         setLoadingLists(false);
       }
@@ -77,13 +71,11 @@ const NewOrder = () => {
     fetchData();
   }, []);
 
-  // Преобразуем клиентов в формат для react-select
   const clientOptions = clients.map((client) => ({
     value: client.id,
     label: `${client.full_name} (${client.phone}) — ${client.address}`,
   }));
 
-  // При выборе существующего клиента подставляем его адрес в адрес заказа
   const handleClientSelect = (selectedOption) => {
     const clientId = selectedOption ? selectedOption.value : "";
     setSelectedClientId(clientId);
@@ -95,14 +87,11 @@ const NewOrder = () => {
     }
   };
 
-  // Стили для react-select
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
       backgroundColor: "var(--input-bg)",
-      borderColor: state.isFocused
-        ? "var(--accent-color)"
-        : "var(--border-color)",
+      borderColor: state.isFocused ? "var(--accent-color)" : "var(--border-color)",
       boxShadow: state.isFocused ? "0 0 0 3px rgba(59, 130, 246, 0.1)" : "none",
       "&:hover": { borderColor: "var(--accent-color)" },
       padding: "2px",
@@ -118,11 +107,7 @@ const NewOrder = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected
-        ? "var(--accent-color)"
-        : state.isFocused
-          ? "var(--border-color)"
-          : "var(--input-bg)",
+      backgroundColor: state.isSelected ? "var(--accent-color)" : state.isFocused ? "var(--border-color)" : "var(--input-bg)",
       color: state.isSelected ? "white" : "var(--text-primary)",
       cursor: "pointer",
       padding: "10px 12px",
@@ -131,38 +116,24 @@ const NewOrder = () => {
     }),
     singleValue: (provided) => ({ ...provided, color: "var(--text-primary)" }),
     input: (provided) => ({ ...provided, color: "var(--text-primary)" }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "var(--text-secondary)",
-    }),
-    dropdownIndicator: (provided) => ({
-      ...provided,
-      color: "var(--text-secondary)",
-    }),
-    indicatorSeparator: (provided) => ({
-      ...provided,
-      backgroundColor: "var(--border-color)",
-    }),
+    placeholder: (provided) => ({ ...provided, color: "var(--text-secondary)" }),
+    dropdownIndicator: (provided) => ({ ...provided, color: "var(--text-secondary)" }),
+    indicatorSeparator: (provided) => ({ ...provided, backgroundColor: "var(--border-color)" }),
   };
 
-  // Обработчики для формы
   const handleChange = (e) => {
-    console.log("handleChange called with:", e.target.name, e.target.value);
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleClientAddressChange = (e) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, clientAddress: value }));
+    setFormData((prev) => ({ ...prev, clientAddress: e.target.value }));
   };
 
   const handleOrderAddressChange = (e) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, orderAddress: value }));
+    setFormData((prev) => ({ ...prev, orderAddress: e.target.value }));
   };
 
-  // ---------- Работа с позициями ----------
   const addItem = () => {
     setItems([
       ...items,
@@ -189,7 +160,6 @@ const NewOrder = () => {
     setItems(newItems);
   };
 
-  // ---------- Работа с монтажниками в заказе ----------
   const addOrderInstaller = () => {
     setOrderInstallers([
       ...orderInstallers,
@@ -212,14 +182,12 @@ const NewOrder = () => {
     setOrderInstallers(newInstallers);
   };
 
-  // Отправка формы
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      // 1. Определяем client_id
       let clientId;
       if (isNewClient) {
         if (!formData.fio || !formData.phone || !formData.clientAddress) {
@@ -241,28 +209,24 @@ const NewOrder = () => {
         clientId = selectedClientId;
       }
 
-      // 2. Подготавливаем даты
       const service_datetime = formData.service_datetime
         ? new Date(formData.service_datetime).toISOString()
         : new Date().toISOString();
-
       const delivery_datetime = formData.delivery_datetime
         ? new Date(formData.delivery_datetime).toISOString()
         : null;
 
-      // 3. Создаём заказ (адрес берётся из orderAddress)
       const orderData = {
         client_id: clientId,
-        service_datetime: service_datetime,
-        delivery_datetime: delivery_datetime,
+        service_datetime,
+        delivery_datetime,
         status: formData.status,
-        address_text: formData.orderAddress, // важно: адрес заказа!
+        address_text: formData.orderAddress,
         warehouse: formData.warehouse,
         promise: formData.promises || "",
       };
       const order = await api.createOrder(orderData);
 
-      // 4. Создаём позиции заказа
       for (const item of items) {
         if (!item.name) continue;
         await api.createOrderItem({
@@ -278,7 +242,6 @@ const NewOrder = () => {
         });
       }
 
-      // 5. Создаём монтажников в заказе
       for (const installer of orderInstallers) {
         if (!installer.installer_id || !installer.role) continue;
         await api.createOrderInstaller({
@@ -290,10 +253,11 @@ const NewOrder = () => {
         });
       }
 
-      // 6. Перенаправляем на список заказов
-      navigate("/orders");
+      alert("Заказ успешно создан!");
+      navigate(`/orders/${order.id}`);
     } catch (err) {
       setError(err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -407,14 +371,10 @@ const NewOrder = () => {
 
           {/* Планирование и логистика */}
           <fieldset className="crm-form__section">
-            <legend className="crm-form__legend">
-              📅 Планирование и логистика
-            </legend>
+            <legend className="crm-form__legend">📅 Планирование и логистика</legend>
             <div className="crm-form__grid">
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Дата и время обслуживания
-                </label>
+                <label className="crm-form__label">Дата и время обслуживания</label>
                 <input
                   type="datetime-local"
                   name="service_datetime"
@@ -434,9 +394,7 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Дата установки (договор)
-                </label>
+                <label className="crm-form__label">Дата установки (договор)</label>
                 <input
                   type="date"
                   name="appointment_date"
@@ -458,11 +416,7 @@ const NewOrder = () => {
                 </select>
               </div>
             </div>
-            {/* Адрес заказа – отдельно */}
-            <div
-              className="crm-form__field crm-form__field--full"
-              style={{ marginTop: "20px" }}
-            >
+            <div className="crm-form__field crm-form__field--full" style={{ marginTop: "20px" }}>
               <label className="crm-form__label">Адрес заказа *</label>
               <AddressSuggest
                 name="orderAddress"
@@ -479,38 +433,15 @@ const NewOrder = () => {
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">📦 Позиции заказа</legend>
             {items.map((item, index) => (
-              <div
-                key={index}
-                className="item-block"
-                style={{
-                  border: "1px solid var(--border-color)",
-                  padding: "15px",
-                  marginBottom: "15px",
-                  borderRadius: "8px",
-                }}
-              >
-                <div
-                  className="item-header"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
+              <div key={index} className="item-block">
+                <div className="item-header">
                   <h4>Позиция #{index + 1}</h4>
                   {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeItem(index)}
                       className="item-remove-btn"
-                      style={{
-                        color: "red",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "1.2rem",
-                      }}
+                      title="Удалить позицию"
                     >
                       ✕
                     </button>
@@ -521,9 +452,7 @@ const NewOrder = () => {
                     <label className="crm-form__label">Тип</label>
                     <select
                       value={item.item_type}
-                      onChange={(e) =>
-                        handleItemChange(index, "item_type", e.target.value)
-                      }
+                      onChange={(e) => handleItemChange(index, "item_type", e.target.value)}
                       className="crm-form__input"
                     >
                       <option value="product">Товар</option>
@@ -535,9 +464,7 @@ const NewOrder = () => {
                     <input
                       type="text"
                       value={item.name}
-                      onChange={(e) =>
-                        handleItemChange(index, "name", e.target.value)
-                      }
+                      onChange={(e) => handleItemChange(index, "name", e.target.value)}
                       className="crm-form__input"
                       required
                     />
@@ -548,13 +475,7 @@ const NewOrder = () => {
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "quantity",
-                          parseInt(e.target.value) || 1,
-                        )
-                      }
+                      onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value) || 1)}
                       className="crm-form__input"
                     />
                   </div>
@@ -566,13 +487,7 @@ const NewOrder = () => {
                         min="0"
                         step="0.01"
                         value={item.purchase_price}
-                        onChange={(e) =>
-                          handleItemChange(
-                            index,
-                            "purchase_price",
-                            parseFloat(e.target.value) || 0,
-                          )
-                        }
+                        onChange={(e) => handleItemChange(index, "purchase_price", parseFloat(e.target.value) || 0)}
                         className="crm-form__input"
                         onFocus={(e) => e.target.select()}
                         onClick={(e) => e.target.select()}
@@ -586,13 +501,7 @@ const NewOrder = () => {
                       min="0"
                       step="0.01"
                       value={item.sale_price}
-                      onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "sale_price",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
+                      onChange={(e) => handleItemChange(index, "sale_price", parseFloat(e.target.value) || 0)}
                       className="crm-form__input"
                       onFocus={(e) => e.target.select()}
                       onClick={(e) => e.target.select()}
@@ -604,13 +513,7 @@ const NewOrder = () => {
                       type="number"
                       min="0"
                       value={item.warranty_manufacturer}
-                      onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "warranty_manufacturer",
-                          parseInt(e.target.value) || 0,
-                        )
-                      }
+                      onChange={(e) => handleItemChange(index, "warranty_manufacturer", parseInt(e.target.value) || 0)}
                       className="crm-form__input"
                       onFocus={(e) => e.target.select()}
                       onClick={(e) => e.target.select()}
@@ -619,11 +522,7 @@ const NewOrder = () => {
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addItem}
-              className="crm-form__button crm-form__button--secondary"
-            >
+            <button type="button" onClick={addItem} className="crm-form__button crm-form__button--secondary">
               ➕ Добавить позицию
             </button>
           </fieldset>
@@ -633,37 +532,14 @@ const NewOrder = () => {
             <legend className="crm-form__legend">👥 Монтажники</legend>
             {orderInstallers.length === 0 && <p>Нет назначенных монтажников</p>}
             {orderInstallers.map((oi, index) => (
-              <div
-                key={index}
-                className="item-block"
-                style={{
-                  border: "1px solid var(--border-color)",
-                  padding: "15px",
-                  marginBottom: "15px",
-                  borderRadius: "8px",
-                }}
-              >
-                <div
-                  className="item-header"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
+              <div key={index} className="item-block">
+                <div className="item-header">
                   <h4>Монтажник #{index + 1}</h4>
                   <button
                     type="button"
                     onClick={() => removeOrderInstaller(index)}
                     className="item-remove-btn"
-                    style={{
-                      color: "red",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "1.2rem",
-                    }}
+                    title="Удалить монтажника"
                   >
                     ✕
                   </button>
@@ -673,21 +549,14 @@ const NewOrder = () => {
                     <label className="crm-form__label">Монтажник *</label>
                     <select
                       value={oi.installer_id}
-                      onChange={(e) =>
-                        handleOrderInstallerChange(
-                          index,
-                          "installer_id",
-                          e.target.value,
-                        )
-                      }
+                      onChange={(e) => handleOrderInstallerChange(index, "installer_id", e.target.value)}
                       className="crm-form__input"
                       required
                     >
                       <option value="">-- Выберите монтажника --</option>
                       {installers.map((inst) => (
                         <option key={inst.id} value={inst.id}>
-                          {inst.full_name}{" "}
-                          {inst.nickname && `(${inst.nickname})`}
+                          {inst.full_name} {inst.nickname && `(${inst.nickname})`}
                         </option>
                       ))}
                     </select>
@@ -697,13 +566,7 @@ const NewOrder = () => {
                     <input
                       type="text"
                       value={oi.role}
-                      onChange={(e) =>
-                        handleOrderInstallerChange(
-                          index,
-                          "role",
-                          e.target.value,
-                        )
-                      }
+                      onChange={(e) => handleOrderInstallerChange(index, "role", e.target.value)}
                       className="crm-form__input"
                       required
                       placeholder="ведущий, помощник, ..."
@@ -716,37 +579,18 @@ const NewOrder = () => {
                       min="0"
                       step="0.01"
                       value={oi.base_payment}
-                      onChange={(e) =>
-                        handleOrderInstallerChange(
-                          index,
-                          "base_payment",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
+                      onChange={(e) => handleOrderInstallerChange(index, "base_payment", parseFloat(e.target.value) || 0)}
                       className="crm-form__input"
                       onFocus={(e) => e.target.select()}
                       onClick={(e) => e.target.select()}
                     />
                   </div>
-                  <div
-                    className="crm-form__field"
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                  <div className="crm-form__field" style={{ flexDirection: "row", alignItems: "center", gap: "10px" }}>
                     <label>
                       <input
                         type="checkbox"
                         checked={oi.is_primary}
-                        onChange={(e) =>
-                          handleOrderInstallerChange(
-                            index,
-                            "is_primary",
-                            e.target.checked,
-                          )
-                        }
+                        onChange={(e) => handleOrderInstallerChange(index, "is_primary", e.target.checked)}
                       />{" "}
                       Основной
                     </label>
@@ -754,11 +598,7 @@ const NewOrder = () => {
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addOrderInstaller}
-              className="crm-form__button crm-form__button--secondary"
-            >
+            <button type="button" onClick={addOrderInstaller} className="crm-form__button crm-form__button--secondary">
               ➕ Назначить монтажника
             </button>
           </fieldset>
@@ -792,9 +632,7 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">
-                  Заметки (мнение монтажника)
-                </label>
+                <label className="crm-form__label">Заметки (мнение монтажника)</label>
                 <textarea
                   name="installer_opinion"
                   value={formData.installer_opinion}

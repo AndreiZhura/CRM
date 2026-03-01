@@ -2,8 +2,9 @@
 
 // Базовый URL бэкенда. В разработке он на localhost:8000.
 // Если будем деплоить через nginx, здесь может быть относительный путь '/api'.
-const BASE_URL = '/api';
+//const BASE_URL = '/api';
 //const BASE_URL = 'http://localhost:8000';
+const BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : '';
 
 // Функция для выполнения запросов с учётом авторизации
 async function apiFetch(endpoint, options = {}) {

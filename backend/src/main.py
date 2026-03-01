@@ -15,7 +15,7 @@ app = FastAPI(title="СRM Олега")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # разрешаем все источники (для разработки)
+    allow_origins=["http://localhost:3000"],  # вместо "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,6 +34,7 @@ app.include_router(order_expenses.router)
 app.include_router(warranty_claims.router)
 app.include_router(payments.router)
 
+
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting CRM application")
@@ -41,10 +42,10 @@ async def startup_event():
     logger.info("Scheduler started")
 
 
-
 @app.get("/")
 async def root():
     return {"message": "CRM is running"}
+
 
 @app.get("/health")
 async def health(db: AsyncSession = Depends(get_db)):
@@ -70,4 +71,3 @@ async def db_check(db: AsyncSession = Depends(get_db)):
         return {"db_status": "connected", "result": result.scalar()}
     except Exception as e:
         return {"db_status": "error", "error": str(e)}
-    

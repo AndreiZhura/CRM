@@ -33,33 +33,35 @@ const AddInstaller = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    // Преобразуем specialization из строки в массив
-    const specializationArray = formData.specialization
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s !== '');
+  // Преобразуем specialization из строки в массив
+  const specializationArray = formData.specialization
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s !== '');
 
-    const dataToSend = {
-      ...formData,
-      specialization: specializationArray,
-      rating: Number(formData.rating),
-      base_price: Number(formData.base_price),
-    };
-
-    try {
-      await api.createInstaller(dataToSend);
-      navigate('/installers');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const dataToSend = {
+    ...formData,
+    specialization: specializationArray,
+    rating: Number(formData.rating),
+    base_price: Number(formData.base_price),
   };
+
+  try {
+    await api.createInstaller(dataToSend);
+    alert('Мастер успешно создан!');
+    navigate('/installers');
+  } catch (err) {
+    setError(err.message);
+    alert(err.message); // если хотите, можно и ошибку показывать через alert
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="page">

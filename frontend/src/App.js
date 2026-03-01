@@ -12,8 +12,10 @@ import Finance from './pages/Finance';
 import Register from './pages/Register';
 import MapPage from './pages/Map';
 
+
 function App() {
   return (
+    
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
