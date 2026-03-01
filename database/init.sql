@@ -7,49 +7,14 @@
 BEGIN;
 
 -- -----------------------------------------------------------------
--- 1. ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ (создаём, если не существуют)
+-- 1. ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ
 -- -----------------------------------------------------------------
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
-        CREATE TYPE order_status AS ENUM ('Новый', 'Ждет установщика', 'В работе', 'Выполнен', 'Отменен');
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
-        CREATE TYPE payment_status AS ENUM ('Не оплачен', 'Частично', 'Оплачен');
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'item_type') THEN
-        CREATE TYPE item_type AS ENUM ('product', 'service');
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fault_type') THEN
-        CREATE TYPE fault_type AS ENUM ('manufacturer', 'installer', 'other');
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'cost_covered_by') THEN
-        CREATE TYPE cost_covered_by AS ENUM ('manufacturer', 'installer', 'oleg');
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'claim_status') THEN
-        CREATE TYPE claim_status AS ENUM ('open', 'in_progress', 'closed', 'rejected');
-    END IF;
-END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN CREATE TYPE order_status AS ENUM ('Новый', 'Ждет установщика', 'В работе', 'Выполнен', 'Отменен'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN CREATE TYPE payment_status AS ENUM ('Не оплачен', 'Частично', 'Оплачен'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'item_type') THEN CREATE TYPE item_type AS ENUM ('product', 'service'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'fault_type') THEN CREATE TYPE fault_type AS ENUM ('manufacturer', 'installer', 'other'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'cost_covered_by') THEN CREATE TYPE cost_covered_by AS ENUM ('manufacturer', 'installer', 'oleg'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'claim_status') THEN CREATE TYPE claim_status AS ENUM ('open', 'in_progress', 'closed', 'rejected'); END IF; END $$;
 
 -- -----------------------------------------------------------------
 -- 2. ТАБЛИЦА АДМИНИСТРАТОРОВ
@@ -62,7 +27,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 -- -----------------------------------------------------------------
--- 3. ТАБЛИЦА МОНТАЖНИКОВ (с расширенной статистикой качества)
+-- 3. ТАБЛИЦА МОНТАЖНИКОВ
 -- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS installers (
     id SERIAL PRIMARY KEY,
@@ -111,7 +76,7 @@ CREATE TABLE IF NOT EXISTS clients (
 );
 
 -- -----------------------------------------------------------------
--- 5. ТАБЛИЦА ГЕОДАННЫХ (КЭШ ДЛЯ ЯНДЕКС.КАРТ)
+-- 5. ТАБЛИЦА ГЕОДАННЫХ
 -- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS address_cache (
     address TEXT PRIMARY KEY,
@@ -151,12 +116,9 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 );
 
 -- =================================================================
--- НОВЫЕ ТАБЛИЦЫ ДЛЯ МУЛЬТИ-ПОЗИЦИОННЫХ ЗАКАЗОВ, НЕСКОЛЬКИХ МОНТАЖНИКОВ И ФИНАНСОВ
+-- НОВЫЕ ТАБЛИЦЫ (МУЛЬТИ-ПОЗИЦИИ, МОНТАЖНИКИ, ГАРАНТИИ, ФИНАНСЫ)
 -- =================================================================
 
--- -----------------------------------------------------------------
--- 8. ТАБЛИЦА ПОЗИЦИЙ ЗАКАЗА
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -175,9 +137,6 @@ CREATE TABLE IF NOT EXISTS order_items (
 COMMENT ON COLUMN order_items.warranty_manufacturer IS 'Гарантия производителя (лет), только для товаров';
 COMMENT ON COLUMN order_items.warranty_master IS 'Гарантия мастера (лет), только для услуг';
 
--- -----------------------------------------------------------------
--- 9. ТАБЛИЦА СВЯЗИ ЗАКАЗОВ И МОНТАЖНИКОВ (РОЛИ, БАЗОВАЯ ОПЛАТА)
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_installers (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -192,9 +151,6 @@ CREATE TABLE IF NOT EXISTS order_installers (
 
 COMMENT ON TABLE order_installers IS 'Монтажники, задействованные в заказе, с их ролями и базовой оплатой';
 
--- -----------------------------------------------------------------
--- 10. ТАБЛИЦА СВЯЗИ ПОЗИЦИЙ ЗАКАЗА С МОНТАЖНИКАМИ (ДЕТАЛИЗАЦИЯ РАБОТ)
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_item_installers (
     id SERIAL PRIMARY KEY,
     order_item_id INTEGER NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
@@ -211,9 +167,6 @@ COMMENT ON TABLE order_item_installers IS 'Привязка конкретных
 CREATE INDEX IF NOT EXISTS idx_order_item_installers_item ON order_item_installers(order_item_id);
 CREATE INDEX IF NOT EXISTS idx_order_item_installers_installer ON order_item_installers(installer_id);
 
--- -----------------------------------------------------------------
--- 11. ТАБЛИЦА НЕПРЕДВИДЕННЫХ РАСХОДОВ ПО ЗАКАЗУ
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_expenses (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -225,11 +178,7 @@ CREATE TABLE IF NOT EXISTS order_expenses (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------------------
--- 12. ТАБЛИЦА ГАРАНТИЙНЫХ СЛУЧАЕВ
--- -----------------------------------------------------------------
 DROP TABLE IF EXISTS installer_incidents CASCADE;
-
 CREATE TABLE IF NOT EXISTS warranty_claims (
     id SERIAL PRIMARY KEY,
     order_item_id INTEGER NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
@@ -255,9 +204,6 @@ CREATE INDEX IF NOT EXISTS idx_warranty_claims_responsible ON warranty_claims(re
 CREATE INDEX IF NOT EXISTS idx_warranty_claims_resolving ON warranty_claims(resolving_installer_id);
 CREATE INDEX IF NOT EXISTS idx_warranty_claims_status ON warranty_claims(status);
 
--- -----------------------------------------------------------------
--- 13. ТАБЛИЦА ПОГОДЫ
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS weather (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -278,9 +224,6 @@ CREATE TABLE IF NOT EXISTS weather (
     UNIQUE(date, location)
 );
 
--- -----------------------------------------------------------------
--- 14. ТАБЛИЦА ПЛАТЕЖЕЙ (ОТ КЛИЕНТА И МОНТАЖНИКАМ)
--- -----------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -294,7 +237,6 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 COMMENT ON TABLE payments IS 'Платежи: от клиента (оплата заказа) и монтажникам (выплаты)';
-
 CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
 CREATE INDEX IF NOT EXISTS idx_payments_installer ON payments(installer_id);
 
@@ -304,12 +246,12 @@ CREATE INDEX IF NOT EXISTS idx_payments_installer ON payments(installer_id);
 CREATE TABLE IF NOT EXISTS finance (
     id SERIAL PRIMARY KEY,
     order_id INTEGER UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    revenue NUMERIC(10,2) DEFAULT 0,                     -- выручка от продаж (sale_price * quantity)
-    cost_of_goods NUMERIC(10,2) DEFAULT 0,                -- себестоимость товаров (purchase_price * quantity)
-    installer_payments NUMERIC(10,2) DEFAULT 0,           -- выплаты монтажникам (из order_item_installers и order_installers)
-    expenses NUMERIC(10,2) DEFAULT 0,                     -- непредвиденные расходы
-    warranty_costs_oleg NUMERIC(10,2) DEFAULT 0,          -- гарантийные расходы за счёт Олега
-    warranty_costs_installer NUMERIC(10,2) DEFAULT 0,     -- гарантийные расходы, отнесённые на монтажников
+    revenue NUMERIC(10,2) DEFAULT 0,
+    cost_of_goods NUMERIC(10,2) DEFAULT 0,
+    installer_payments NUMERIC(10,2) DEFAULT 0,
+    expenses NUMERIC(10,2) DEFAULT 0,
+    warranty_costs_oleg NUMERIC(10,2) DEFAULT 0,
+    warranty_costs_installer NUMERIC(10,2) DEFAULT 0,
     profit NUMERIC(10,2) GENERATED ALWAYS AS (
         revenue - cost_of_goods - installer_payments - expenses - warranty_costs_oleg
     ) STORED,
@@ -317,13 +259,12 @@ CREATE TABLE IF NOT EXISTS finance (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Индексы
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_installers_order ON order_installers(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_expenses_order ON order_expenses(order_id);
 
 -- -----------------------------------------------------------------
--- 15. ФУНКЦИЯ ДЛЯ АВТООБНОВЛЕНИЯ updated_at
+-- ФУНКЦИЯ ДЛЯ АВТООБНОВЛЕНИЯ updated_at
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -334,7 +275,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- -----------------------------------------------------------------
--- 16. ТРИГГЕРЫ updated_at для всех таблиц
+-- ТРИГГЕРЫ updated_at
 -- -----------------------------------------------------------------
 DO $$
 BEGIN
@@ -377,7 +318,7 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------
--- 17. ФУНКЦИЯ И ТРИГГЕР ДЛЯ ПОДСЧЁТА total_orders (через order_installers)
+-- ФУНКЦИЯ ДЛЯ ПОДСЧЁТА total_orders (через order_installers)
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_installer_total_orders()
 RETURNS TRIGGER AS $$
@@ -405,7 +346,7 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------
--- 18. ФУНКЦИЯ И ТРИГГЕР ДЛЯ СТАТИСТИКИ ИНЦИДЕНТОВ (с учётом привязки к монтажникам)
+-- ФУНКЦИЯ ДЛЯ СТАТИСТИКИ ИНЦИДЕНТОВ (с учётом привязки к монтажникам)
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_installer_stats_from_claims()
 RETURNS TRIGGER AS $$
@@ -413,39 +354,25 @@ DECLARE
     v_installer_id INTEGER;
     v_order_id INTEGER;
 BEGIN
-    -- Получаем order_id через order_item
     SELECT order_id INTO v_order_id FROM order_items WHERE id = NEW.order_item_id;
-
     IF TG_OP = 'INSERT' THEN
         IF NEW.fault_type = 'installer' THEN
-            UPDATE installers SET 
-                poor_work_count = poor_work_count + 1,
-                last_incident_date = NEW.claim_date
+            UPDATE installers SET poor_work_count = poor_work_count + 1, last_incident_date = NEW.claim_date
             WHERE id = NEW.responsible_installer_id;
         ELSE
-            -- Для гарантийного выезда (не по вине монтажника) увеличиваем счётчик у монтажников,
-            -- которые выполняли эту позицию (через order_item_installers)
-            UPDATE installers SET 
-                warranty_visits_count = warranty_visits_count + 1,
-                last_incident_date = NEW.claim_date
-            WHERE id IN (
-                SELECT installer_id FROM order_item_installers WHERE order_item_id = NEW.order_item_id
-            );
+            UPDATE installers SET warranty_visits_count = warranty_visits_count + 1, last_incident_date = NEW.claim_date
+            WHERE id IN (SELECT installer_id FROM order_item_installers WHERE order_item_id = NEW.order_item_id);
         END IF;
     END IF;
-
     IF TG_OP = 'DELETE' THEN
         IF OLD.fault_type = 'installer' THEN
             UPDATE installers SET poor_work_count = poor_work_count - 1
             WHERE id = OLD.responsible_installer_id;
         ELSE
             UPDATE installers SET warranty_visits_count = warranty_visits_count - 1
-            WHERE id IN (
-                SELECT installer_id FROM order_item_installers WHERE order_item_id = OLD.order_item_id
-            );
+            WHERE id IN (SELECT installer_id FROM order_item_installers WHERE order_item_id = OLD.order_item_id);
         END IF;
     END IF;
-
     RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql;
@@ -459,8 +386,9 @@ BEGIN
             EXECUTE FUNCTION update_installer_stats_from_claims();
     END IF;
 END $$;
+
 -- -----------------------------------------------------------------
--- 19. ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
+-- ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION recalc_all_quality_scores()
 RETURNS VOID AS $$
@@ -475,7 +403,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- -----------------------------------------------------------------
--- 20. ФУНКЦИЯ И ТРИГГЕР ДЛЯ ИСТОРИИ СТАТУСОВ
+-- ФУНКЦИЯ И ТРИГГЕР ДЛЯ ИСТОРИИ СТАТУСОВ
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION log_order_status_change()
 RETURNS TRIGGER AS $$
@@ -499,7 +427,7 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------
--- 21. ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА АГРЕГАТОВ FINANCE (расширенная)
+-- ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА АГРЕГАТОВ FINANCE (расширенная)
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION recalc_order_finance(p_order_id INTEGER)
 RETURNS VOID AS $$
@@ -511,30 +439,21 @@ DECLARE
     v_warranty_oleg NUMERIC(10,2);
     v_warranty_installer NUMERIC(10,2);
 BEGIN
-    -- Выручка и себестоимость товаров
-    SELECT COALESCE(SUM(sale_price * quantity), 0),
-           COALESCE(SUM(purchase_price * quantity), 0)
+    SELECT COALESCE(SUM(sale_price * quantity), 0), COALESCE(SUM(purchase_price * quantity), 0)
     INTO v_revenue, v_cost_of_goods
-    FROM order_items
-    WHERE order_id = p_order_id;
+    FROM order_items WHERE order_id = p_order_id;
 
-    -- Выплаты монтажникам: суммируем base_payment из order_installers
     SELECT COALESCE(SUM(base_payment), 0) INTO v_installer_payments
-    FROM order_installers
-    WHERE order_id = p_order_id;
+    FROM order_installers WHERE order_id = p_order_id;
 
-    -- Добавляем выплаты из order_item_installers
     SELECT v_installer_payments + COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
     FROM order_item_installers oii
     JOIN order_items oi ON oii.order_item_id = oi.id
     WHERE oi.order_id = p_order_id;
 
-    -- Непредвиденные расходы
     SELECT COALESCE(SUM(amount), 0) INTO v_expenses
-    FROM order_expenses
-    WHERE order_id = p_order_id;
+    FROM order_expenses WHERE order_id = p_order_id;
 
-    -- Гарантийные расходы
     SELECT COALESCE(SUM(cost), 0) INTO v_warranty_oleg
     FROM warranty_claims wc
     JOIN order_items oi ON wc.order_item_id = oi.id
@@ -545,7 +464,6 @@ BEGIN
     JOIN order_items oi ON wc.order_item_id = oi.id
     WHERE oi.order_id = p_order_id AND wc.cost_covered_by = 'installer';
 
-    -- Вставляем или обновляем запись в finance
     INSERT INTO finance (
         order_id, revenue, cost_of_goods, installer_payments, expenses,
         warranty_costs_oleg, warranty_costs_installer
@@ -564,6 +482,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- -------------------------------------------------------------
+-- ВРЕМЕННО ОТКЛЮЧЕНЫ ТРИГГЕРЫ ДЛЯ ПЕРЕСЧЁТА FINANCE
+-- -------------------------------------------------------------
+/* 
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_items_recalc_finance') THEN
@@ -571,33 +493,12 @@ BEGIN
             AFTER INSERT OR UPDATE OR DELETE ON order_items
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_installers_recalc_finance') THEN
-        CREATE TRIGGER trg_order_installers_recalc_finance
-            AFTER INSERT OR UPDATE OR DELETE ON order_installers
-            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_item_installers_recalc_finance') THEN
-        CREATE TRIGGER trg_order_item_installers_recalc_finance
-            AFTER INSERT OR UPDATE OR DELETE ON order_item_installers
-            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_expenses_recalc_finance') THEN
-        CREATE TRIGGER trg_order_expenses_recalc_finance
-            AFTER INSERT OR UPDATE OR DELETE ON order_expenses
-            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_warranty_claims_recalc_finance') THEN
-        CREATE TRIGGER trg_warranty_claims_recalc_finance
-            AFTER INSERT OR UPDATE OR DELETE ON warranty_claims
-            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
-    END IF;
+    ... (остальной блок)
 END $$;
+*/
+
 -- -----------------------------------------------------------------
--- 22. КОММЕНТАРИИ
+-- КОММЕНТАРИИ
 -- -----------------------------------------------------------------
 COMMENT ON TABLE installers IS 'Монтажники, включая рейтинг и статистику брака/гарантии';
 COMMENT ON COLUMN installers.poor_work_count IS 'Количество заказов с некачественной установкой (брак/переделка)';
@@ -612,6 +513,3 @@ COMMENT ON TABLE payments IS 'Платежи от клиента и монтаж
 COMMENT ON TABLE finance IS 'Финансовая сводка по заказу';
 
 COMMIT;
--- =====================================================
--- ГОТОВО: СХЕМА ПОЛНОСТЬЮ РАЗВЁРНУТА
--- =====================================================
