@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 import PhoneField from "../components/PhoneField";
+import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import "../styles/order-form.css";
 import "../styles/phone.css";
 
@@ -24,12 +25,14 @@ const OrderDetail = () => {
   const [orderInstallers, setOrderInstallers] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [claims, setClaims] = useState([]); // гарантийные случаи
 
   // Состояния для форм добавления
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddInstaller, setShowAddInstaller] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddPayment, setShowAddPayment] = useState(false);
+  const [showAddClaim, setShowAddClaim] = useState(false);
 
   // Данные для новых записей
   const [newItem, setNewItem] = useState({
@@ -59,6 +62,18 @@ const OrderDetail = () => {
     payment_date: new Date().toISOString().split("T")[0],
     description: "",
   });
+  const [newClaim, setNewClaim] = useState({
+    order_item_id: "",
+    claim_date: new Date().toISOString().split("T")[0],
+    description: "",
+    fault_type: "manufacturer",
+    responsible_installer_id: "",
+    resolution: "",
+    resolving_installer_id: "",
+    cost: 0,
+    cost_covered_by: "oleg",
+    status: "open",
+  });
 
   // Общие состояния
   const [loading, setLoading] = useState(true);
@@ -82,6 +97,7 @@ const OrderDetail = () => {
         setOrderInstallers(orderData.installers || []);
         setExpenses(orderData.expenses || []);
         setPayments(orderData.payments || []);
+        setClaims(orderData.warranty_claims || []);
         setInstallers(installersData);
       } catch (err) {
         setError(err.message);
@@ -283,6 +299,55 @@ const OrderDetail = () => {
     }
   };
 
+  // ---------- Работа с гарантийными случаями ----------
+  const handleAddClaim = async () => {
+    if (!newClaim.order_item_id) {
+      alert("Выберите позицию");
+      return;
+    }
+    try {
+      const created = await api.createWarrantyClaim({
+        order_item_id: newClaim.order_item_id,
+        claim_date: newClaim.claim_date,
+        description: newClaim.description,
+        fault_type: newClaim.fault_type,
+        responsible_installer_id: newClaim.responsible_installer_id || null,
+        resolution: newClaim.resolution,
+        resolving_installer_id: newClaim.resolving_installer_id || null,
+        cost: newClaim.cost,
+        cost_covered_by: newClaim.cost_covered_by,
+        status: newClaim.status,
+      });
+      setClaims([...claims, created]);
+      setShowAddClaim(false);
+      setNewClaim({
+        order_item_id: "",
+        claim_date: new Date().toISOString().split("T")[0],
+        description: "",
+        fault_type: "manufacturer",
+        responsible_installer_id: "",
+        resolution: "",
+        resolving_installer_id: "",
+        cost: 0,
+        cost_covered_by: "oleg",
+        status: "open",
+      });
+    } catch (err) {
+      alert("Ошибка при добавлении гарантийного случая: " + err.message);
+    }
+  };
+
+  const handleDeleteClaim = async (claimId) => {
+    if (window.confirm("Удалить гарантийный случай?")) {
+      try {
+        await api.deleteWarrantyClaim(claimId);
+        setClaims(claims.filter((c) => c.id !== claimId));
+      } catch (err) {
+        alert("Ошибка удаления: " + err.message);
+      }
+    }
+  };
+
   if (loading)
     return (
       <div className="page">
@@ -295,7 +360,7 @@ const OrderDetail = () => {
     );
   if (error) return <div>Ошибка: {error}</div>;
   if (!order || !client) return <div>Заказ не найден</div>;
-  console.log("RENDER with order id:", order?.id);
+
   return (
     <div className="page">
       <Header />
@@ -478,6 +543,31 @@ const OrderDetail = () => {
                     ₽
                   </div>
                 </div>
+              </div>
+            </fieldset>
+          )}
+          {/* Карта с меткой заказа */}
+          {order.lat && order.lon && (
+            <fieldset className="crm-form__section">
+              <legend className="crm-form__legend">📍 Карта</legend>
+              <div
+                className="map-container"
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  overflow: "hidden",
+                  borderRadius: "8px",
+                }}
+              >
+                <YMaps>
+                  <Map
+                    defaultState={{ center: [order.lat, order.lon], zoom: 15 }}
+                    width="100%"
+                    height="100%"
+                  >
+                    <Placemark geometry={[order.lat, order.lon]} />
+                  </Map>
+                </YMaps>
               </div>
             </fieldset>
           )}
@@ -1057,6 +1147,249 @@ const OrderDetail = () => {
                 <button
                   type="button"
                   onClick={handleAddPayment}
+                  className="crm-form__button crm-form__button--submit"
+                  style={{ marginTop: "10px" }}
+                >
+                  Добавить
+                </button>
+              </div>
+            )}
+          </fieldset>
+
+          {/* Гарантийные случаи */}
+          <fieldset className="crm-form__section">
+            <legend className="crm-form__legend">🛡 Гарантийные случаи</legend>
+            {claims.length === 0 && <p>Нет гарантийных случаев</p>}
+            {claims.map((claim) => {
+              const item = items.find((i) => i.id === claim.order_item_id);
+              const responsible = installers.find(
+                (i) => i.id === claim.responsible_installer_id,
+              );
+              const resolver = installers.find(
+                (i) => i.id === claim.resolving_installer_id,
+              );
+              return (
+                <div
+                  key={claim.id}
+                  className="item-block"
+                  style={{
+                    border: "1px solid var(--border-color)",
+                    padding: "10px",
+                    marginBottom: "10px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <div>
+                      <strong>{claim.description || "Без описания"}</strong>
+                      <br />
+                      Позиция: {item?.name || "неизвестно"}
+                      <br />
+                      Дата: {claim.claim_date}, тип: {claim.fault_type}
+                      <br />
+                      Ответственный: {responsible?.full_name || "не указан"}
+                      <br />
+                      Решение: {claim.resolution || "нет"}, исполнитель:{" "}
+                      {resolver?.full_name || "не указан"}
+                      <br />
+                      Стоимость: {claim.cost} ₽, покрывает:{" "}
+                      {claim.cost_covered_by}, статус: {claim.status}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteClaim(claim.id)}
+                      className="item-remove-btn"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setShowAddClaim(!showAddClaim)}
+              className="crm-form__button crm-form__button--secondary"
+            >
+              {showAddClaim ? "Отмена" : "➕ Добавить гарантийный случай"}
+            </button>
+            {showAddClaim && (
+              <div
+                className="add-form"
+                style={{
+                  marginTop: "15px",
+                  padding: "15px",
+                  border: "1px solid var(--border-color)",
+                  borderRadius: "8px",
+                }}
+              >
+                <h4>Новый гарантийный случай</h4>
+                <div className="crm-form__grid">
+                  <div className="crm-form__field">
+                    <label>Позиция *</label>
+                    <select
+                      value={newClaim.order_item_id}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          order_item_id: e.target.value,
+                        })
+                      }
+                      className="crm-form__input"
+                      required
+                    >
+                      <option value="">-- Выберите позицию --</option>
+                      {items.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Дата</label>
+                    <input
+                      type="date"
+                      value={newClaim.claim_date}
+                      onChange={(e) =>
+                        setNewClaim({ ...newClaim, claim_date: e.target.value })
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Описание</label>
+                    <input
+                      type="text"
+                      value={newClaim.description}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          description: e.target.value,
+                        })
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Тип неисправности</label>
+                    <select
+                      value={newClaim.fault_type}
+                      onChange={(e) =>
+                        setNewClaim({ ...newClaim, fault_type: e.target.value })
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="manufacturer">Производитель</option>
+                      <option value="installer">Монтажник</option>
+                      <option value="other">Другое</option>
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Ответственный монтажник</label>
+                    <select
+                      value={newClaim.responsible_installer_id}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          responsible_installer_id: e.target.value,
+                        })
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="">-- Не выбран --</option>
+                      {installers.map((i) => (
+                        <option key={i.id} value={i.id}>
+                          {i.full_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Решение</label>
+                    <input
+                      type="text"
+                      value={newClaim.resolution}
+                      onChange={(e) =>
+                        setNewClaim({ ...newClaim, resolution: e.target.value })
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Исполнитель</label>
+                    <select
+                      value={newClaim.resolving_installer_id}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          resolving_installer_id: e.target.value,
+                        })
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="">-- Не выбран --</option>
+                      {installers.map((i) => (
+                        <option key={i.id} value={i.id}>
+                          {i.full_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Стоимость (₽)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={newClaim.cost}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          cost: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="crm-form__input"
+                    />
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Кто покрывает</label>
+                    <select
+                      value={newClaim.cost_covered_by}
+                      onChange={(e) =>
+                        setNewClaim({
+                          ...newClaim,
+                          cost_covered_by: e.target.value,
+                        })
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="oleg">Олег</option>
+                      <option value="manufacturer">Производитель</option>
+                      <option value="installer">Монтажник</option>
+                    </select>
+                  </div>
+                  <div className="crm-form__field">
+                    <label>Статус</label>
+                    <select
+                      value={newClaim.status}
+                      onChange={(e) =>
+                        setNewClaim({ ...newClaim, status: e.target.value })
+                      }
+                      className="crm-form__input"
+                    >
+                      <option value="open">Открыт</option>
+                      <option value="in_progress">В работе</option>
+                      <option value="closed">Закрыт</option>
+                      <option value="rejected">Отклонён</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddClaim}
                   className="crm-form__button crm-form__button--submit"
                   style={{ marginTop: "10px" }}
                 >

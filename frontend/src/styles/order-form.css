@@ -235,6 +235,15 @@ textarea.crm-form__input {
     color: white !important;
 }
 
+/* Карта в деталях заказа */
+.map-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
 @media (max-width: 1024px) {
     .crm-form {
         max-width: 95%;
@@ -338,6 +347,10 @@ textarea.crm-form__input {
         word-wrap: break-word;
         overflow-wrap: break-word;
         max-width: 100%;
+    }
+
+    .map-container {
+        height: 250px;
     }
 }
 

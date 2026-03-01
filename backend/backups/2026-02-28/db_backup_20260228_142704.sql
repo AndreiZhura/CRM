@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict XoYVaVE29xirdsOBpcG4elpLKXKWt2NfsNieI4vE3cM3A1Utdn2olKBpSAt73gW
+\restrict 5NN9eutF4pYNhr8t74HTdNaiAyXupnCYzaGffy1qmxKlFKwKcMLeG9hsc2vIi6W
 
 -- Dumped from database version 15.15
 -- Dumped by pg_dump version 18.2 (Ubuntu 18.2-1.pgdg24.04+1)
@@ -160,12 +160,13 @@ BEGIN
     FROM order_items
     WHERE order_id = p_order_id;
 
-    -- Выплаты монтажникам (суммируем base_payment из order_installers + payment_amount из order_item_installers)
+    -- Выплаты монтажникам: суммируем base_payment из order_installers
     SELECT COALESCE(SUM(base_payment), 0) INTO v_installer_payments
     FROM order_installers
     WHERE order_id = p_order_id;
 
-    SELECT COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
+    -- Добавляем выплаты из order_item_installers
+    SELECT v_installer_payments + COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
     FROM order_item_installers oii
     JOIN order_items oi ON oii.order_item_id = oi.id
     WHERE oi.order_id = p_order_id;
@@ -1129,7 +1130,9 @@ ALTER TABLE ONLY public.weather ALTER COLUMN id SET DEFAULT nextval('public.weat
 --
 
 COPY public.address_cache (address, lat, lon, updated_at) FROM stdin;
-Москва, ул. Ленина, 10	55.6021130	37.1700500	2026-02-27 13:32:36.910737
+Москва, ул. Тверская, д. 12, кв. 45	55.7633050	37.6093710	2026-02-28 10:16:26.549226
+Московская область, г. Мытищи, ул. Мира, д. 8, офис 302	55.9124610	37.7335090	2026-02-28 10:30:25.150276
+Россия, Московская область, Мытищи, улица Мира, 8	55.9124610	37.7335090	2026-02-28 11:10:21.799926
 \.
 
 
@@ -1138,7 +1141,7 @@ COPY public.address_cache (address, lat, lon, updated_at) FROM stdin;
 --
 
 COPY public.admins (id, username, password_hash, created_at) FROM stdin;
-1	zhura2296@yandex.ru	$2b$12$R7SSggTaNmSojXru6F/mKuO6Bu9GI8GzXSjD5U5y7J5vmjXCMQrG2	2026-02-27 13:30:56.998953
+1	zhura2296@yandex.ru	$2b$12$aX5KZyRJeENoQKJqqCQ9f.ajTpektMruBAx6xbK8JiyMNgLb92PDm	2026-02-28 09:21:01.990457
 \.
 
 
@@ -1147,7 +1150,8 @@ COPY public.admins (id, username, password_hash, created_at) FROM stdin;
 --
 
 COPY public.clients (id, full_name, phone, backup_phone, address, coordinates, created_at, last_contact, comments, updated_at, deleted_at) FROM stdin;
-1	Иванов Иван	+79991234567	\N	Москва, ул. Ленина, 10	\N	2026-02-27 13:32:09.24013	2026-02-27 13:32:09.24013	Тестовый клиент	\N	\N
+1	Смирнов Алексей Викторович	+79031234567	+79039876543	Москва, ул. Тверская, д. 12, кв. 45	\N	2026-02-28 10:16:26.321112	2026-02-28 10:16:26.321112		\N	\N
+2	ООО "Ромашка" (контакт: Елена)	+74951234567	+74959876543	Россия, Московская область, Мытищи, улица Мира, 8	\N	2026-02-28 10:30:25.01176	2026-02-28 10:30:25.01176		\N	\N
 \.
 
 
@@ -1156,9 +1160,8 @@ COPY public.clients (id, full_name, phone, backup_phone, address, coordinates, c
 --
 
 COPY public.finance (id, order_id, revenue, cost_of_goods, installer_payments, expenses, warranty_costs_oleg, warranty_costs_installer, created_at, updated_at) FROM stdin;
-1	1	45000.00	25000.00	0.00	1500.00	5000.00	0.00	2026-02-27 13:32:48.995392	2026-02-27 14:09:09.864951
-5	2	35000.00	20000.00	0.00	1200.50	0.00	0.00	2026-02-27 13:46:11.99279	2026-02-27 14:11:06.610796
-10	3	32000.00	18000.00	0.00	800.00	0.00	0.00	2026-02-27 14:29:11.059855	2026-02-27 14:29:39.162601
+1	1	42000.00	25000.00	0.00	0.00	0.00	0.00	2026-02-28 10:16:26.626515	2026-02-28 10:16:26.665546
+3	2	115000.00	60000.00	13000.00	3500.00	0.00	0.00	2026-02-28 10:30:25.227486	2026-02-28 11:09:15.194393
 \.
 
 
@@ -1167,8 +1170,9 @@ COPY public.finance (id, order_id, revenue, cost_of_goods, installer_payments, e
 --
 
 COPY public.installers (id, full_name, nickname, phone, backup_phone, specialization, rating, base_price, is_debtor, comments, is_active, is_in_funnel, total_orders, poor_work_count, warranty_visits_count, last_incident_date, updated_at, created_at, deleted_at) FROM stdin;
-1	Альпинист Иван	\N	+79991112233	\N	{альпинист}	9.0	4000.00	f	\N	t	t	0	0	0	\N	2026-02-27 13:32:23.521455	2026-02-27 13:32:23.521455	\N
-2	Иван Петров	\N	+71234567890	\N	{монтаж}	10.0	0.00	f	\N	t	t	0	0	0	\N	2026-02-27 14:23:14.175939	2026-02-27 14:23:14.175939	\N
+1	Иванов Иван Иванович	Мороз	+79161112233	+79163334455	{установка,ремонт,заправка}	9.5	5000.00	f	Опытный мастер, работаем с 2018 года	t	t	0	0	0	\N	2026-02-28 09:26:12.479096	2026-02-28 09:26:12.479096	\N
+2	Петров Пётр Петрович	Ветер	+79262223344		{подъём,монтаж}	8.0	3000.00	f	Молодой специалист, физически сильный	t	t	0	0	0	\N	2026-02-28 09:35:02.134752	2026-02-28 09:35:02.134752	\N
+3	Сидоров Сидор Сидорович	Высота	+79374445566		{"высотные работы",альпинизм}	9.0	6000.00	f	Работает на фасадах любой сложности	t	t	0	0	0	\N	2026-02-28 09:40:12.487833	2026-02-28 09:40:12.487833	\N
 \.
 
 
@@ -1177,9 +1181,7 @@ COPY public.installers (id, full_name, nickname, phone, backup_phone, specializa
 --
 
 COPY public.order_expenses (id, order_id, amount, description, expense_date, category, created_at, updated_at) FROM stdin;
-1	1	1500.00	Покупка сверла	2026-02-27	tools	2026-02-27 13:33:00.732793	2026-02-27 13:33:00.732793
-2	2	1200.50	Дополнительный крепёж	2026-02-27	materials	2026-02-27 14:11:06.610796	2026-02-27 14:11:06.610796
-3	3	800.00	Кронштейны	2026-02-27	other	2026-02-27 14:29:39.162601	2026-02-27 14:29:39.162601
+1	2	3500.00	Аренда автовышки	2026-03-06	transport	2026-02-28 10:31:05.33047	2026-02-28 10:31:05.33047
 \.
 
 
@@ -1188,9 +1190,9 @@ COPY public.order_expenses (id, order_id, amount, description, expense_date, cat
 --
 
 COPY public.order_installers (id, order_id, installer_id, role, base_payment, is_primary, created_at, updated_at) FROM stdin;
-1	1	1	альпинист	4000.00	t	2026-02-27 13:33:12.575289	2026-02-27 13:33:12.575289
-2	2	1	ведущий	5000.00	t	2026-02-27 14:10:51.54997	2026-02-27 14:10:51.54997
-3	3	1	ведущий	4000.00	f	2026-02-27 14:29:24.638547	2026-02-27 14:29:24.638547
+1	1	1	ведущий	5000.00	t	2026-02-28 10:16:26.665546	2026-02-28 10:16:26.665546
+2	2	1	ведущий	7000.00	t	2026-02-28 10:30:25.259729	2026-02-28 10:30:25.259729
+3	2	3	альпинист	6000.00	f	2026-02-28 10:30:25.266618	2026-02-28 10:30:25.266618
 \.
 
 
@@ -1207,9 +1209,9 @@ COPY public.order_item_installers (id, order_item_id, installer_id, payment_amou
 --
 
 COPY public.order_items (id, order_id, item_type, name, quantity, purchase_price, sale_price, warranty_manufacturer, warranty_master, sort_order, created_at, updated_at) FROM stdin;
-1	1	product	Кондиционер Haier	1	25000.00	45000.00	3	1	10	2026-02-27 13:32:48.995392	2026-02-27 13:32:48.995392
-2	2	product	Кондиционер Haier	1	20000.00	35000.00	0	0	0	2026-02-27 13:46:11.99279	2026-02-27 13:46:11.99279
-3	3	product	Сплит-система	1	18000.00	32000.00	0	0	0	2026-02-27 14:29:11.059855	2026-02-27 14:29:11.059855
+1	1	product	Кондиционер Haier AS25H	1	25000.00	42000.00	3	0	0	2026-02-28 10:16:26.626515	2026-02-28 10:16:26.626515
+2	2	product	Mitsubishi Heavy	2	30000.00	50000.00	5	0	0	2026-02-28 10:30:25.227486	2026-02-28 10:30:25.227486
+3	2	service	Монтаж с подъёмом	1	0.00	15000.00	1	0	1	2026-02-28 10:30:25.238316	2026-02-28 10:30:25.238316
 \.
 
 
@@ -1226,9 +1228,8 @@ COPY public.order_status_history (id, order_id, status, changed_at) FROM stdin;
 --
 
 COPY public.orders (id, client_id, status, warehouse, service_datetime, delivery_datetime, promise, marker_color, address_id, address_text, created_at, updated_at) FROM stdin;
-1	\N	Новый	Основной	2026-03-02 14:00:00	2026-03-02 12:00:00	Позвонить за час	blue	Москва, ул. Ленина, 10	Москва, ул. Ленина, 10	2026-02-27 13:32:36.955509	2026-02-27 13:32:36.955509
-2	\N	Новый	\N	2026-02-28 10:00:00	\N	\N	\N	\N	\N	2026-02-27 13:45:42.852565	2026-02-27 13:45:42.852565
-3	\N	Новый	\N	2026-02-28 11:00:00	\N	\N	\N	\N	\N	2026-02-27 14:28:55.37402	2026-02-27 14:28:55.37402
+1	1	Новый	Основной	2026-03-05 11:00:00	2026-03-04 07:00:00		green	Москва, ул. Тверская, д. 12, кв. 45	Москва, ул. Тверская, д. 12, кв. 45	2026-02-28 10:16:26.593866	2026-02-28 10:16:26.593866
+2	2	Новый	Основной	2026-03-07 07:00:00	2026-03-06 06:00:00	нужна срочная установка	red	Россия, Московская область, Мытищи, улица Мира, 8	Россия, Московская область, Мытищи, улица Мира, 8	2026-02-28 10:30:25.206441	2026-02-28 11:10:22.027617
 \.
 
 
@@ -1237,8 +1238,6 @@ COPY public.orders (id, client_id, status, warehouse, service_datetime, delivery
 --
 
 COPY public.payments (id, order_id, payment_type, installer_id, amount, payment_date, description, created_at, updated_at) FROM stdin;
-1	2	client	\N	35000.00	2026-02-27	\N	2026-02-27 14:20:24.572467	2026-02-27 14:20:24.572467
-3	3	client	\N	32000.00	2026-02-27	\N	2026-02-27 14:29:58.283196	2026-02-27 14:29:58.283196
 \.
 
 
@@ -1247,9 +1246,6 @@ COPY public.payments (id, order_id, payment_type, installer_id, amount, payment_
 --
 
 COPY public.warranty_claims (id, order_item_id, claim_date, description, fault_type, responsible_installer_id, resolution, resolving_installer_id, cost, cost_covered_by, status, closed_at, created_at, updated_at) FROM stdin;
-1	1	2026-03-01	Не охлаждает	manufacturer	\N	\N	\N	5000.00	oleg	open	\N	2026-02-27 13:33:25.002998	2026-02-27 13:33:25.002998
-2	1	2026-02-27	Не работает компрессор	manufacturer	\N	\N	\N	5000.00	manufacturer	open	\N	2026-02-27 13:46:35.838701	2026-02-27 13:46:35.838701
-3	1	2026-02-27	Не работает компрессор	manufacturer	\N	\N	\N	5000.00	manufacturer	open	\N	2026-02-27 14:09:09.864951	2026-02-27 14:09:09.864951
 \.
 
 
@@ -1272,28 +1268,28 @@ SELECT pg_catalog.setval('public.admins_id_seq', 1, true);
 -- Name: clients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.clients_id_seq', 1, true);
+SELECT pg_catalog.setval('public.clients_id_seq', 2, true);
 
 
 --
 -- Name: finance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.finance_id_seq', 12, true);
+SELECT pg_catalog.setval('public.finance_id_seq', 8, true);
 
 
 --
 -- Name: installers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.installers_id_seq', 2, true);
+SELECT pg_catalog.setval('public.installers_id_seq', 3, true);
 
 
 --
 -- Name: order_expenses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.order_expenses_id_seq', 3, true);
+SELECT pg_catalog.setval('public.order_expenses_id_seq', 1, true);
 
 
 --
@@ -1328,21 +1324,21 @@ SELECT pg_catalog.setval('public.order_status_history_id_seq', 1, false);
 -- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.orders_id_seq', 3, true);
+SELECT pg_catalog.setval('public.orders_id_seq', 2, true);
 
 
 --
 -- Name: payments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.payments_id_seq', 3, true);
+SELECT pg_catalog.setval('public.payments_id_seq', 1, false);
 
 
 --
 -- Name: warranty_claims_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.warranty_claims_id_seq', 3, true);
+SELECT pg_catalog.setval('public.warranty_claims_id_seq', 1, false);
 
 
 --
@@ -1853,5 +1849,5 @@ ALTER TABLE ONLY public.warranty_claims
 -- PostgreSQL database dump complete
 --
 
-\unrestrict XoYVaVE29xirdsOBpcG4elpLKXKWt2NfsNieI4vE3cM3A1Utdn2olKBpSAt73gW
+\unrestrict 5NN9eutF4pYNhr8t74HTdNaiAyXupnCYzaGffy1qmxKlFKwKcMLeG9hsc2vIi6W
 

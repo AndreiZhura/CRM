@@ -1,7 +1,8 @@
 import asyncio
 import subprocess
 import logging
-import shutil
+import tempfile
+import os
 from datetime import datetime
 from pathlib import Path
 import pandas as pd
@@ -12,26 +13,18 @@ import yadisk
 
 logger = logging.getLogger(__name__)
 
+# ---------- Базовая директория для локальных бэкапов ----------
 BACKUP_DIR = Path("backups")
 BACKUP_DIR.mkdir(exist_ok=True)
 
-def clean_old_backups():
-    """Удаляет все старые файлы бэкапов из папки BACKUP_DIR."""
-    for pattern in ["db_backup_*", "report_*"]:
-        for f in BACKUP_DIR.glob(pattern):
-            try:
-                f.unlink()
-                logger.debug(f"Removed old backup file: {f}")
-            except Exception as e:
-                logger.error(f"Failed to remove {f}: {e}")
-
-def create_db_dump() -> Path:
+# ---------- Создание дампа БД ----------
+def create_db_dump(local_dir: Path) -> Path:
     """
-    Создаёт дамп базы данных с помощью pg_dump.
+    Создаёт дамп базы данных с помощью pg_dump в указанной локальной папке.
     Возвращает путь к созданному файлу.
     """
-    timestamp = datetime.now().strftime("%Y.%m.%d_%H-%M")
-    filename = BACKUP_DIR / f"db_backup_{timestamp}.sql"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = local_dir / f"db_backup_{timestamp}.sql"
 
     cmd = [
         "pg_dump",
@@ -51,12 +44,14 @@ def create_db_dump() -> Path:
         logger.error(f"Failed to create dump: {e.stderr}")
         raise
 
-async def generate_excel_report() -> Path:
+# ---------- Генерация Excel-отчёта ----------
+async def generate_excel_report(local_dir: Path) -> Path:
     """
-    Генерирует Excel-отчёт со сводкой заказов.
+    Генерирует Excel-отчёт со сводкой заказов в указанной локальной папке.
+    Возвращает путь к созданному файлу.
     """
-    timestamp = datetime.now().strftime("%Y.%m.%d_%H-%M")
-    filename = BACKUP_DIR / f"report_{timestamp}.xlsx"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = local_dir / f"report_{timestamp}.xlsx"
 
     async with AsyncSessionLocal() as db:
         stmt = text("""
@@ -88,11 +83,21 @@ async def generate_excel_report() -> Path:
 
     df = pd.DataFrame(rows)
 
-    # Переименовываем колонки на русские
+    # Переименовываем колонки на русские для удобства Олега
     df.columns = [
-        'ID заказа', 'Дата создания', 'Статус', 'Адрес', 'Клиент',
-        'Монтажники', 'Выручка', 'Себестоимость', 'Выплаты монтажникам',
-        'Расходы', 'Прибыль', 'Температура', 'Осадки'
+        'ID заказа',
+        'Дата создания',
+        'Статус',
+        'Адрес',
+        'Клиент',
+        'Монтажники',
+        'Выручка',
+        'Себестоимость',
+        'Выплаты монтажникам',
+        'Расходы',
+        'Прибыль',
+        'Температура',
+        'Осадки'
     ]
 
     # Форматирование чисел и дат
@@ -133,9 +138,9 @@ async def ensure_disk_folder(client: yadisk.AsyncClient, path: str):
             logger.error(f"Failed to create folder {current}: {e}")
             raise
 
-async def upload_to_disk(local_path: Path, remote_dir: str = "/CRM/backups") -> bool:
+async def upload_to_disk(local_path: Path, remote_dir: str) -> bool:
     """
-    Загружает файл на Яндекс.Диск в указанную папку.
+    Загружает файл на Яндекс.Диск в указанную удалённую папку.
     Возвращает True при успехе, False при ошибке.
     """
     token = settings.YANDEX_DISK_TOKEN
@@ -163,28 +168,36 @@ async def upload_to_disk(local_path: Path, remote_dir: str = "/CRM/backups") -> 
 # ---------- Основная задача ----------
 async def daily_backup_and_report(recipient: str):
     """
-    Ежедневная задача: удаляет старые локальные бэкапы, создаёт новые дамп и отчёт,
-    загружает их на Яндекс.Диск.
+    Ежедневная задача: создаёт дамп и отчёт в подпапке с датой,
+    загружает на Яндекс.Диск в аналогичную подпапку,
+    отправляет письмо (опционально).
     """
+    # Получаем текущую дату для создания подпапки
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    local_date_dir = BACKUP_DIR / today_str
+    local_date_dir.mkdir(exist_ok=True)
+
+    remote_date_dir = f"{settings.YANDEX_DISK_PATH}/{today_str}"
+
+    dump_path = None
+    report_path = None
     try:
-        # Удаляем старые файлы перед созданием новых
-        clean_old_backups()
+        # Создаём локальные файлы в датированной подпапке
+        dump_path = await asyncio.to_thread(create_db_dump, local_date_dir)
+        report_path = await generate_excel_report(local_date_dir)
 
-        # Создаём локальные файлы
-        dump_path = await asyncio.to_thread(create_db_dump)
-        report_path = await generate_excel_report()
-
-        # Загружаем на Яндекс.Диск
-        dump_ok = await upload_to_disk(dump_path)
-        report_ok = await upload_to_disk(report_path)
+        # Загружаем на Яндекс.Диск в датированную подпапку
+        dump_ok = await upload_to_disk(dump_path, remote_date_dir)
+        report_ok = await upload_to_disk(report_path, remote_date_dir)
 
         if dump_ok and report_ok:
             logger.info("Both files uploaded successfully")
-            # (опционально) можно отправить письмо
+            # Здесь можно добавить отправку письма, если нужно
         else:
             logger.warning("Some files failed to upload")
 
-        logger.info("Daily backup and report completed")
+        logger.info(f"Daily backup and report completed for {today_str}")
 
     except Exception as e:
         logger.exception(f"Backup/report failed: {e}")
+    # Локальные файлы остаются в подпапке (для истории). Если нужно удалять – добавить ротацию.
