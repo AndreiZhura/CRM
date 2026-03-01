@@ -125,7 +125,7 @@
 }
 
 /* 6. Адаптивность (Katana/Tablets/Mobile) */
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 1200px) {
     .header__burger { display: flex; }
 
     .header__nav {

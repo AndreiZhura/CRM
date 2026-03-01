@@ -81,76 +81,86 @@
 }
 
 /* --- 3. ТАБЛИЦА МАСТЕРОВ (ДЕСКТОП) --- */
+/* --- 3. ТАБЛИЦА МАСТЕРОВ (ДЕСКТОП) --- */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    border-radius: 20px; /* увеличили скругление */
+    border-radius: 16px;
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .orders-table {
-    width: 90%;
+    width: 100%;
     border-collapse: collapse;
     background: var(--card-bg);
-    border-radius: 20px; /* чтобы углы таблицы тоже были скруглены */
+    border-radius: 16px;
+    overflow: hidden;
 }
 
 .orders-table th {
     background-color: var(--bg-secondary);
-    padding: 14px 16px;
+    padding: 16px 20px;
     text-align: left;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: 700;
+    color: var(--text-primary);
     border-bottom: 2px solid var(--border-color);
     text-transform: uppercase;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.03em;
 }
 
-.orders-table th:first-child {
-    border-top-left-radius: 20px;
-}
-.orders-table th:last-child {
-    border-top-right-radius: 20px;
-}
-
-.orders-table__td {
-    padding: 16px;
+.orders-table td {
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
     color: var(--text-primary);
 }
 
-.orders-table__row:hover {
-    background-color: var(--table-row-hover);
+/* Чередование фона строк */
+.orders-table tbody tr:nth-child(even) {
+    background-color: var(--bg-secondary);
 }
 
-/* Ссылки на имена монтажников (десктоп) */
-.orders-table__td a {
+.orders-table tbody tr:hover {
+    background-color: var(--accent-color-light, rgba(59, 130, 246, 0.05));
+}
+
+/* Ссылки на имена монтажников */
+.orders-table td a {
     text-decoration: none;
-    color: var(--accent-color); /* делаем акцентным цветом, но без подчёркивания */
+    color: var(--accent-color);
     font-weight: 600;
     transition: color 0.2s;
 }
 
-.orders-table__td a:hover {
-    color: var(--accent-hover);
-    text-decoration: underline; /* при наведении можно подчеркнуть */
-}
-
-/* Элементы внутри ячеек (для мобильных они переопределятся) */
-.installer-link {
-    text-decoration: none;
-    color: var(--accent-color);
-    transition: color 0.2s;
-}
-
-.installer-link:hover {
+.orders-table td a:hover {
     color: var(--accent-hover);
     text-decoration: underline;
 }
 
+/* Обёртка для имени и ника */
+.name-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Тег ника */
+.nickname-tag {
+    display: inline-block;
+    background: var(--bg-primary);
+    color: var(--accent-color);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--accent-color);
+    white-space: nowrap;
+}
+
+/* Иконки телефона (если нужны) */
 .table-phone-wrapper {
     display: flex;
     align-items: center;

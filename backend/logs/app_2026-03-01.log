@@ -4501,3 +4501,683 @@ FROM address_cache
 WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
 2026-03-01 12:11:28,734 - sqlalchemy.engine.Engine - INFO - [cached since 2911s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
 2026-03-01 12:11:28,737 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:35,193 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:35,193 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:35,193 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (100, 0)
+2026-03-01 12:13:35,195 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:35,195 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (1, 2)
+2026-03-01 12:13:35,196 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:35,196 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (1, 2)
+2026-03-01 12:13:35,197 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:13:35,197 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:13:35,199 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:35,200 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:35,200 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:35,200 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (100, 0)
+2026-03-01 12:13:35,202 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:35,202 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (1, 2)
+2026-03-01 12:13:35,203 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:35,203 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] (1, 2)
+2026-03-01 12:13:35,204 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:13:35,205 - sqlalchemy.engine.Engine - INFO - [cached since 3038s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:13:35,206 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:36,098 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:36,098 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:36,099 - sqlalchemy.engine.Engine - INFO - [cached since 3042s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:36,101 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:36,101 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:36,103 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:36,104 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:36,104 - sqlalchemy.engine.Engine - INFO - [cached since 3042s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:36,106 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:36,106 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:36,107 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:36,108 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:36,108 - sqlalchemy.engine.Engine - INFO - [cached since 3042s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:36,108 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:36,109 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:36,109 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:36,109 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:36,111 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:36,111 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:36,111 - sqlalchemy.engine.Engine - INFO - [cached since 3042s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:36,112 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:36,112 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:36,112 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:36,113 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:38,643 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:38,643 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:38,643 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:38,645 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:38,645 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (1, 2)
+2026-03-01 12:13:38,646 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:38,646 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (1, 2)
+2026-03-01 12:13:38,647 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:13:38,647 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:13:38,648 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:38,649 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:38,649 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:38,649 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (100, 0)
+2026-03-01 12:13:38,651 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:38,651 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (1, 2)
+2026-03-01 12:13:38,651 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:13:38,651 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] (1, 2)
+2026-03-01 12:13:38,652 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:13:38,652 - sqlalchemy.engine.Engine - INFO - [cached since 3041s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:13:38,653 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:40,124 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:40,125 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:40,125 - sqlalchemy.engine.Engine - INFO - [cached since 3046s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:40,127 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:40,128 - sqlalchemy.engine.Engine - INFO - [cached since 3045s ago] (100, 0)
+2026-03-01 12:13:40,131 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:40,131 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = $1::INTEGER
+2026-03-01 12:13:40,131 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,134 - sqlalchemy.engine.Engine - INFO - SELECT payments.order_id AS payments_order_id, payments.id AS payments_id, payments.payment_type AS payments_payment_type, payments.installer_id AS payments_installer_id, payments.amount AS payments_amount, payments.payment_date AS payments_payment_date, payments.description AS payments_description, payments.created_at AS payments_created_at, payments.updated_at AS payments_updated_at 
+FROM payments 
+WHERE payments.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,134 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,135 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,135 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,136 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:40,137 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:40,137 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:13:40,137 - sqlalchemy.engine.Engine - INFO - [cached since 3046s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:13:40,138 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER)
+2026-03-01 12:13:40,138 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,139 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR)
+2026-03-01 12:13:40,139 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] ('Москва, ул. Тверская, д. 12, кв. 45',)
+2026-03-01 12:13:40,139 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:13:40,139 - sqlalchemy.engine.Engine - INFO - [cached since 3045s ago] (100, 0)
+2026-03-01 12:13:40,140 - sqlalchemy.engine.Engine - INFO - SELECT order_items.order_id AS order_items_order_id, order_items.id AS order_items_id, order_items.item_type AS order_items_item_type, order_items.name AS order_items_name, order_items.quantity AS order_items_quantity, order_items.purchase_price AS order_items_purchase_price, order_items.sale_price AS order_items_sale_price, order_items.warranty_manufacturer AS order_items_warranty_manufacturer, order_items.warranty_master AS order_items_warranty_master, order_items.sort_order AS order_items_sort_order, order_items.created_at AS order_items_created_at, order_items.updated_at AS order_items_updated_at 
+FROM order_items 
+WHERE order_items.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,140 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,141 - sqlalchemy.engine.Engine - INFO - SELECT order_installers.order_id AS order_installers_order_id, order_installers.id AS order_installers_id, order_installers.installer_id AS order_installers_installer_id, order_installers.role AS order_installers_role, order_installers.base_payment AS order_installers_base_payment, order_installers.is_primary AS order_installers_is_primary, order_installers.created_at AS order_installers_created_at, order_installers.updated_at AS order_installers_updated_at 
+FROM order_installers 
+WHERE order_installers.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,141 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,141 - sqlalchemy.engine.Engine - INFO - SELECT order_expenses.order_id AS order_expenses_order_id, order_expenses.id AS order_expenses_id, order_expenses.amount AS order_expenses_amount, order_expenses.description AS order_expenses_description, order_expenses.expense_date AS order_expenses_expense_date, order_expenses.category AS order_expenses_category, order_expenses.created_at AS order_expenses_created_at, order_expenses.updated_at AS order_expenses_updated_at 
+FROM order_expenses 
+WHERE order_expenses.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,141 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,142 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:40,143 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:13:40,143 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:13:40,143 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = $1::INTEGER
+2026-03-01 12:13:40,143 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,145 - sqlalchemy.engine.Engine - INFO - SELECT payments.order_id AS payments_order_id, payments.id AS payments_id, payments.payment_type AS payments_payment_type, payments.installer_id AS payments_installer_id, payments.amount AS payments_amount, payments.payment_date AS payments_payment_date, payments.description AS payments_description, payments.created_at AS payments_created_at, payments.updated_at AS payments_updated_at 
+FROM payments 
+WHERE payments.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,145 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,145 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,145 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,146 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER)
+2026-03-01 12:13:40,146 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,147 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR)
+2026-03-01 12:13:40,147 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] ('Москва, ул. Тверская, д. 12, кв. 45',)
+2026-03-01 12:13:40,148 - sqlalchemy.engine.Engine - INFO - SELECT order_items.order_id AS order_items_order_id, order_items.id AS order_items_id, order_items.item_type AS order_items_item_type, order_items.name AS order_items_name, order_items.quantity AS order_items_quantity, order_items.purchase_price AS order_items_purchase_price, order_items.sale_price AS order_items_sale_price, order_items.warranty_manufacturer AS order_items_warranty_manufacturer, order_items.warranty_master AS order_items_warranty_master, order_items.sort_order AS order_items_sort_order, order_items.created_at AS order_items_created_at, order_items.updated_at AS order_items_updated_at 
+FROM order_items 
+WHERE order_items.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,148 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,149 - sqlalchemy.engine.Engine - INFO - SELECT order_installers.order_id AS order_installers_order_id, order_installers.id AS order_installers_id, order_installers.installer_id AS order_installers_installer_id, order_installers.role AS order_installers_role, order_installers.base_payment AS order_installers_base_payment, order_installers.is_primary AS order_installers_is_primary, order_installers.created_at AS order_installers_created_at, order_installers.updated_at AS order_installers_updated_at 
+FROM order_installers 
+WHERE order_installers.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,149 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,150 - sqlalchemy.engine.Engine - INFO - SELECT order_expenses.order_id AS order_expenses_order_id, order_expenses.id AS order_expenses_id, order_expenses.amount AS order_expenses_amount, order_expenses.description AS order_expenses_description, order_expenses.expense_date AS order_expenses_expense_date, order_expenses.category AS order_expenses_category, order_expenses.created_at AS order_expenses_created_at, order_expenses.updated_at AS order_expenses_updated_at 
+FROM order_expenses 
+WHERE order_expenses.order_id IN ($1::INTEGER)
+2026-03-01 12:13:40,150 - sqlalchemy.engine.Engine - INFO - [cached since 2667s ago] (1,)
+2026-03-01 12:13:40,151 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:23:40,540 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:23:40,541 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:23:40,541 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (100, 0)
+2026-03-01 12:23:40,542 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:23:40,542 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (1, 2)
+2026-03-01 12:23:40,544 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:23:40,544 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (1, 2)
+2026-03-01 12:23:40,545 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:23:40,545 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:23:40,547 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:23:40,548 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:23:40,548 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:23:40,548 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (100, 0)
+2026-03-01 12:23:40,550 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:23:40,550 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (1, 2)
+2026-03-01 12:23:40,551 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:23:40,551 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] (1, 2)
+2026-03-01 12:23:40,552 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:23:40,552 - sqlalchemy.engine.Engine - INFO - [cached since 3643s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:23:40,554 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:23:43,043 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:23:43,043 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:23:43,044 - sqlalchemy.engine.Engine - INFO - [cached since 3648s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:23:43,047 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:23:43,047 - sqlalchemy.engine.Engine - INFO - [cached since 3648s ago] (100, 0)
+2026-03-01 12:23:43,050 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:23:43,052 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:23:43,053 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:23:43,053 - sqlalchemy.engine.Engine - INFO - [cached since 3649s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:23:43,055 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:23:43,055 - sqlalchemy.engine.Engine - INFO - [cached since 3648s ago] (100, 0)
+2026-03-01 12:23:43,056 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:53,809 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:53,810 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:53,810 - sqlalchemy.engine.Engine - INFO - [cached since 4079s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:54,038 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:54,142 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:54,142 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:54,143 - sqlalchemy.engine.Engine - INFO - [cached since 4080s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:54,143 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:54,143 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:54,143 - sqlalchemy.engine.Engine - INFO - [cached since 4080s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:54,144 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:54,144 - sqlalchemy.engine.Engine - INFO - [cached since 4079s ago] (100, 0)
+2026-03-01 12:30:54,145 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:54,145 - sqlalchemy.engine.Engine - INFO - [cached since 4079s ago] (100, 0)
+2026-03-01 12:30:54,146 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:54,146 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:54,147 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:54,147 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:54,147 - sqlalchemy.engine.Engine - INFO - [cached since 4080s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:54,148 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:54,148 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:54,148 - sqlalchemy.engine.Engine - INFO - [cached since 4080s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:54,149 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:54,149 - sqlalchemy.engine.Engine - INFO - [cached since 4079s ago] (100, 0)
+2026-03-01 12:30:54,150 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:54,150 - sqlalchemy.engine.Engine - INFO - [cached since 4079s ago] (100, 0)
+2026-03-01 12:30:54,151 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:54,151 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:55,477 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:55,478 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:55,478 - sqlalchemy.engine.Engine - INFO - [cached since 4081s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:55,479 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:55,480 - sqlalchemy.engine.Engine - INFO - [cached since 4081s ago] (100, 0)
+2026-03-01 12:30:55,481 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:30:55,481 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:30:55,482 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:30:55,482 - sqlalchemy.engine.Engine - INFO - [cached since 4081s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:30:55,483 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:30:55,483 - sqlalchemy.engine.Engine - INFO - [cached since 4081s ago] (100, 0)
+2026-03-01 12:30:55,485 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:32:29,020 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:32:29,020 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:32:29,020 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,021 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:32:29,021 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:32:29,021 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,022 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:32:29,022 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,023 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:32:29,023 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,025 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:32:29,026 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:32:29,026 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:32:29,026 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,027 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:32:29,030 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:32:29,048 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:32:29,049 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:32:29,049 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,051 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:32:29,051 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,052 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:32:29,052 - sqlalchemy.engine.Engine - INFO - [cached since 2371s ago] ()
+2026-03-01 12:32:29,054 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:34:57,341 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:34:57,341 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:34:57,341 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,342 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:34:57,342 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:34:57,342 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,344 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:34:57,344 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,345 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:34:57,345 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,346 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:34:57,347 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:34:57,348 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:34:57,348 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,348 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:34:57,349 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:34:57,349 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:34:57,349 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,351 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:34:57,351 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,351 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:34:57,352 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:34:57,352 - sqlalchemy.engine.Engine - INFO - [cached since 2519s ago] ()
+2026-03-01 12:34:57,353 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:28,352 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:28,352 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:28,352 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:28,553 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:28,799 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:28,800 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:28,800 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:28,801 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:28,801 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] (100, 0)
+2026-03-01 12:37:28,804 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:28,804 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:28,804 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:28,805 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:28,806 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:28,806 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:28,806 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:28,807 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:28,808 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] (100, 0)
+2026-03-01 12:37:28,809 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:28,810 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:28,810 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:28,810 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:28,811 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:28,811 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] (100, 0)
+2026-03-01 12:37:28,812 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:28,812 - sqlalchemy.engine.Engine - INFO - [cached since 4474s ago] (100, 0)
+2026-03-01 12:37:28,813 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:28,814 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:30,649 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:30,650 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:37:30,650 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,650 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:30,650 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:37:30,650 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,651 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:37:30,651 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,651 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:37:30,652 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,652 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:30,653 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:30,653 - sqlalchemy.engine.Engine - INFO - SELECT EXTRACT(year FROM finance.created_at) AS year, EXTRACT(month FROM finance.created_at) AS month, sum(finance.profit) AS profit 
+FROM finance GROUP BY year, month ORDER BY year, month
+2026-03-01 12:37:30,653 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,654 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:30,655 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:30,655 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.profit) AS sum_1 
+FROM finance
+2026-03-01 12:37:30,655 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,657 - sqlalchemy.engine.Engine - INFO - SELECT sum(finance.installer_payments) AS sum_1 
+FROM finance
+2026-03-01 12:37:30,657 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,659 - sqlalchemy.engine.Engine - INFO - SELECT count(orders.id) AS count_1 
+FROM orders
+2026-03-01 12:37:30,659 - sqlalchemy.engine.Engine - INFO - [cached since 2672s ago] ()
+2026-03-01 12:37:30,659 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:30,660 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:49,884 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:49,885 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:49,885 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (100, 0)
+2026-03-01 12:37:49,886 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:49,886 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (1, 2)
+2026-03-01 12:37:49,887 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:49,887 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (1, 2)
+2026-03-01 12:37:49,889 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:37:49,889 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:37:49,891 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:49,892 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:49,892 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:49,893 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (100, 0)
+2026-03-01 12:37:49,894 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:49,894 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (1, 2)
+2026-03-01 12:37:49,895 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:49,895 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] (1, 2)
+2026-03-01 12:37:49,896 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:37:49,896 - sqlalchemy.engine.Engine - INFO - [cached since 4492s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:37:49,897 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:55,004 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:55,005 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:55,005 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:55,005 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:55,006 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:55,006 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:55,008 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:55,008 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] (100, 0)
+2026-03-01 12:37:55,008 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:55,008 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] (100, 0)
+2026-03-01 12:37:55,009 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:55,011 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:55,012 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:55,012 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:55,013 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:55,013 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:55,013 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:55,013 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:55,014 - sqlalchemy.engine.Engine - INFO - SELECT clients.id, clients.full_name, clients.phone, clients.address, clients.coordinates, clients.created_at, clients.last_contact, clients.comments, clients.updated_at, clients.backup_phone, clients.deleted_at 
+FROM clients 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:55,014 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] (100, 0)
+2026-03-01 12:37:55,015 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:55,015 - sqlalchemy.engine.Engine - INFO - [cached since 4500s ago] (100, 0)
+2026-03-01 12:37:55,016 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:55,016 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:58,374 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:58,374 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:58,374 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (100, 0)
+2026-03-01 12:37:58,375 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:58,375 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (1, 2)
+2026-03-01 12:37:58,376 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:58,376 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (1, 2)
+2026-03-01 12:37:58,377 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:37:58,377 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:37:58,378 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:58,378 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:58,378 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:58,378 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (100, 0)
+2026-03-01 12:37:58,387 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:58,387 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (1, 2)
+2026-03-01 12:37:58,389 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER, $2::INTEGER)
+2026-03-01 12:37:58,389 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] (1, 2)
+2026-03-01 12:37:58,390 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR, $2::VARCHAR)
+2026-03-01 12:37:58,390 - sqlalchemy.engine.Engine - INFO - [cached since 4501s ago] ('Москва, ул. Тверская, д. 12, кв. 45', 'Россия, Московская область, Мытищи, улица Мира, 8')
+2026-03-01 12:37:58,391 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:59,955 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:59,955 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:59,956 - sqlalchemy.engine.Engine - INFO - [cached since 4505s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:59,957 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:59,957 - sqlalchemy.engine.Engine - INFO - [cached since 4505s ago] (100, 0)
+2026-03-01 12:37:59,959 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:59,959 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = $1::INTEGER
+2026-03-01 12:37:59,959 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,960 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:59,961 - sqlalchemy.engine.Engine - INFO - SELECT payments.order_id AS payments_order_id, payments.id AS payments_id, payments.payment_type AS payments_payment_type, payments.installer_id AS payments_installer_id, payments.amount AS payments_amount, payments.payment_date AS payments_payment_date, payments.description AS payments_description, payments.created_at AS payments_created_at, payments.updated_at AS payments_updated_at 
+FROM payments 
+WHERE payments.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,961 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,962 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:59,962 - sqlalchemy.engine.Engine - INFO - SELECT admins.id, admins.username, admins.password_hash, admins.created_at 
+FROM admins 
+WHERE admins.username = $1::VARCHAR
+2026-03-01 12:37:59,962 - sqlalchemy.engine.Engine - INFO - [cached since 4505s ago] ('zhura2296@yandex.ru',)
+2026-03-01 12:37:59,963 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,963 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,963 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER)
+2026-03-01 12:37:59,964 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,964 - sqlalchemy.engine.Engine - INFO - SELECT installers.id, installers.full_name, installers.nickname, installers.phone, installers.backup_phone, installers.specialization, installers.rating, installers.base_price, installers.is_debtor, installers.comments, installers.is_active, installers.is_in_funnel, installers.total_orders, installers.poor_work_count, installers.warranty_visits_count, installers.last_incident_date, installers.updated_at, installers.created_at, installers.deleted_at 
+FROM installers 
+WHERE installers.deleted_at IS NULL 
+ LIMIT $1::INTEGER OFFSET $2::INTEGER
+2026-03-01 12:37:59,964 - sqlalchemy.engine.Engine - INFO - [cached since 4505s ago] (100, 0)
+2026-03-01 12:37:59,965 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR)
+2026-03-01 12:37:59,965 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] ('Москва, ул. Тверская, д. 12, кв. 45',)
+2026-03-01 12:37:59,966 - sqlalchemy.engine.Engine - INFO - SELECT order_items.order_id AS order_items_order_id, order_items.id AS order_items_id, order_items.item_type AS order_items_item_type, order_items.name AS order_items_name, order_items.quantity AS order_items_quantity, order_items.purchase_price AS order_items_purchase_price, order_items.sale_price AS order_items_sale_price, order_items.warranty_manufacturer AS order_items_warranty_manufacturer, order_items.warranty_master AS order_items_warranty_master, order_items.sort_order AS order_items_sort_order, order_items.created_at AS order_items_created_at, order_items.updated_at AS order_items_updated_at 
+FROM order_items 
+WHERE order_items.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,966 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,966 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:59,966 - sqlalchemy.engine.Engine - INFO - SELECT order_installers.order_id AS order_installers_order_id, order_installers.id AS order_installers_id, order_installers.installer_id AS order_installers_installer_id, order_installers.role AS order_installers_role, order_installers.base_payment AS order_installers_base_payment, order_installers.is_primary AS order_installers_is_primary, order_installers.created_at AS order_installers_created_at, order_installers.updated_at AS order_installers_updated_at 
+FROM order_installers 
+WHERE order_installers.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,966 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,967 - sqlalchemy.engine.Engine - INFO - SELECT order_expenses.order_id AS order_expenses_order_id, order_expenses.id AS order_expenses_id, order_expenses.amount AS order_expenses_amount, order_expenses.description AS order_expenses_description, order_expenses.expense_date AS order_expenses_expense_date, order_expenses.category AS order_expenses_category, order_expenses.created_at AS order_expenses_created_at, order_expenses.updated_at AS order_expenses_updated_at 
+FROM order_expenses 
+WHERE order_expenses.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,967 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,968 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-03-01 12:37:59,969 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-03-01 12:37:59,969 - sqlalchemy.engine.Engine - INFO - SELECT orders.id, orders.client_id, orders.status, orders.warehouse, orders.service_datetime, orders.delivery_datetime, orders.promise, orders.marker_color, orders.address_id, orders.address_text, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = $1::INTEGER
+2026-03-01 12:37:59,969 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,970 - sqlalchemy.engine.Engine - INFO - SELECT payments.order_id AS payments_order_id, payments.id AS payments_id, payments.payment_type AS payments_payment_type, payments.installer_id AS payments_installer_id, payments.amount AS payments_amount, payments.payment_date AS payments_payment_date, payments.description AS payments_description, payments.created_at AS payments_created_at, payments.updated_at AS payments_updated_at 
+FROM payments 
+WHERE payments.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,970 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,971 - sqlalchemy.engine.Engine - INFO - SELECT finance.order_id AS finance_order_id, finance.id AS finance_id, finance.revenue AS finance_revenue, finance.cost_of_goods AS finance_cost_of_goods, finance.installer_payments AS finance_installer_payments, finance.expenses AS finance_expenses, finance.warranty_costs_oleg AS finance_warranty_costs_oleg, finance.warranty_costs_installer AS finance_warranty_costs_installer, finance.profit AS finance_profit, finance.created_at AS finance_created_at, finance.updated_at AS finance_updated_at 
+FROM finance 
+WHERE finance.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,971 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,972 - sqlalchemy.engine.Engine - INFO - SELECT clients.id AS clients_id, clients.full_name AS clients_full_name, clients.phone AS clients_phone, clients.address AS clients_address, clients.coordinates AS clients_coordinates, clients.created_at AS clients_created_at, clients.last_contact AS clients_last_contact, clients.comments AS clients_comments, clients.updated_at AS clients_updated_at, clients.backup_phone AS clients_backup_phone, clients.deleted_at AS clients_deleted_at 
+FROM clients 
+WHERE clients.id IN ($1::INTEGER)
+2026-03-01 12:37:59,972 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,973 - sqlalchemy.engine.Engine - INFO - SELECT address_cache.address AS address_cache_address, address_cache.lat AS address_cache_lat, address_cache.lon AS address_cache_lon, address_cache.updated_at AS address_cache_updated_at 
+FROM address_cache 
+WHERE address_cache.address IN ($1::VARCHAR)
+2026-03-01 12:37:59,973 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] ('Москва, ул. Тверская, д. 12, кв. 45',)
+2026-03-01 12:37:59,974 - sqlalchemy.engine.Engine - INFO - SELECT order_items.order_id AS order_items_order_id, order_items.id AS order_items_id, order_items.item_type AS order_items_item_type, order_items.name AS order_items_name, order_items.quantity AS order_items_quantity, order_items.purchase_price AS order_items_purchase_price, order_items.sale_price AS order_items_sale_price, order_items.warranty_manufacturer AS order_items_warranty_manufacturer, order_items.warranty_master AS order_items_warranty_master, order_items.sort_order AS order_items_sort_order, order_items.created_at AS order_items_created_at, order_items.updated_at AS order_items_updated_at 
+FROM order_items 
+WHERE order_items.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,974 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,978 - sqlalchemy.engine.Engine - INFO - SELECT order_installers.order_id AS order_installers_order_id, order_installers.id AS order_installers_id, order_installers.installer_id AS order_installers_installer_id, order_installers.role AS order_installers_role, order_installers.base_payment AS order_installers_base_payment, order_installers.is_primary AS order_installers_is_primary, order_installers.created_at AS order_installers_created_at, order_installers.updated_at AS order_installers_updated_at 
+FROM order_installers 
+WHERE order_installers.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,979 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,980 - sqlalchemy.engine.Engine - INFO - SELECT order_expenses.order_id AS order_expenses_order_id, order_expenses.id AS order_expenses_id, order_expenses.amount AS order_expenses_amount, order_expenses.description AS order_expenses_description, order_expenses.expense_date AS order_expenses_expense_date, order_expenses.category AS order_expenses_category, order_expenses.created_at AS order_expenses_created_at, order_expenses.updated_at AS order_expenses_updated_at 
+FROM order_expenses 
+WHERE order_expenses.order_id IN ($1::INTEGER)
+2026-03-01 12:37:59,980 - sqlalchemy.engine.Engine - INFO - [cached since 4127s ago] (1,)
+2026-03-01 12:37:59,981 - sqlalchemy.engine.Engine - INFO - ROLLBACK

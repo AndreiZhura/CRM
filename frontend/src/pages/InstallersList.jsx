@@ -123,45 +123,49 @@ const InstallersList = () => {
         </div>
 
         <div className="table-responsive">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>ФИО / Ник</th>
-                <th>Телефон</th>
-                <th>Специализация</th>
-                <th>Рейтинг</th>
-                <th>Статус</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInstallers.map((inst) => (
-                <tr key={inst.id} className="orders-table__row">
-                  <td className="orders-table__td" data-label="ФИО / Ник">
-                    <div className="name-wrapper">
-                      <Link to={`/installers/${inst.id}`}>
-                        {inst.full_name}
-                      </Link>
-                      {inst.nickname && (
-                        <span className="nickname-tag">{inst.nickname}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="orders-table__td" data-label="Телефон">
-                    {inst.phone}
-                  </td>
-                  <td className="orders-table__td" data-label="Специализация">
-                    {inst.specialization?.join(", ")}
-                  </td>
-                  <td className="orders-table__td" data-label="Рейтинг">
-                    {inst.rating}
-                  </td>
-                  <td className="orders-table__td" data-label="Статус">
-                    {inst.is_debtor ? "Должник" : "Активен"}
-                  </td>
+          {filteredInstallers.length === 0 ? (
+            <div className="no-orders">📭 Мастеров пока нет</div>
+          ) : (
+            <table className="orders-table">
+              <thead>
+                <tr>
+                  <th>ФИО / Ник</th>
+                  <th>Телефон</th>
+                  <th>Специализация</th>
+                  <th>Рейтинг</th>
+                  <th>Статус</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredInstallers.map((inst) => (
+                  <tr key={inst.id} className="orders-table__row">
+                    <td className="orders-table__td" data-label="ФИО / Ник">
+                      <div className="name-wrapper">
+                        <Link to={`/installers/${inst.id}`}>
+                          {inst.full_name}
+                        </Link>
+                        {inst.nickname && (
+                          <span className="nickname-tag">{inst.nickname}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="orders-table__td" data-label="Телефон">
+                      {inst.phone}
+                    </td>
+                    <td className="orders-table__td" data-label="Специализация">
+                      {inst.specialization?.join(", ")}
+                    </td>
+                    <td className="orders-table__td" data-label="Рейтинг">
+                      {inst.rating}
+                    </td>
+                    <td className="orders-table__td" data-label="Статус">
+                      {inst.is_debtor ? "Должник" : "Активен"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </main>
       <Footer />

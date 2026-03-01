@@ -441,21 +441,21 @@ const OrderDetail = () => {
                 />
               </div>
               <div className="crm-form__field">
-                <label>Дата обслуживания</label>
+                <label>Дата и время обслуживания</label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   name="service_datetime"
-                  value={order.service_datetime?.slice(0, 10) || ""}
+                  value={order.service_datetime?.slice(0, 16) || ""}
                   onChange={handleOrderChange}
                   className="crm-form__input"
                 />
               </div>
               <div className="crm-form__field">
-                <label>Дата доставки</label>
+                <label>Дата и время доставки</label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   name="delivery_datetime"
-                  value={order.delivery_datetime?.slice(0, 10) || ""}
+                  value={order.delivery_datetime?.slice(0, 16) || ""}
                   onChange={handleOrderChange}
                   className="crm-form__input"
                 />
@@ -546,7 +546,7 @@ const OrderDetail = () => {
               </div>
             </fieldset>
           )}
-          
+
           {/* Карта с меткой заказа */}
           {order.lat && order.lon && (
             <fieldset className="crm-form__section">
