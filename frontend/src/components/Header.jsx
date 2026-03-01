@@ -15,8 +15,8 @@ const Header = () => {
     <header className="header">
       <div className="header__container">
         <div className="header__left-group">
-          <Link to="/" className="header__logo">
-            ❄️ Тестовая
+          <Link to="/orders/new" className="header__logo">
+            ❄️ CRM Oleg
           </Link>
           <div className="header__status">
             <span className="header__dot"></span>
