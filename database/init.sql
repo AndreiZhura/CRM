@@ -426,66 +426,38 @@ BEGIN
     END IF;
 END $$;
 
--- -----------------------------------------------------------------
--- ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА АГРЕГАТОВ FINANCE (расширенная)
--- -----------------------------------------------------------------
-CREATE OR REPLACE FUNCTION recalc_order_finance(p_order_id INTEGER)
-RETURNS VOID AS $$
+-- -------------------------------------------------------------
+-- ФУНКЦИЯ-ОБРАБОТЧИК ДЛЯ ТРИГГЕРОВ ПЕРЕСЧЁТА FINANCE
+-- -------------------------------------------------------------
+CREATE OR REPLACE FUNCTION trigger_recalc_finance()
+RETURNS TRIGGER AS $$
 DECLARE
-    v_revenue NUMERIC(10,2);
-    v_cost_of_goods NUMERIC(10,2);
-    v_installer_payments NUMERIC(10,2);
-    v_expenses NUMERIC(10,2);
-    v_warranty_oleg NUMERIC(10,2);
-    v_warranty_installer NUMERIC(10,2);
+    affected_order_id INTEGER;
 BEGIN
-    SELECT COALESCE(SUM(sale_price * quantity), 0), COALESCE(SUM(purchase_price * quantity), 0)
-    INTO v_revenue, v_cost_of_goods
-    FROM order_items WHERE order_id = p_order_id;
+    -- Определяем, какой заказ нужно пересчитать
+    IF TG_TABLE_NAME = 'warranty_claims' THEN
+        IF TG_OP = 'DELETE' THEN
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = OLD.order_item_id;
+        ELSE
+            SELECT order_id INTO affected_order_id FROM order_items WHERE id = NEW.order_item_id;
+        END IF;
+    ELSE
+        IF TG_OP = 'DELETE' THEN
+            affected_order_id := OLD.order_id;
+        ELSE
+            affected_order_id := NEW.order_id;
+        END IF;
+    END IF;
 
-    SELECT COALESCE(SUM(base_payment), 0) INTO v_installer_payments
-    FROM order_installers WHERE order_id = p_order_id;
-
-    SELECT v_installer_payments + COALESCE(SUM(payment_amount), 0) INTO v_installer_payments
-    FROM order_item_installers oii
-    JOIN order_items oi ON oii.order_item_id = oi.id
-    WHERE oi.order_id = p_order_id;
-
-    SELECT COALESCE(SUM(amount), 0) INTO v_expenses
-    FROM order_expenses WHERE order_id = p_order_id;
-
-    SELECT COALESCE(SUM(cost), 0) INTO v_warranty_oleg
-    FROM warranty_claims wc
-    JOIN order_items oi ON wc.order_item_id = oi.id
-    WHERE oi.order_id = p_order_id AND wc.cost_covered_by = 'oleg';
-
-    SELECT COALESCE(SUM(cost), 0) INTO v_warranty_installer
-    FROM warranty_claims wc
-    JOIN order_items oi ON wc.order_item_id = oi.id
-    WHERE oi.order_id = p_order_id AND wc.cost_covered_by = 'installer';
-
-    INSERT INTO finance (
-        order_id, revenue, cost_of_goods, installer_payments, expenses,
-        warranty_costs_oleg, warranty_costs_installer
-    ) VALUES (
-        p_order_id, v_revenue, v_cost_of_goods, v_installer_payments, v_expenses,
-        v_warranty_oleg, v_warranty_installer
-    )
-    ON CONFLICT (order_id) DO UPDATE SET
-        revenue = EXCLUDED.revenue,
-        cost_of_goods = EXCLUDED.cost_of_goods,
-        installer_payments = EXCLUDED.installer_payments,
-        expenses = EXCLUDED.expenses,
-        warranty_costs_oleg = EXCLUDED.warranty_costs_oleg,
-        warranty_costs_installer = EXCLUDED.warranty_costs_installer,
-        updated_at = CURRENT_TIMESTAMP;
+    -- Вызываем функцию пересчёта
+    PERFORM recalc_order_finance(affected_order_id);
+    RETURN COALESCE(NEW, OLD);
 END;
 $$ LANGUAGE plpgsql;
 
 -- -------------------------------------------------------------
--- ВРЕМЕННО ОТКЛЮЧЕНЫ ТРИГГЕРЫ ДЛЯ ПЕРЕСЧЁТА FINANCE
+-- ТРИГГЕРЫ ДЛЯ АВТОМАТИЧЕСКОГО ПЕРЕСЧЁТА FINANCE
 -- -------------------------------------------------------------
-/* 
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_items_recalc_finance') THEN
@@ -493,9 +465,37 @@ BEGIN
             AFTER INSERT OR UPDATE OR DELETE ON order_items
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
-    ... (остальной блок)
+
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_installers_recalc_finance') THEN
+        CREATE TRIGGER trg_order_installers_recalc_finance
+            AFTER INSERT OR UPDATE OR DELETE ON order_installers
+            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_item_installers_recalc_finance') THEN
+        CREATE TRIGGER trg_order_item_installers_recalc_finance
+            AFTER INSERT OR UPDATE OR DELETE ON order_item_installers
+            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_order_expenses_recalc_finance') THEN
+        CREATE TRIGGER trg_order_expenses_recalc_finance
+            AFTER INSERT OR UPDATE OR DELETE ON order_expenses
+            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_warranty_claims_recalc_finance') THEN
+        CREATE TRIGGER trg_warranty_claims_recalc_finance
+            AFTER INSERT OR UPDATE OR DELETE ON warranty_claims
+            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_payments_recalc_finance') THEN
+        CREATE TRIGGER trg_payments_recalc_finance
+            AFTER INSERT OR UPDATE OR DELETE ON payments
+            FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
+    END IF;
 END $$;
-*/
 
 -- -----------------------------------------------------------------
 -- КОММЕНТАРИИ
