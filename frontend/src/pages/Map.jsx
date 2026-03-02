@@ -19,7 +19,10 @@ const MapPage = () => {
     const fetchOrders = async () => {
       try {
         const data = await api.getOrders();
-        const ordersWithCoords = data.filter((order) => order.lat && order.lon);
+        // Фильтруем: только заказы с координатами, статус не "Выполнен" и не "Отменен"
+        const ordersWithCoords = data.filter(
+          (order) => order.lat && order.lon && order.status !== "Выполнен" && order.status !== "Отменен"
+        );
         setOrders(ordersWithCoords);
         if (ordersWithCoords.length > 0) {
           setMapState({
@@ -90,11 +93,11 @@ const MapPage = () => {
                   onClick={() => window.open(`/orders/${order.id}`, '_self')}
                   properties={{
                     balloonContent: `
-      <strong>Заказ #${order.id}</strong><br/>
-      Клиент: ${order.client?.full_name || "—"}<br/>
-      Адрес: ${order.address_text || "—"}<br/>
-      Статус: ${order.status}
-    `,
+                      <strong>Заказ #${order.id}</strong><br/>
+                      Клиент: ${order.client?.full_name || "—"}<br/>
+                      Адрес: ${order.address_text || "—"}<br/>
+                      Статус: ${order.status}
+                    `,
                   }}
                   options={{
                     iconColor: getMarkerColor(order.status),
@@ -103,6 +106,18 @@ const MapPage = () => {
               ))}
             </Map>
           </YMaps>
+
+          {/* Легенда цветов */}
+          <div className="map-legend">
+            <h3>Обозначение статусов на карте</h3>
+            <ul className="legend-list">
+              <li><span className="color-dot blue"></span> Новый</li>
+              <li><span className="color-dot orange"></span> Ждет установщика</li>
+              <li><span className="color-dot green"></span> В работе</li>
+              <li><span className="color-dot gray"></span> Выполнен (скрыт)</li>
+              <li><span className="color-dot red"></span> Отменен (скрыт)</li>
+            </ul>
+          </div>
         </div>
       </main>
       <Footer />

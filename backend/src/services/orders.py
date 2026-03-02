@@ -77,6 +77,7 @@ async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[
             selectinload(Order.client),
             selectinload(Order.finance),
             selectinload(Order.address_cache),
+            selectinload(Order.installers),  # <-- добавляем эту строку
         )
     )
     return result.scalars().all()

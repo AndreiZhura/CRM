@@ -138,16 +138,26 @@ const OrderDetail = () => {
           comments: client.comments,
         });
       }
-      await api.updateOrder(order.id, {
+
+      // Подготавливаем данные заказа
+      const orderData = {
         client_id: client?.id,
-        installer_id: order.installer_id || null,
-        service_type: order.service_type,
-        service_datetime: order.service_datetime,
         status: order.status,
-        address_text: client?.address || "",
         warehouse: order.warehouse,
+        service_datetime: order.service_datetime,
         promise: order.promise,
-      });
+        marker_color: order.marker_color,
+        address_text: order.address_text,
+      };
+
+      // Добавляем delivery_datetime только если оно есть (может быть null)
+      if (order.delivery_datetime) {
+        orderData.delivery_datetime = order.delivery_datetime;
+      }
+
+      console.log("Отправляемые данные заказа:", orderData);
+
+      await api.updateOrder(order.id, orderData);
       alert("Заказ обновлён");
     } catch (err) {
       setError(err.message);
@@ -155,7 +165,6 @@ const OrderDetail = () => {
       setSaving(false);
     }
   };
-
   // Удаление заказа
   const handleDelete = async () => {
     if (window.confirm("Удалить заказ?")) {
@@ -452,13 +461,45 @@ const OrderDetail = () => {
               </div>
               <div className="crm-form__field">
                 <label>Дата и время доставки</label>
-                <input
-                  type="datetime-local"
-                  name="delivery_datetime"
-                  value={order.delivery_datetime?.slice(0, 16) || ""}
-                  onChange={handleOrderChange}
-                  className="crm-form__input"
-                />
+                <div
+                  style={{ display: "flex", gap: "8px", alignItems: "center" }}
+                >
+                  <input
+                    type="datetime-local"
+                    name="delivery_datetime"
+                    value={order.delivery_datetime?.slice(0, 16) || ""}
+                    onChange={handleOrderChange}
+                    className="crm-form__input"
+                    style={{ flex: 1 }}
+                  />
+                  {order.delivery_datetime && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrder((prev) => ({
+                          ...prev,
+                          delivery_datetime: null,
+                        }));
+                      }}
+                      style={{
+                        background: "#f87171",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        width: "32px",
+                        height: "32px",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      title="Очистить дату"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="crm-form__field crm-form__field--full">
                 <label>Обещания</label>

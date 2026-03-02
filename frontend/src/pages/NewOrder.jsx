@@ -16,7 +16,6 @@ const NewOrder = () => {
     fio: "",
     phone: "",
     backup_phone: "",
-    clientAddress: "",
     orderAddress: "",
     service_datetime: "",
     delivery_datetime: "",
@@ -126,10 +125,6 @@ const NewOrder = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleClientAddressChange = (e) => {
-    setFormData((prev) => ({ ...prev, clientAddress: e.target.value }));
-  };
-
   const handleOrderAddressChange = (e) => {
     setFormData((prev) => ({ ...prev, orderAddress: e.target.value }));
   };
@@ -190,14 +185,19 @@ const NewOrder = () => {
     try {
       let clientId;
       if (isNewClient) {
-        if (!formData.fio || !formData.phone || !formData.clientAddress) {
-          throw new Error("Заполните ФИО, телефон и адрес нового клиента");
+        if (!formData.fio || !formData.phone) {
+          throw new Error("Заполните ФИО и телефон нового клиента");
         }
+        // При создании нового клиента адрес не сохраняем (поле clientAddress убрано)
         const clientData = {
           full_name: formData.fio,
           phone: formData.phone,
           backup_phone: formData.backup_phone || "",
-          address: formData.clientAddress,
+          // address не передаём, будет сохранён как пустой? В БД поле address NOT NULL, нужно что-то передавать.
+          // Можно передать пустую строку или адрес заказа? Но лучше передать адрес заказа, чтобы не было пустого.
+          // Однако, если клиент в будущем захочет иметь свой адрес, его не будет.
+          // Решение: передаём адрес заказа как адрес клиента, чтобы не нарушать ограничение NOT NULL.
+          address: formData.orderAddress || "Адрес не указан",
           comments: formData.installer_opinion || "",
         };
         const client = await api.createClient(clientData);
@@ -337,17 +337,7 @@ const NewOrder = () => {
                     }
                   />
                 </div>
-                <div className="crm-form__field crm-form__field--full">
-                  <label className="crm-form__label">Адрес клиента</label>
-                  <AddressSuggest
-                    name="clientAddress"
-                    value={formData.clientAddress}
-                    onChange={handleClientAddressChange}
-                    required
-                    className="crm-form__input"
-                    placeholder="Начните вводить адрес..."
-                  />
-                </div>
+                {/* Поле "Адрес клиента" удалено */}
               </div>
             ) : (
               <div className="crm-form__field crm-form__field--full">

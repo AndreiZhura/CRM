@@ -91,3 +91,47 @@
 .balloon-link:hover {
   background-color: #1d4ed8;
 }
+
+.map-legend {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  max-width: 300px;
+}
+
+.map-legend h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.color-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.color-dot.blue { background-color: blue; }
+.color-dot.orange { background-color: orange; }
+.color-dot.green { background-color: green; }
+.color-dot.gray { background-color: gray; }
+.color-dot.red { background-color: red; }

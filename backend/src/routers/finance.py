@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.db import get_db
 from src.services.finance import (
@@ -38,16 +38,23 @@ async def read_finance_by_order(
         raise HTTPException(status_code=404, detail="Finance record not found for this order")
     return finance
 
-# Специфичные пути должны идти до {finance_id}
+# ===== ИЗМЕНЕНИЯ ЗДЕСЬ =====
 @router.get("/summary")
-async def finance_summary(db: AsyncSession = Depends(get_db)):
-    """Возвращает сводную информацию по финансам"""
-    return await get_finance_summary(db)
+async def finance_summary(
+    completed: bool = Query(False, description="Только выполненные заказы"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Возвращает сводную информацию по финансам (опционально только по выполненным заказам)"""
+    return await get_finance_summary(db, completed)
 
 @router.get("/monthly")
-async def monthly_profit(db: AsyncSession = Depends(get_db)):
-    """Возвращает прибыль по месяцам"""
-    return await get_monthly_profit(db)
+async def monthly_profit(
+    completed: bool = Query(False, description="Только выполненные заказы"),
+    db: AsyncSession = Depends(get_db)
+):
+    """Возвращает прибыль по месяцам (опционально только по выполненным заказам)"""
+    return await get_monthly_profit(db, completed)
+# ============================
 
 @router.get("/{finance_id}", response_model=FinanceOut)
 async def read_finance(

@@ -1,3 +1,4 @@
+from .order_installer import OrderInstaller
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional, List
@@ -87,5 +88,5 @@ class OrderListOut(OrderBase):
     finance: Optional[FinanceOut] = None
     lat: Optional[float] = None
     lon: Optional[float] = None
-
+    installers: List[OrderInstaller] = []   # <-- добавляем
     model_config = ConfigDict(from_attributes=True)

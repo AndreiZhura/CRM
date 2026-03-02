@@ -1,8 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select,func, extract
+from sqlalchemy import select, func, extract
 from src.models.finance import Finance
 from src.schemas.finance import FinanceCreate, FinanceUpdate
-from src.models.finance import Finance
 from src.models.orders import Order
 
 async def create_finance(db: AsyncSession, finance_data: FinanceCreate):
@@ -47,23 +46,28 @@ async def delete_finance(db: AsyncSession, finance_id: int):
         await db.commit()
     return finance
 
-async def get_finance_summary(db: AsyncSession):
-    """Возвращает сводку по финансам: общая прибыль, выплаты монтажникам, количество заказов, средняя прибыль"""
-    # Общая прибыль
-    result = await db.execute(select(func.sum(Finance.profit)))
-    total_profit = result.scalar() or 0.0
-
-    # Сумма выплат монтажникам (используем installer_payments)
-    result = await db.execute(select(func.sum(Finance.installer_payments)))
-    total_installer_pay = result.scalar() or 0.0
-
-    # Количество заказов
-    result = await db.execute(select(func.count(Order.id)))
-    total_orders = result.scalar() or 0
-
-    # Средняя прибыль
+# ===== ИЗМЕНЕНИЯ ЗДЕСЬ =====
+async def get_finance_summary(db: AsyncSession, completed: bool = False):
+    """Возвращает сводку по финансам с возможностью фильтрации только по выполненным заказам"""
+    stmt = select(
+        func.sum(Finance.profit).label("total_profit"),
+        func.sum(Finance.installer_payments).label("total_installer_pay"),
+        func.count(Finance.id).label("total_orders")
+    )
+    
+    if completed:
+        # Присоединяем заказы и фильтруем по статусу "Выполнен"
+        stmt = stmt.join(Finance.order).where(Order.status == "Выполнен")
+    
+    result = await db.execute(stmt)
+    row = result.one()
+    
+    total_profit = row.total_profit or 0.0
+    total_installer_pay = row.total_installer_pay or 0.0
+    total_orders = row.total_orders or 0
+    
     avg_profit = total_profit / total_orders if total_orders > 0 else 0
-
+    
     return {
         "total_profit": float(total_profit),
         "total_installer_pay": float(total_installer_pay),
@@ -71,16 +75,21 @@ async def get_finance_summary(db: AsyncSession):
         "avg_profit": float(avg_profit),
     }
 
-async def get_monthly_profit(db: AsyncSession):
-    """Возвращает прибыль по месяцам за всё время (или за последние 12 месяцев)"""
+async def get_monthly_profit(db: AsyncSession, completed: bool = False):
+    """Возвращает прибыль по месяцам с возможностью фильтрации только по выполненным заказам"""
     stmt = select(
         extract('year', Finance.created_at).label('year'),
         extract('month', Finance.created_at).label('month'),
         func.sum(Finance.profit).label('profit')
-    ).group_by('year', 'month').order_by('year', 'month')
-
+    )
+    
+    if completed:
+        stmt = stmt.join(Finance.order).where(Order.status == "Выполнен")
+    
+    stmt = stmt.group_by('year', 'month').order_by('year', 'month')
+    
     result = await db.execute(stmt)
     rows = result.all()
-    # Преобразуем в список словарей
     monthly_data = [{"year": int(r.year), "month": int(r.month), "profit": float(r.profit)} for r in rows]
     return monthly_data
+# ============================

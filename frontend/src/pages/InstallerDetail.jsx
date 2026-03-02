@@ -27,6 +27,15 @@ const InstallerDetail = () => {
         ]);
         setInstaller(installerData);
         setOrders(ordersData);
+        console.log("InstallerDetail: данные монтажника", installerData);
+        console.log("InstallerDetail: все заказы", ordersData);
+        // Проверим, есть ли у заказов поле installers или installer_id
+        ordersData.forEach((order) => {
+          console.log(`Заказ ${order.id}:`, {
+            installers: order.installers,
+            installer_id: order.installer_id,
+          });
+        });
       } catch (err) {
         setError(err.message);
       } finally {
@@ -41,11 +50,14 @@ const InstallerDetail = () => {
     const { id, value, type, checked } = e.target;
     setInstaller((prev) => ({
       ...prev,
-      [id]: type === "checkbox" 
-        ? checked 
-        : (type === "number" 
-            ? (value === "" ? "" : Number(value)) 
-            : value),
+      [id]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+            ? value === ""
+              ? ""
+              : Number(value)
+            : value,
     }));
   };
 
@@ -103,9 +115,11 @@ const InstallerDetail = () => {
   };
 
   // Фильтрация заказов по монтажнику и статусу
-  const installerOrders = orders.filter(
-    (order) => order.installer_id === installer?.id,
-  );
+const installerOrders = orders.filter((order) => {
+  if (!order.installers || !Array.isArray(order.installers)) return false;
+  return order.installers.some(oi => Number(oi.installer_id) === Number(installer?.id));
+});
+  console.log('Отфильтрованные заказы для мастера', installer?.id, installerOrders);
   const activeOrders = installerOrders.filter(
     (order) => order.status !== "Выполнен" && order.status !== "Отменен",
   );
