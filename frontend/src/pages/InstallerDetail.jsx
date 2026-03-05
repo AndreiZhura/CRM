@@ -243,6 +243,8 @@ const InstallerDetail = () => {
                     id="debt_amount"
                     value={installer.debt_amount ?? 0}
                     onChange={handleInputChange}
+                    onFocus={(e) => e.target.select()}
+                    onClick={(e) => e.target.select()}
                     step="0.01"
                     min="0"
                     placeholder="0.00"
@@ -280,7 +282,11 @@ const InstallerDetail = () => {
                     id="base_price"
                     value={installer.base_price ?? ""}
                     onChange={handleInputChange}
-                    placeholder="0"
+                    onFocus={(e) => e.target.select()}
+                    onClick={(e) => e.target.select()}
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
                   />
                 </div>
               </div>

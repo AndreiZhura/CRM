@@ -18,7 +18,7 @@ const AddInstaller = () => {
     rating: 10,
     base_price: 0,
     is_debtor: false,
-    debt_amount: 0,               // ← новое поле
+    debt_amount: 0,
     comments: '',
     is_active: true,
     is_in_funnel: true,
@@ -51,7 +51,6 @@ const AddInstaller = () => {
     const dataToSend = {
       ...formData,
       specialization: specializationArray,
-      // rating и base_price уже числа благодаря handleChange
     };
 
     try {
@@ -149,9 +148,12 @@ const AddInstaller = () => {
                 name="rating"
                 value={formData.rating}
                 onChange={handleChange}
+                onFocus={(e) => e.target.select()}
+                onClick={(e) => e.target.select()}
                 min="1"
                 max="10"
                 step="0.1"
+                placeholder="10.0"
               />
             </div>
 
@@ -180,6 +182,8 @@ const AddInstaller = () => {
                     name="debt_amount"
                     value={formData.debt_amount}
                     onChange={handleChange}
+                    onFocus={(e) => e.target.select()}
+                    onClick={(e) => e.target.select()}
                     step="0.01"
                     min="0"
                     placeholder="0.00"
@@ -197,8 +201,11 @@ const AddInstaller = () => {
                 name="base_price"
                 value={formData.base_price}
                 onChange={handleChange}
+                onFocus={(e) => e.target.select()}
+                onClick={(e) => e.target.select()}
                 step="0.01"
                 min="0"
+                placeholder="0.00"
               />
             </div>
 
