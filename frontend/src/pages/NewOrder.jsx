@@ -407,12 +407,11 @@ const NewOrder = () => {
               </div>
             </div>
             <div className="crm-form__field crm-form__field--full" style={{ marginTop: "20px" }}>
-              <label className="crm-form__label">Адрес заказа *</label>
+              <label className="crm-form__label">Адрес заказа </label>
               <AddressSuggest
                 name="orderAddress"
                 value={formData.orderAddress}
                 onChange={handleOrderAddressChange}
-                required
                 className="crm-form__input"
                 placeholder="Начните вводить адрес..."
               />
@@ -456,7 +455,7 @@ const NewOrder = () => {
                       value={item.name}
                       onChange={(e) => handleItemChange(index, "name", e.target.value)}
                       className="crm-form__input"
-                      required
+                      
                     />
                   </div>
                   <div className="crm-form__field">
@@ -541,7 +540,7 @@ const NewOrder = () => {
                       value={oi.installer_id}
                       onChange={(e) => handleOrderInstallerChange(index, "installer_id", e.target.value)}
                       className="crm-form__input"
-                      required
+                      
                     >
                       <option value="">-- Выберите монтажника --</option>
                       {installers.map((inst) => (
@@ -552,13 +551,13 @@ const NewOrder = () => {
                     </select>
                   </div>
                   <div className="crm-form__field">
-                    <label className="crm-form__label">Роль *</label>
+                    <label className="crm-form__label">Роль </label>
                     <input
                       type="text"
                       value={oi.role}
                       onChange={(e) => handleOrderInstallerChange(index, "role", e.target.value)}
                       className="crm-form__input"
-                      required
+                      
                       placeholder="ведущий, помощник, ..."
                     />
                   </div>
