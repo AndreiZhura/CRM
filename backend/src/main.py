@@ -8,6 +8,7 @@ from src.core.scheduler import start_scheduler
 from src.core.logging import logger
 from src.core.logging import LoggingMiddleware
 from src.core.scheduler import scheduler
+from src.routers import debug
 from src.routers import clients, installers, orders, finance, reminders, auth, order_items, order_installers, order_expenses, warranty_claims, payments
 
 
@@ -33,7 +34,7 @@ app.include_router(order_installers.router)
 app.include_router(order_expenses.router)
 app.include_router(warranty_claims.router)
 app.include_router(payments.router)
-
+app.include_router(debug.router)
 
 @app.on_event("startup")
 async def startup_event():
