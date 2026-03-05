@@ -83,6 +83,18 @@
     border-color: #dcfce7;
 }
 
+.status-v-rabote {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.status-otmenen {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fee2e2;
+}
+
 .filters-row th {
     padding: 8px;
     background: var(--bg-secondary);

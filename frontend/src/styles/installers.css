@@ -207,6 +207,33 @@
 
 /* --- 5. АДАПТИВНОСТЬ ПОД ТЕЛЕФОНЫ --- */
 @media screen and (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        /* заголовок сверху, кнопка снизу */
+        align-items: center;
+        /* центрируем по горизонтали */
+        gap: 15px;
+        /* отступ между заголовком и кнопкой */
+        text-align: center;
+        /* сам текст заголовка по центру */
+        padding: 0 15px;
+        /* отступы по бокам */
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        /* можно подобрать размер */
+        margin-bottom: 0;
+    }
+
+    .btn-primary {
+        /* кнопка остаётся обычного размера (не на всю ширину) */
+        justify-content: center;
+        /* текст и иконка по центру кнопки */
+        margin: 0 auto;
+        /* дополнительная центровка (на случай, если align-items не сработает) */
+    }
+
     .table-responsive {
         overflow-x: visible !important;
         border: none !important;
@@ -266,7 +293,7 @@
     }
 
     /* Значение (всё, кроме псевдоэлемента) */
-    .orders-table__td > *:not(::before) {
+    .orders-table__td>*:not(::before) {
         width: 65%;
         text-align: right;
         word-break: break-word;
@@ -303,14 +330,15 @@
     }
 
     /* Выделяем рейтинг жирным */
-    .orders-table__td[data-label="Рейтинг"] > *:not(::before) {
+    .orders-table__td[data-label="Рейтинг"]>*:not(::before) {
         font-weight: 700;
         color: var(--accent-color);
     }
 
     /* Статус должника можно выделить цветом */
-    .orders-table__td[data-label="Статус"] > *:not(::before) {
+    .orders-table__td[data-label="Статус"]>*:not(::before) {
         font-weight: 600;
-        color: #ef4444; /* для должника будет красный, но если активен, то чёрный — нужно уточнить */
+        color: #ef4444;
+        /* для должника будет красный, но если активен, то чёрный — нужно уточнить */
     }
 }

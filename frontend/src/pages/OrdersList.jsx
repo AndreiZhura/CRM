@@ -23,8 +23,9 @@ const OrdersList = () => {
     { value: "", label: "Все статусы" },
     { value: "Новый", label: "Новый" },
     { value: "Ждет установщика", label: "Ждет установщика" },
+    { value: "В работе", label: "В работе" },
     { value: "Выполнен", label: "Выполнен" },
-    { value: "Завершено", label: "Завершено" },
+    { value: "Отменен", label: "Отменен" },
   ];
 
   const customSelectStyles = {
@@ -60,7 +61,10 @@ const OrdersList = () => {
     }),
     singleValue: (provided) => ({ ...provided, color: "var(--text-primary)" }),
     input: (provided) => ({ ...provided, color: "var(--text-primary)" }),
-    placeholder: (provided) => ({ ...provided, color: "var(--text-secondary)" }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--text-secondary)",
+    }),
     dropdownIndicator: (provided) => ({
       ...provided,
       color: "var(--text-secondary)",
@@ -88,7 +92,10 @@ const OrdersList = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Order IDs:", orders.map((o) => o.id));
+    console.log(
+      "Order IDs:",
+      orders.map((o) => o.id),
+    );
   }, [orders]);
 
   useEffect(() => {
@@ -112,20 +119,24 @@ const OrdersList = () => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "Новый":
-      case "Новая заявка":
-        return "status-novaya-zayavka";
-      case "Ждет установщика":
-        return "status-zhdet-ustanovshchika";
-      case "Завершено":
-      case "Выполнен":
-        return "status-zaversheno";
-      default:
-        return "";
-    }
-  };
+const getStatusClass = (status) => {
+  switch (status) {
+    case "Новый":
+    case "Новая заявка":
+      return "status-novaya-zayavka";
+    case "Ждет установщика":
+      return "status-zhdet-ustanovshchika";
+    case "В работе":
+      return "status-v-rabote";
+    case "Выполнен":
+    case "Завершено":
+      return "status-zaversheno";
+    case "Отменен":
+      return "status-otmenen";
+    default:
+      return "";
+  }
+};
 
   if (loading) {
     return (
@@ -183,10 +194,13 @@ const OrdersList = () => {
                   name="status"
                   options={statusOptions}
                   value={statusOptions.find(
-                    (option) => option.value === filters.status
+                    (option) => option.value === filters.status,
                   )}
                   onChange={(selected) =>
-                    setFilters({ ...filters, status: selected ? selected.value : "" })
+                    setFilters({
+                      ...filters,
+                      status: selected ? selected.value : "",
+                    })
                   }
                   styles={customSelectStyles}
                   isClearable
