@@ -159,7 +159,9 @@ const InstallersList = () => {
                       {inst.rating}
                     </td>
                     <td className="orders-table__td" data-label="Статус">
-                      {inst.is_debtor ? "Должник" : "Активен"}
+                      {inst.is_debtor 
+                        ? `Должник (${inst.debt_amount || 0} ₽)` 
+                        : 'Активен'}
                     </td>
                   </tr>
                 ))}

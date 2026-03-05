@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import PhoneField from '../components/PhoneField'; // ← добавили импорт
+import PhoneField from '../components/PhoneField';
 import '../styles/installer_add.css';
 import '../styles/phone.css';
 
@@ -18,6 +18,7 @@ const AddInstaller = () => {
     rating: 10,
     base_price: 0,
     is_debtor: false,
+    debt_amount: 0,               // ← новое поле
     comments: '',
     is_active: true,
     is_in_funnel: true,
@@ -27,41 +28,43 @@ const AddInstaller = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Для чекбокса – checked, для числовых полей – число (или 0, если пусто)
+    const processedValue = type === 'checkbox' ? checked
+                          : (type === 'number' ? (value === '' ? 0 : parseFloat(value)) : value);
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: processedValue,
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  // Преобразуем specialization из строки в массив
-  const specializationArray = formData.specialization
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => s !== '');
+    // Преобразуем specialization из строки в массив
+    const specializationArray = formData.specialization
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s !== '');
 
-  const dataToSend = {
-    ...formData,
-    specialization: specializationArray,
-    rating: Number(formData.rating),
-    base_price: Number(formData.base_price),
+    const dataToSend = {
+      ...formData,
+      specialization: specializationArray,
+      // rating и base_price уже числа благодаря handleChange
+    };
+
+    try {
+      await api.createInstaller(dataToSend);
+      alert('Мастер успешно создан!');
+      navigate('/installers');
+    } catch (err) {
+      setError(err.message);
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  try {
-    await api.createInstaller(dataToSend);
-    alert('Мастер успешно создан!');
-    navigate('/installers');
-  } catch (err) {
-    setError(err.message);
-    alert(err.message); // если хотите, можно и ошибку показывать через alert
-  } finally {
-    setLoading(false);
-  }
-};
 
   return (
     <div className="page">
@@ -167,6 +170,22 @@ const handleSubmit = async (e) => {
                   <label htmlFor="is_debtor">В долгу</label>
                 </div>
               </div>
+              {/* Поле суммы долга, появляется только если отмечен чекбокс */}
+              {formData.is_debtor && (
+                <div className="form-group" style={{ marginTop: '10px' }}>
+                  <label htmlFor="debt_amount">Сумма долга (₽)</label>
+                  <input
+                    type="number"
+                    id="debt_amount"
+                    name="debt_amount"
+                    value={formData.debt_amount}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Базовая ставка */}
@@ -195,7 +214,7 @@ const handleSubmit = async (e) => {
                 <option value={true}>Новый</option>
                 <option value={false}>Проверен</option>
               </select>
-              <small className="helper-text">"Проверен" — монтажник не показывается в активной воронке</small>
+              <small className="helper-text"></small>
             </div>
 
             {/* Заметки */}

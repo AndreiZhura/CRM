@@ -75,6 +75,7 @@ const InstallerDetail = () => {
       const normalizedInstaller = {
         ...installer,
         base_price: installer.base_price === "" ? 0 : installer.base_price,
+        debt_amount: installer.debt_amount === "" ? 0 : installer.debt_amount,
       };
 
       let specializationArray;
@@ -115,10 +116,10 @@ const InstallerDetail = () => {
   };
 
   // Фильтрация заказов по монтажнику и статусу
-const installerOrders = orders.filter((order) => {
-  if (!order.installers || !Array.isArray(order.installers)) return false;
-  return order.installers.some(oi => Number(oi.installer_id) === Number(installer?.id));
-});
+  const installerOrders = orders.filter((order) => {
+    if (!order.installers || !Array.isArray(order.installers)) return false;
+    return order.installers.some(oi => Number(oi.installer_id) === Number(installer?.id));
+  });
   console.log('Отфильтрованные заказы для мастера', installer?.id, installerOrders);
   const activeOrders = installerOrders.filter(
     (order) => order.status !== "Выполнен" && order.status !== "Отменен",
@@ -233,6 +234,21 @@ const installerOrders = orders.filter((order) => {
                   </label>
                 </div>
               </div>
+              {/* Поле суммы долга появляется, если чекбокс отмечен */}
+              {installer.is_debtor && (
+                <div className="field-group" style={{ marginTop: '10px' }}>
+                  <label htmlFor="debt_amount">Сумма долга (₽)</label>
+                  <input
+                    type="number"
+                    id="debt_amount"
+                    value={installer.debt_amount ?? 0}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
             </div>
           </section>
 

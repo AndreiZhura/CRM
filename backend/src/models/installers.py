@@ -15,6 +15,7 @@ class Installer(Base):
     rating = Column(Numeric(3,1), default=10.0)
     base_price = Column(Numeric(10,2), default=0)
     is_debtor = Column(Boolean, default=False)
+    debt_amount = Column(Numeric(10,2), default=0)
     comments = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     is_in_funnel = Column(Boolean, default=True)

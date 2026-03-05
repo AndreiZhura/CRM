@@ -496,6 +496,20 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
 END $$;
+--------------------------------------------------------------------------
+-- Добавление колонки debt_amount,которая будет показывать сумму долга 
+-------------------------------------------------------------------------
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'installers'
+          AND column_name = 'debt_amount'
+    ) THEN
+        ALTER TABLE installers ADD COLUMN debt_amount NUMERIC(10,2) DEFAULT 0;
+    END IF;
+END $$;
 
 -- -----------------------------------------------------------------
 -- КОММЕНТАРИИ

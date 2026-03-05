@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional, List
+from decimal import Decimal
 
 class InstallerBase(BaseModel):
     full_name: str
@@ -18,6 +19,7 @@ class InstallerBase(BaseModel):
     poor_work_count: Optional[int] = 0
     warranty_visits_count: Optional[int] = 0
     last_incident_date: Optional[datetime] = None
+    debt_amount: Decimal = Decimal(0)
     # quality_score не включаем, оно вычисляется БД
 
 class InstallerCreate(InstallerBase):
@@ -40,6 +42,7 @@ class InstallerUpdate(InstallerBase):
     poor_work_count: Optional[int] = None
     warranty_visits_count: Optional[int] = None
     last_incident_date: Optional[datetime] = None
+    debt_amount: Optional[Decimal] = None
 
 class InstallerOut(InstallerBase):
     id: int
