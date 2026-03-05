@@ -5,6 +5,7 @@ import tempfile
 import os
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse  # <-- добавили этот импорт
 import pandas as pd
 from sqlalchemy import text
 from src.core.db import AsyncSessionLocal
@@ -17,6 +18,18 @@ logger = logging.getLogger(__name__)
 BACKUP_DIR = Path("backups")
 BACKUP_DIR.mkdir(exist_ok=True)
 
+# ---------- Вспомогательная функция для получения параметров БД ----------
+def get_db_params():
+    """Извлекает параметры подключения к БД из DATABASE_URL."""
+    url = urlparse(settings.DATABASE_URL)
+    return {
+        "host": url.hostname or "localhost",
+        "port": url.port or 5432,
+        "user": url.username or "admin",
+        "dbname": url.path.lstrip('/'),
+        "password": settings.POSTGRES_PASSWORD,
+    }
+
 # ---------- Создание дампа БД ----------
 def create_db_dump(local_dir: Path) -> Path:
     """
@@ -26,15 +39,16 @@ def create_db_dump(local_dir: Path) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = local_dir / f"db_backup_{timestamp}.sql"
 
+    params = get_db_params()
     cmd = [
         "pg_dump",
-        "-h", "localhost",
-        "-p", "5433",
-        "-U", "admin",
-        "-d", "oleg_crm",
+        "-h", params["host"],
+        "-p", str(params["port"]),
+        "-U", params["user"],
+        "-d", params["dbname"],
         "-f", str(filename)
     ]
-    env = {"PGPASSWORD": settings.POSTGRES_PASSWORD}
+    env = {"PGPASSWORD": params["password"]}
 
     try:
         subprocess.run(cmd, env=env, check=True, capture_output=True, text=True)
