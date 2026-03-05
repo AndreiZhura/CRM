@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 import PhoneField from "../components/PhoneField";
+import AddressSuggest from "../components/AddressSuggest";
 import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import "../styles/order-form.css";
 import "../styles/phone.css";
@@ -416,12 +417,17 @@ const OrderDetail = () => {
               />
               <div className="crm-form__field crm-form__field--full">
                 <label>Адрес заказа</label>
-                <input
-                  type="text"
+                <AddressSuggest
                   name="address_text"
                   value={order.address_text || ""}
-                  onChange={handleOrderChange}
+                  onChange={(e) =>
+                    setOrder((prev) => ({
+                      ...prev,
+                      address_text: e.target.value,
+                    }))
+                  }
                   className="crm-form__input"
+                  placeholder="Начните вводить адрес..."
                 />
               </div>
               <div className="crm-form__field">
