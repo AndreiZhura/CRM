@@ -511,6 +511,21 @@ BEGIN
     END IF;
 END $$;
 
+
+-- Добавляем поле status для монтажников
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'installers'
+          AND column_name = 'status'
+    ) THEN
+        ALTER TABLE installers ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active';
+        COMMENT ON COLUMN installers.status IS 'Статус: active, fired, vacation, sick';
+    END IF;
+END $$;
+
 -- -----------------------------------------------------------------
 -- КОММЕНТАРИИ
 -- -----------------------------------------------------------------

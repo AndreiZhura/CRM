@@ -1,36 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import PhoneField from '../components/PhoneField';
-import '../styles/installer_add.css';
-import '../styles/phone.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import PhoneField from "../components/PhoneField";
+import "../styles/installer_add.css";
+import "../styles/phone.css";
 
 const AddInstaller = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: '',
-    nickname: '',
-    phone: '',
-    backup_phone: '',
-    specialization: '',
+    full_name: "",
+    nickname: "",
+    phone: "",
+    backup_phone: "",
+    specialization: "",
     rating: 10,
     base_price: 0,
     is_debtor: false,
     debt_amount: 0,
-    comments: '',
+    comments: "",
     is_active: true,
     is_in_funnel: true,
+    status: "active",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     // Для чекбокса – checked, для числовых полей – число (или 0, если пусто)
-    const processedValue = type === 'checkbox' ? checked
-                          : (type === 'number' ? (value === '' ? 0 : parseFloat(value)) : value);
+    const processedValue =
+      type === "checkbox"
+        ? checked
+        : type === "number"
+          ? value === ""
+            ? 0
+            : parseFloat(value)
+          : value;
     setFormData({
       ...formData,
       [name]: processedValue,
@@ -40,13 +47,13 @@ const AddInstaller = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     // Преобразуем specialization из строки в массив
     const specializationArray = formData.specialization
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s !== '');
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
 
     const dataToSend = {
       ...formData,
@@ -55,8 +62,8 @@ const AddInstaller = () => {
 
     try {
       await api.createInstaller(dataToSend);
-      alert('Мастер успешно создан!');
-      navigate('/installers');
+      alert("Мастер успешно создан!");
+      navigate("/installers");
     } catch (err) {
       setError(err.message);
       alert(err.message);
@@ -119,7 +126,9 @@ const AddInstaller = () => {
                 name="backup_phone"
                 label="Резервный телефон"
                 value={formData.backup_phone}
-                onChange={(value) => setFormData({ ...formData, backup_phone: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, backup_phone: value })
+                }
                 required={false}
               />
             </div>
@@ -174,7 +183,7 @@ const AddInstaller = () => {
               </div>
               {/* Поле суммы долга, появляется только если отмечен чекбокс */}
               {formData.is_debtor && (
-                <div className="form-group" style={{ marginTop: '10px' }}>
+                <div className="form-group" style={{ marginTop: "10px" }}>
                   <label htmlFor="debt_amount">Сумма долга (₽)</label>
                   <input
                     type="number"
@@ -192,6 +201,25 @@ const AddInstaller = () => {
               )}
             </div>
 
+            {/* Статус активности */}
+            <div className="form-group">
+              <label htmlFor="status">Статус активности</label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="crm-form__input"
+              >
+                <option value="active">Активен</option>
+                <option value="fired">Уволен</option>
+                <option value="vacation">В отпуске</option>
+                <option value="sick">На больничном</option>
+              </select>
+              <small className="helper-text">
+                Определяет доступность мастера
+              </small>
+            </div>
             {/* Базовая ставка */}
             <div className="form-group">
               <label htmlFor="base_price">Цена за монтаж (базовая)</label>
@@ -238,7 +266,7 @@ const AddInstaller = () => {
             </div>
 
             <button type="submit" className="btn-save" disabled={loading}>
-              {loading ? 'Сохранение...' : '💾 Сохранить досье'}
+              {loading ? "Сохранение..." : "💾 Сохранить досье"}
             </button>
           </form>
         </div>

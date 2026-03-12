@@ -14,6 +14,8 @@ const InstallersList = () => {
   const [searchName, setSearchName] = useState("");
   const [searchSpec, setSearchSpec] = useState("");
   const [filterDebt, setFilterDebt] = useState(false);
+  // Новое состояние для фильтра по статусу
+  const [filterStatus, setFilterStatus] = useState("");
 
   useEffect(() => {
     const fetchInstallers = async () => {
@@ -51,12 +53,18 @@ const InstallersList = () => {
       filtered = filtered.filter((inst) => inst.is_debtor);
     }
 
+    // Фильтрация по статусу
+    if (filterStatus) {
+      filtered = filtered.filter((inst) => inst.status === filterStatus);
+    }
+
     setFilteredInstallers(filtered);
-  }, [searchName, searchSpec, filterDebt, installers]);
+  }, [searchName, searchSpec, filterDebt, filterStatus, installers]);
 
   const handleSearchName = (e) => setSearchName(e.target.value);
   const handleSearchSpec = (e) => setSearchSpec(e.target.value);
   const handleFilterDebt = (e) => setFilterDebt(e.target.checked);
+  const handleFilterStatus = (e) => setFilterStatus(e.target.value);
 
   if (loading)
     return (
@@ -110,6 +118,21 @@ const InstallersList = () => {
             </div>
           </div>
 
+          {/* Новый фильтр по статусу */}
+          <div className="search-group">
+            <select
+              value={filterStatus}
+              onChange={handleFilterStatus}
+              className="search-input"
+            >
+              <option value="">Все статусы</option>
+              <option value="active">Активен</option>
+              <option value="fired">Уволен</option>
+              <option value="vacation">В отпуске</option>
+              <option value="sick">На больничном</option>
+            </select>
+          </div>
+
           <div className="search-group checkbox-group">
             <input
               type="checkbox"
@@ -134,6 +157,7 @@ const InstallersList = () => {
                   <th>Специализация</th>
                   <th>Рейтинг</th>
                   <th>Статус</th>
+                  <th>Долг</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,9 +183,20 @@ const InstallersList = () => {
                       {inst.rating}
                     </td>
                     <td className="orders-table__td" data-label="Статус">
-                      {inst.is_debtor 
-                        ? `Должник (${inst.debt_amount || 0} ₽)` 
-                        : 'Активен'}
+                      <span className={`status-badge status-${inst.status || 'active'}`}>
+                        {inst.status === "active" && "Активен"}
+                        {inst.status === "fired" && "Уволен"}
+                        {inst.status === "vacation" && "В отпуске"}
+                        {inst.status === "sick" && "На больничном"}
+                        {!inst.status && "Активен"}
+                      </span>
+                    </td>
+                    <td className="orders-table__td" data-label="Долг">
+                      {inst.is_debtor ? (
+                        <span className="debt-yes">{inst.debt_amount} ₽</span>
+                      ) : (
+                        <span className="debt-no">✓</span>
+                      )}
                     </td>
                   </tr>
                 ))}

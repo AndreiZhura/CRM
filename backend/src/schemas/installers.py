@@ -20,6 +20,7 @@ class InstallerBase(BaseModel):
     warranty_visits_count: Optional[int] = 0
     last_incident_date: Optional[datetime] = None
     debt_amount: Decimal = Decimal(0)
+    status: str = 'active'
     # quality_score не включаем, оно вычисляется БД
 
 class InstallerCreate(InstallerBase):
@@ -43,6 +44,7 @@ class InstallerUpdate(InstallerBase):
     warranty_visits_count: Optional[int] = None
     last_incident_date: Optional[datetime] = None
     debt_amount: Optional[Decimal] = None
+    status: Optional[str] = None
 
 class InstallerOut(InstallerBase):
     id: int

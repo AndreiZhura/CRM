@@ -16,6 +16,7 @@ class Installer(Base):
     base_price = Column(Numeric(10,2), default=0)
     is_debtor = Column(Boolean, default=False)
     debt_amount = Column(Numeric(10,2), default=0)
+    status = Column(String(20), nullable=False, default='active')
     comments = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     is_in_funnel = Column(Boolean, default=True)
@@ -35,3 +36,4 @@ class Installer(Base):
     payments = relationship("Payment", back_populates="installer")
     responsible_claims = relationship("WarrantyClaim", foreign_keys="[WarrantyClaim.responsible_installer_id]", back_populates="responsible_installer")
     resolving_claims = relationship("WarrantyClaim", foreign_keys="[WarrantyClaim.resolving_installer_id]", back_populates="resolving_installer")
+    status = Column(String(20), nullable=False, default='active')

@@ -118,9 +118,15 @@ const InstallerDetail = () => {
   // Фильтрация заказов по монтажнику и статусу
   const installerOrders = orders.filter((order) => {
     if (!order.installers || !Array.isArray(order.installers)) return false;
-    return order.installers.some(oi => Number(oi.installer_id) === Number(installer?.id));
+    return order.installers.some(
+      (oi) => Number(oi.installer_id) === Number(installer?.id),
+    );
   });
-  console.log('Отфильтрованные заказы для мастера', installer?.id, installerOrders);
+  console.log(
+    "Отфильтрованные заказы для мастера",
+    installer?.id,
+    installerOrders,
+  );
   const activeOrders = installerOrders.filter(
     (order) => order.status !== "Выполнен" && order.status !== "Отменен",
   );
@@ -236,7 +242,7 @@ const InstallerDetail = () => {
               </div>
               {/* Поле суммы долга появляется, если чекбокс отмечен */}
               {installer.is_debtor && (
-                <div className="field-group" style={{ marginTop: '10px' }}>
+                <div className="field-group" style={{ marginTop: "10px" }}>
                   <label htmlFor="debt_amount">Сумма долга (₽)</label>
                   <input
                     type="number"
@@ -290,6 +296,28 @@ const InstallerDetail = () => {
                   />
                 </div>
               </div>
+
+              {/* Новая строка: статус активности */}
+              <div className="field-row">
+                <div className="field-group">
+                  <label htmlFor="status">Статус активности</label>
+                  <select
+                    id="status"
+                    value={installer.status || "active"}
+                    onChange={handleInputChange}
+                    className="crm-form__input"
+                  >
+                    <option value="active">Активен</option>
+                    <option value="fired">Уволен</option>
+                    <option value="vacation">В отпуске</option>
+                    <option value="sick">На больничном</option>
+                  </select>
+                </div>
+                <div className="field-group">
+                  {/* Можно оставить пустым или добавить что-то ещё */}
+                </div>
+              </div>
+
               <div className="field-group">
                 <label>Досье и заметки (текстовая информация)</label>
                 <textarea
