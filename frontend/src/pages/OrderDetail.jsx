@@ -35,34 +35,38 @@ const OrderDetail = () => {
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [showAddClaim, setShowAddClaim] = useState(false);
 
-  // Данные для новых записей
+  // Данные для новых записей (числовые поля храним как строки, чтобы можно было стереть)
   const [newItem, setNewItem] = useState({
     item_type: "product",
     name: "",
-    quantity: 1,
-    purchase_price: 0,
-    sale_price: 0,
-    warranty_manufacturer: 0,
+    quantity: "1",
+    purchase_price: "",
+    sale_price: "",
+    warranty_manufacturer: "",
   });
+
   const [newOrderInstaller, setNewOrderInstaller] = useState({
     installer_id: "",
     role: "",
-    base_payment: 0,
+    base_payment: "",
     is_primary: false,
   });
+
   const [newExpense, setNewExpense] = useState({
-    amount: 0,
+    amount: "",
     description: "",
     expense_date: new Date().toISOString().split("T")[0],
     category: "other",
   });
+
   const [newPayment, setNewPayment] = useState({
     payment_type: "client",
     installer_id: "",
-    amount: 0,
+    amount: "",
     payment_date: new Date().toISOString().split("T")[0],
     description: "",
   });
+
   const [newClaim, setNewClaim] = useState({
     order_item_id: "",
     claim_date: new Date().toISOString().split("T")[0],
@@ -71,7 +75,7 @@ const OrderDetail = () => {
     responsible_installer_id: "",
     resolution: "",
     resolving_installer_id: "",
-    cost: 0,
+    cost: "",
     cost_covered_by: "oleg",
     status: "open",
   });
@@ -166,6 +170,7 @@ const OrderDetail = () => {
       setSaving(false);
     }
   };
+
   // Удаление заказа
   const handleDelete = async () => {
     if (window.confirm("Удалить заказ?")) {
@@ -181,21 +186,27 @@ const OrderDetail = () => {
   // ---------- Работа с позициями ----------
   const handleAddItem = async () => {
     try {
-      const created = await api.createOrderItem({
+      const itemData = {
         order_id: order.id,
-        ...newItem,
+        item_type: newItem.item_type,
+        name: newItem.name,
+        quantity: newItem.quantity === "" ? 1 : parseInt(newItem.quantity) || 1,
+        purchase_price: newItem.purchase_price === "" ? 0 : parseFloat(newItem.purchase_price) || 0,
+        sale_price: newItem.sale_price === "" ? 0 : parseFloat(newItem.sale_price) || 0,
+        warranty_manufacturer: newItem.warranty_manufacturer === "" ? 0 : parseInt(newItem.warranty_manufacturer) || 0,
         warranty_master: 0,
         sort_order: items.length,
-      });
+      };
+      const created = await api.createOrderItem(itemData);
       setItems([...items, created]);
       setShowAddItem(false);
       setNewItem({
         item_type: "product",
         name: "",
-        quantity: 1,
-        purchase_price: 0,
-        sale_price: 0,
-        warranty_manufacturer: 0,
+        quantity: "1",
+        purchase_price: "",
+        sale_price: "",
+        warranty_manufacturer: "",
       });
     } catch (err) {
       alert("Ошибка при добавлении позиции: " + err.message);
@@ -216,16 +227,20 @@ const OrderDetail = () => {
   // ---------- Работа с монтажниками в заказе ----------
   const handleAddOrderInstaller = async () => {
     try {
-      const created = await api.createOrderInstaller({
+      const installerData = {
         order_id: order.id,
-        ...newOrderInstaller,
-      });
+        installer_id: newOrderInstaller.installer_id,
+        role: newOrderInstaller.role,
+        base_payment: newOrderInstaller.base_payment === "" ? 0 : parseFloat(newOrderInstaller.base_payment) || 0,
+        is_primary: newOrderInstaller.is_primary,
+      };
+      const created = await api.createOrderInstaller(installerData);
       setOrderInstallers([...orderInstallers, created]);
       setShowAddInstaller(false);
       setNewOrderInstaller({
         installer_id: "",
         role: "",
-        base_payment: 0,
+        base_payment: "",
         is_primary: false,
       });
     } catch (err) {
@@ -249,14 +264,18 @@ const OrderDetail = () => {
   // ---------- Работа с расходами ----------
   const handleAddExpense = async () => {
     try {
-      const created = await api.createOrderExpense({
+      const expenseData = {
         order_id: order.id,
-        ...newExpense,
-      });
+        amount: newExpense.amount === "" ? 0 : parseFloat(newExpense.amount) || 0,
+        description: newExpense.description,
+        expense_date: newExpense.expense_date,
+        category: newExpense.category,
+      };
+      const created = await api.createOrderExpense(expenseData);
       setExpenses([...expenses, created]);
       setShowAddExpense(false);
       setNewExpense({
-        amount: 0,
+        amount: "",
         description: "",
         expense_date: new Date().toISOString().split("T")[0],
         category: "other",
@@ -280,16 +299,21 @@ const OrderDetail = () => {
   // ---------- Работа с платежами ----------
   const handleAddPayment = async () => {
     try {
-      const created = await api.createPayment({
+      const paymentData = {
         order_id: order.id,
-        ...newPayment,
-      });
+        payment_type: newPayment.payment_type,
+        installer_id: newPayment.installer_id || null,
+        amount: newPayment.amount === "" ? 0 : parseFloat(newPayment.amount) || 0,
+        payment_date: newPayment.payment_date,
+        description: newPayment.description,
+      };
+      const created = await api.createPayment(paymentData);
       setPayments([...payments, created]);
       setShowAddPayment(false);
       setNewPayment({
         payment_type: "client",
         installer_id: "",
-        amount: 0,
+        amount: "",
         payment_date: new Date().toISOString().split("T")[0],
         description: "",
       });
@@ -316,7 +340,7 @@ const OrderDetail = () => {
       return;
     }
     try {
-      const created = await api.createWarrantyClaim({
+      const claimData = {
         order_item_id: newClaim.order_item_id,
         claim_date: newClaim.claim_date,
         description: newClaim.description,
@@ -324,10 +348,11 @@ const OrderDetail = () => {
         responsible_installer_id: newClaim.responsible_installer_id || null,
         resolution: newClaim.resolution,
         resolving_installer_id: newClaim.resolving_installer_id || null,
-        cost: newClaim.cost,
+        cost: newClaim.cost === "" ? 0 : parseFloat(newClaim.cost) || 0,
         cost_covered_by: newClaim.cost_covered_by,
         status: newClaim.status,
-      });
+      };
+      const created = await api.createWarrantyClaim(claimData);
       setClaims([...claims, created]);
       setShowAddClaim(false);
       setNewClaim({
@@ -338,7 +363,7 @@ const OrderDetail = () => {
         responsible_installer_id: "",
         resolution: "",
         resolving_installer_id: "",
-        cost: 0,
+        cost: "",
         cost_covered_by: "oleg",
         status: "open",
       });
@@ -604,7 +629,7 @@ const OrderDetail = () => {
                     defaultState={{ center: [order.lat, order.lon], zoom: 15 }}
                     width="100%"
                     height="100%"
-                    options={{ suppressMapOpenBlock: true }} // убираем лишние элементы
+                    options={{ suppressMapOpenBlock: true }}
                   >
                     <Placemark geometry={[order.lat, order.lon]} />
                   </Map>
@@ -694,14 +719,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Количество</label>
                     <input
-                      type="number"
-                      min="1"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={newItem.quantity}
                       onChange={(e) =>
-                        setNewItem({
-                          ...newItem,
-                          quantity: parseInt(e.target.value) || 1,
-                        })
+                        setNewItem({ ...newItem, quantity: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -710,15 +733,12 @@ const OrderDetail = () => {
                     <div className="crm-form__field">
                       <label>Закупка (₽)</label>
                       <input
-                        type="number"
-                        min="0"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
                         value={newItem.purchase_price}
                         onChange={(e) =>
-                          setNewItem({
-                            ...newItem,
-                            purchase_price: parseFloat(e.target.value) || 0,
-                          })
+                          setNewItem({ ...newItem, purchase_price: e.target.value })
                         }
                         className="crm-form__input"
                       />
@@ -727,15 +747,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Продажа (₽)</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={newItem.sale_price}
                       onChange={(e) =>
-                        setNewItem({
-                          ...newItem,
-                          sale_price: parseFloat(e.target.value) || 0,
-                        })
+                        setNewItem({ ...newItem, sale_price: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -743,14 +760,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Гарантия (лет)</label>
                     <input
-                      type="number"
-                      min="0"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={newItem.warranty_manufacturer}
                       onChange={(e) =>
-                        setNewItem({
-                          ...newItem,
-                          warranty_manufacturer: parseInt(e.target.value) || 0,
-                        })
+                        setNewItem({ ...newItem, warranty_manufacturer: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -863,14 +878,14 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Оплата (₽)</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={newOrderInstaller.base_payment}
                       onChange={(e) =>
                         setNewOrderInstaller({
                           ...newOrderInstaller,
-                          base_payment: parseFloat(e.target.value) || 0,
+                          base_payment: e.target.value,
                         })
                       }
                       className="crm-form__input"
@@ -969,15 +984,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Сумма (₽) *</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={newExpense.amount}
                       onChange={(e) =>
-                        setNewExpense({
-                          ...newExpense,
-                          amount: parseFloat(e.target.value) || 0,
-                        })
+                        setNewExpense({ ...newExpense, amount: e.target.value })
                       }
                       className="crm-form__input"
                       required
@@ -989,10 +1001,7 @@ const OrderDetail = () => {
                       type="text"
                       value={newExpense.description}
                       onChange={(e) =>
-                        setNewExpense({
-                          ...newExpense,
-                          description: e.target.value,
-                        })
+                        setNewExpense({ ...newExpense, description: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1003,10 +1012,7 @@ const OrderDetail = () => {
                       type="date"
                       value={newExpense.expense_date}
                       onChange={(e) =>
-                        setNewExpense({
-                          ...newExpense,
-                          expense_date: e.target.value,
-                        })
+                        setNewExpense({ ...newExpense, expense_date: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1016,10 +1022,7 @@ const OrderDetail = () => {
                     <select
                       value={newExpense.category}
                       onChange={(e) =>
-                        setNewExpense({
-                          ...newExpense,
-                          category: e.target.value,
-                        })
+                        setNewExpense({ ...newExpense, category: e.target.value })
                       }
                       className="crm-form__input"
                     >
@@ -1106,10 +1109,7 @@ const OrderDetail = () => {
                     <select
                       value={newPayment.payment_type}
                       onChange={(e) =>
-                        setNewPayment({
-                          ...newPayment,
-                          payment_type: e.target.value,
-                        })
+                        setNewPayment({ ...newPayment, payment_type: e.target.value })
                       }
                       className="crm-form__input"
                     >
@@ -1120,15 +1120,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Сумма (₽) *</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={newPayment.amount}
                       onChange={(e) =>
-                        setNewPayment({
-                          ...newPayment,
-                          amount: parseFloat(e.target.value) || 0,
-                        })
+                        setNewPayment({ ...newPayment, amount: e.target.value })
                       }
                       className="crm-form__input"
                       required
@@ -1140,10 +1137,7 @@ const OrderDetail = () => {
                       type="date"
                       value={newPayment.payment_date}
                       onChange={(e) =>
-                        setNewPayment({
-                          ...newPayment,
-                          payment_date: e.target.value,
-                        })
+                        setNewPayment({ ...newPayment, payment_date: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1154,10 +1148,7 @@ const OrderDetail = () => {
                       <select
                         value={newPayment.installer_id}
                         onChange={(e) =>
-                          setNewPayment({
-                            ...newPayment,
-                            installer_id: e.target.value,
-                          })
+                          setNewPayment({ ...newPayment, installer_id: e.target.value })
                         }
                         className="crm-form__input"
                       >
@@ -1176,10 +1167,7 @@ const OrderDetail = () => {
                       type="text"
                       value={newPayment.description}
                       onChange={(e) =>
-                        setNewPayment({
-                          ...newPayment,
-                          description: e.target.value,
-                        })
+                        setNewPayment({ ...newPayment, description: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1273,10 +1261,7 @@ const OrderDetail = () => {
                     <select
                       value={newClaim.order_item_id}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          order_item_id: e.target.value,
-                        })
+                        setNewClaim({ ...newClaim, order_item_id: e.target.value })
                       }
                       className="crm-form__input"
                       required
@@ -1306,10 +1291,7 @@ const OrderDetail = () => {
                       type="text"
                       value={newClaim.description}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          description: e.target.value,
-                        })
+                        setNewClaim({ ...newClaim, description: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1333,10 +1315,7 @@ const OrderDetail = () => {
                     <select
                       value={newClaim.responsible_installer_id}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          responsible_installer_id: e.target.value,
-                        })
+                        setNewClaim({ ...newClaim, responsible_installer_id: e.target.value })
                       }
                       className="crm-form__input"
                     >
@@ -1364,10 +1343,7 @@ const OrderDetail = () => {
                     <select
                       value={newClaim.resolving_installer_id}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          resolving_installer_id: e.target.value,
-                        })
+                        setNewClaim({ ...newClaim, resolving_installer_id: e.target.value })
                       }
                       className="crm-form__input"
                     >
@@ -1382,15 +1358,12 @@ const OrderDetail = () => {
                   <div className="crm-form__field">
                     <label>Стоимость (₽)</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={newClaim.cost}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          cost: parseFloat(e.target.value) || 0,
-                        })
+                        setNewClaim({ ...newClaim, cost: e.target.value })
                       }
                       className="crm-form__input"
                     />
@@ -1400,10 +1373,7 @@ const OrderDetail = () => {
                     <select
                       value={newClaim.cost_covered_by}
                       onChange={(e) =>
-                        setNewClaim({
-                          ...newClaim,
-                          cost_covered_by: e.target.value,
-                        })
+                        setNewClaim({ ...newClaim, cost_covered_by: e.target.value })
                       }
                       className="crm-form__input"
                     >
