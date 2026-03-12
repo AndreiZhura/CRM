@@ -6,5 +6,5 @@ __pycache__/
 *.log
 logs/
 backend/logs/
-
+backend/scripts/
 frontend/build/
