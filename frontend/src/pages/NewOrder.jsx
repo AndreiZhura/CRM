@@ -32,14 +32,15 @@ const NewOrder = () => {
   const [isNewClient, setIsNewClient] = useState(true);
   const [loadingLists, setLoadingLists] = useState(true);
 
+  // Изменено: quantity, purchase_price, sale_price, warranty_manufacturer теперь строки
   const [items, setItems] = useState([
     {
       item_type: "product",
       name: "",
-      quantity: 1,
-      purchase_price: 0,
-      sale_price: 0,
-      warranty_manufacturer: 0,
+      quantity: "1",
+      purchase_price: "",
+      sale_price: "",
+      warranty_manufacturer: "",
       warranty_master: 0,
       sort_order: 0,
     },
@@ -150,10 +151,10 @@ const NewOrder = () => {
       {
         item_type: "product",
         name: "",
-        quantity: 1,
-        purchase_price: 0,
-        sale_price: 0,
-        warranty_manufacturer: 0,
+        quantity: "1",
+        purchase_price: "",
+        sale_price: "",
+        warranty_manufacturer: "",
         warranty_master: 0,
         sort_order: items.length,
       },
@@ -203,15 +204,10 @@ const NewOrder = () => {
         if (!formData.fio || !formData.phone) {
           throw new Error("Заполните ФИО и телефон нового клиента");
         }
-        // При создании нового клиента адрес не сохраняем (поле clientAddress убрано)
         const clientData = {
           full_name: formData.fio,
           phone: formData.phone,
           backup_phone: formData.backup_phone || "",
-          // address не передаём, будет сохранён как пустой? В БД поле address NOT NULL, нужно что-то передавать.
-          // Можно передать пустую строку или адрес заказа? Но лучше передать адрес заказа, чтобы не было пустого.
-          // Однако, если клиент в будущем захочет иметь свой адрес, его не будет.
-          // Решение: передаём адрес заказа как адрес клиента, чтобы не нарушать ограничение NOT NULL.
           address: formData.orderAddress || "Адрес не указан",
           comments: formData.installer_opinion || "",
         };
@@ -244,14 +240,15 @@ const NewOrder = () => {
 
       for (const item of items) {
         if (!item.name) continue;
+        // Преобразование пустых строк в числа
         await api.createOrderItem({
           order_id: order.id,
           item_type: item.item_type,
           name: item.name,
-          quantity: item.quantity,
-          purchase_price: item.purchase_price,
-          sale_price: item.sale_price,
-          warranty_manufacturer: item.warranty_manufacturer,
+          quantity: item.quantity === "" ? 1 : parseInt(item.quantity) || 1,
+          purchase_price: item.purchase_price === "" ? 0 : parseFloat(item.purchase_price) || 0,
+          sale_price: item.sale_price === "" ? 0 : parseFloat(item.sale_price) || 0,
+          warranty_manufacturer: item.warranty_manufacturer === "" ? 0 : parseInt(item.warranty_manufacturer) || 0,
           warranty_master: 0,
           sort_order: item.sort_order,
         });
@@ -294,7 +291,6 @@ const NewOrder = () => {
           {/* Карточка клиента */}
           <fieldset className="crm-form__section">
             <legend className="crm-form__legend">👤 Карточка клиента</legend>
-
             <div className="crm-form__toggle">
               <label>
                 <input
@@ -336,9 +332,7 @@ const NewOrder = () => {
                     name="phone"
                     label="Номер телефона"
                     value={formData.phone}
-                    onChange={(value) =>
-                      setFormData({ ...formData, phone: value })
-                    }
+                    onChange={(value) => setFormData({ ...formData, phone: value })}
                   />
                 </div>
                 <div className="crm-form__field">
@@ -347,12 +341,9 @@ const NewOrder = () => {
                     name="backup_phone"
                     label="Резервный телефон"
                     value={formData.backup_phone}
-                    onChange={(value) =>
-                      setFormData({ ...formData, backup_phone: value })
-                    }
+                    onChange={(value) => setFormData({ ...formData, backup_phone: value })}
                   />
                 </div>
-                {/* Поле "Адрес клиента" удалено */}
               </div>
             ) : (
               <div className="crm-form__field crm-form__field--full">
@@ -376,14 +367,10 @@ const NewOrder = () => {
 
           {/* Планирование и логистика */}
           <fieldset className="crm-form__section">
-            <legend className="crm-form__legend">
-              📅 Планирование и логистика
-            </legend>
+            <legend className="crm-form__legend">📅 Планирование и логистика</legend>
             <div className="crm-form__grid">
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Дата и время обслуживания
-                </label>
+                <label className="crm-form__label">Дата и время обслуживания</label>
                 <input
                   type="datetime-local"
                   name="service_datetime"
@@ -403,9 +390,7 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field">
-                <label className="crm-form__label">
-                  Дата установки (договор)
-                </label>
+                <label className="crm-form__label">Дата установки (договор)</label>
                 <input
                   type="date"
                   name="appointment_date"
@@ -427,11 +412,8 @@ const NewOrder = () => {
                 </select>
               </div>
             </div>
-            <div
-              className="crm-form__field crm-form__field--full"
-              style={{ marginTop: "20px" }}
-            >
-              <label className="crm-form__label">Адрес заказа </label>
+            <div className="crm-form__field crm-form__field--full" style={{ marginTop: "20px" }}>
+              <label className="crm-form__label">Адрес заказа</label>
               <AddressSuggest
                 name="orderAddress"
                 value={formData.orderAddress}
@@ -488,15 +470,12 @@ const NewOrder = () => {
                   <div className="crm-form__field">
                     <label className="crm-form__label">Количество</label>
                     <input
-                      type="number"
-                      min="1"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={item.quantity}
                       onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "quantity",
-                          parseInt(e.target.value) || 1,
-                        )
+                        handleItemChange(index, "quantity", e.target.value)
                       }
                       className="crm-form__input"
                     />
@@ -505,58 +484,41 @@ const NewOrder = () => {
                     <div className="crm-form__field">
                       <label className="crm-form__label">Закупка (₽)</label>
                       <input
-                        type="number"
-                        min="0"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
                         value={item.purchase_price}
                         onChange={(e) =>
-                          handleItemChange(
-                            index,
-                            "purchase_price",
-                            parseFloat(e.target.value) || 0,
-                          )
+                          handleItemChange(index, "purchase_price", e.target.value)
                         }
                         className="crm-form__input"
-                        onFocus={(e) => e.target.select()}
-                        onClick={(e) => e.target.select()}
                       />
                     </div>
                   )}
                   <div className="crm-form__field">
                     <label className="crm-form__label">Продажа (₽)</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
                       value={item.sale_price}
                       onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "sale_price",
-                          parseFloat(e.target.value) || 0,
-                        )
+                        handleItemChange(index, "sale_price", e.target.value)
                       }
                       className="crm-form__input"
-                      onFocus={(e) => e.target.select()}
-                      onClick={(e) => e.target.select()}
                     />
                   </div>
                   <div className="crm-form__field">
                     <label className="crm-form__label">Гарантия (лет)</label>
                     <input
-                      type="number"
-                      min="0"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={item.warranty_manufacturer}
                       onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "warranty_manufacturer",
-                          parseInt(e.target.value) || 0,
-                        )
+                        handleItemChange(index, "warranty_manufacturer", e.target.value)
                       }
                       className="crm-form__input"
-                      onFocus={(e) => e.target.select()}
-                      onClick={(e) => e.target.select()}
                     />
                   </div>
                 </div>
@@ -605,23 +567,18 @@ const NewOrder = () => {
                       <option value="">-- Выберите монтажника --</option>
                       {installers.map((inst) => (
                         <option key={inst.id} value={inst.id}>
-                          {inst.full_name}{" "}
-                          {inst.nickname && `(${inst.nickname})`}
+                          {inst.full_name} {inst.nickname && `(${inst.nickname})`}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="crm-form__field">
-                    <label className="crm-form__label">Роль </label>
+                    <label className="crm-form__label">Роль</label>
                     <input
                       type="text"
                       value={oi.role}
                       onChange={(e) =>
-                        handleOrderInstallerChange(
-                          index,
-                          "role",
-                          e.target.value,
-                        )
+                        handleOrderInstallerChange(index, "role", e.target.value)
                       }
                       className="crm-form__input"
                       placeholder="ведущий, помощник, ..."
@@ -711,9 +668,7 @@ const NewOrder = () => {
                 />
               </div>
               <div className="crm-form__field crm-form__field--full">
-                <label className="crm-form__label">
-                  Заметки (мнение монтажника)
-                </label>
+                <label className="crm-form__label">Заметки (мнение монтажника)</label>
                 <textarea
                   name="installer_opinion"
                   value={formData.installer_opinion}
