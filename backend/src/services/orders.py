@@ -8,6 +8,10 @@ from src.schemas.orders import OrderCreate, OrderUpdate
 from src.services.geocoding import get_coordinates
 from src.services.address_cache import get_or_create_address_cache
 
+from sqlalchemy import exists, and_
+from src.models.order_item import OrderItem
+from src.models.warranty_claim import WarrantyClaim
+
 
 async def create_order(db: AsyncSession, order_data: OrderCreate):
     order_dict = order_data.model_dump()
@@ -69,18 +73,32 @@ async def get_order(db: AsyncSession, order_id: int) -> Optional[Order]:
 
 
 async def get_orders(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
+    # Подзапрос: есть ли хотя бы одна гарантийная претензия для позиций заказа
+    warranty_exists = exists().where(
+        and_(
+            OrderItem.order_id == Order.id,
+            WarrantyClaim.order_item_id == OrderItem.id
+        )
+    ).correlate(Order)
+
     result = await db.execute(
-        select(Order)
-        .offset(skip)
-        .limit(limit)
+        select(Order, warranty_exists.label("has_warranty"))
         .options(
             selectinload(Order.client),
             selectinload(Order.finance),
             selectinload(Order.address_cache),
-            selectinload(Order.installers),  # <-- добавляем эту строку
+            selectinload(Order.installers),
         )
+        .offset(skip)
+        .limit(limit)
     )
-    return result.scalars().all()
+    rows = result.all()
+    # Присваиваем временный атрибут has_warranty каждому заказу
+    orders = []
+    for order, has_warranty in rows:
+        order.has_warranty = has_warranty
+        orders.append(order)
+    return orders
 
 
 async def update_order(db: AsyncSession, order_id: int, order_data: OrderUpdate) -> Optional[Order]:

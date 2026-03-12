@@ -18,6 +18,8 @@ const OrdersList = () => {
     address: "",
     status: "",
   });
+  // Состояние для фильтра по гарантии (проблемам)
+  const [filterWarranty, setFilterWarranty] = useState(false);
 
   const statusOptions = [
     { value: "", label: "Все статусы" },
@@ -98,6 +100,7 @@ const OrdersList = () => {
     );
   }, [orders]);
 
+  // Фильтрация с учётом всех фильтров
   useEffect(() => {
     const filtered = orders.filter((order) => {
       const clientMatch =
@@ -110,33 +113,35 @@ const OrdersList = () => {
           .includes(filters.address.toLowerCase()) ?? true;
       const statusMatch =
         filters.status === "" || order.status === filters.status;
-      return clientMatch && addressMatch && statusMatch;
+      // Фильтр по гарантии: если включён, то оставляем только заказы с has_warranty === true
+      const warrantyMatch = !filterWarranty || order.has_warranty === true;
+      return clientMatch && addressMatch && statusMatch && warrantyMatch;
     });
     setFilteredOrders(filtered);
-  }, [filters, orders]);
+  }, [filters, filterWarranty, orders]);
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-const getStatusClass = (status) => {
-  switch (status) {
-    case "Новый":
-    case "Новая заявка":
-      return "status-novaya-zayavka";
-    case "Ждет установщика":
-      return "status-zhdet-ustanovshchika";
-    case "В работе":
-      return "status-v-rabote";
-    case "Выполнен":
-    case "Завершено":
-      return "status-zaversheno";
-    case "Отменен":
-      return "status-otmenen";
-    default:
-      return "";
-  }
-};
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Новый":
+      case "Новая заявка":
+        return "status-novaya-zayavka";
+      case "Ждет установщика":
+        return "status-zhdet-ustanovshchika";
+      case "В работе":
+        return "status-v-rabote";
+      case "Выполнен":
+      case "Завершено":
+        return "status-zaversheno";
+      case "Отменен":
+        return "status-otmenen";
+      default:
+        return "";
+    }
+  };
 
   if (loading) {
     return (
@@ -209,6 +214,18 @@ const getStatusClass = (status) => {
                   classNamePrefix="filter-select"
                 />
               </div>
+
+              {/* Обновлённый чекбокс фильтра по гарантии */}
+              <div className="filter-group" style={{ display: 'flex', alignItems: 'center', marginTop: 'auto' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={filterWarranty}
+                    onChange={(e) => setFilterWarranty(e.target.checked)}
+                  />
+                  <span>Только с проблемами по гарантии</span>
+                </label>
+              </div>
             </div>
 
             {filteredOrders.length === 0 ? (
@@ -221,6 +238,7 @@ const getStatusClass = (status) => {
                     <th className="orders-table__th">Адрес</th>
                     <th className="orders-table__th">Сумма</th>
                     <th className="orders-table__th">Статус</th>
+                    <th className="orders-table__th">Гарантия</th>
                   </tr>
                 </thead>
                 <tbody className="orders-table__body">
@@ -245,6 +263,14 @@ const getStatusClass = (status) => {
                         >
                           {order.status}
                         </span>
+                      </td>
+                      {/* Обновлённая ячейка с индикатором гарантии */}
+                      <td className="orders-table__td" data-label="Гарантия">
+                        {order.has_warranty ? (
+                          <span style={{ color: '#dc2626', fontWeight: 'bold' }} title="Есть открытые гарантийные случаи">⚠️</span>
+                        ) : (
+                          <span style={{ color: '#10b981', fontSize: '1.2rem' }} title="Нет проблем по гарантии">✓</span>
+                        )}
                       </td>
                     </tr>
                   ))}

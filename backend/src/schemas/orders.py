@@ -89,4 +89,5 @@ class OrderListOut(OrderBase):
     lat: Optional[float] = None
     lon: Optional[float] = None
     installers: List[OrderInstaller] = []   # <-- добавляем
+    has_warranty: bool = False 
     model_config = ConfigDict(from_attributes=True)
