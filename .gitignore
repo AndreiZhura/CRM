@@ -7,4 +7,6 @@ __pycache__/
 logs/
 backend/logs/
 backend/scripts/
+backend/backups/
 frontend/build/
+backups/
