@@ -389,16 +389,7 @@ const NewOrder = () => {
                   className="crm-form__input"
                 />
               </div>
-              <div className="crm-form__field">
-                <label className="crm-form__label">Дата установки (договор)</label>
-                <input
-                  type="date"
-                  name="appointment_date"
-                  value={formData.appointment_date}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                />
-              </div>
+       
               <div className="crm-form__field">
                 <label className="crm-form__label">Склад</label>
                 <select
