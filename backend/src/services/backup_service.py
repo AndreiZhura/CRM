@@ -5,7 +5,7 @@ import tempfile
 import os
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urlparse  # <-- добавили этот импорт
+from urllib.parse import urlparse
 import pandas as pd
 from sqlalchemy import text
 from src.core.db import AsyncSessionLocal
@@ -95,26 +95,45 @@ async def generate_excel_report(local_dir: Path) -> Path:
         result = await db.execute(stmt)
         rows = result.mappings().all()
 
-    df = pd.DataFrame(rows)
-
-    # Переименовываем колонки на русские для удобства Олега
-    df.columns = [
-        'ID заказа',
-        'Дата создания',
-        'Статус',
-        'Адрес',
-        'Клиент',
-        'Монтажники',
-        'Выручка',
-        'Себестоимость',
-        'Выплаты монтажникам',
-        'Расходы',
-        'Прибыль',
-        'Температура',
-        'Осадки'
+    # --- ЖЁСТКО ЗАДАЁМ ПОРЯДОК КОЛОНОК ---
+    desired_order = [
+        'order_id',
+        'created_at',
+        'status',
+        'address_text',
+        'client_name',
+        'installers',
+        'revenue',
+        'cost_of_goods',
+        'installer_payments',
+        'expenses',
+        'profit',
+        'temperature_avg',
+        'precipitation'
     ]
 
-    # Форматирование чисел и дат
+    # Создаём DataFrame сразу с нужными колонками в правильном порядке
+    df = pd.DataFrame(rows, columns=desired_order)
+
+    # Переименовываем колонки на русские
+    rename_map = {
+        'order_id': 'ID заказа',
+        'created_at': 'Дата создания',
+        'status': 'Статус',
+        'address_text': 'Адрес',
+        'client_name': 'Клиент',
+        'installers': 'Монтажники',
+        'revenue': 'Выручка',
+        'cost_of_goods': 'Себестоимость',
+        'installer_payments': 'Выплаты монтажникам',
+        'expenses': 'Расходы',
+        'profit': 'Прибыль',
+        'temperature_avg': 'Температура',
+        'precipitation': 'Осадки'
+    }
+    df.rename(columns=rename_map, inplace=True)
+
+    # --- ФОРМАТИРОВАНИЕ (без изменений) ---
     with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='Заказы')
         workbook = writer.book
@@ -186,7 +205,6 @@ async def daily_backup_and_report(recipient: str):
     загружает на Яндекс.Диск в аналогичную подпапку,
     отправляет письмо (опционально).
     """
-    # Получаем текущую дату для создания подпапки
     today_str = datetime.now().strftime('%Y-%m-%d')
     local_date_dir = BACKUP_DIR / today_str
     local_date_dir.mkdir(exist_ok=True)
@@ -196,17 +214,14 @@ async def daily_backup_and_report(recipient: str):
     dump_path = None
     report_path = None
     try:
-        # Создаём локальные файлы в датированной подпапке
         dump_path = await asyncio.to_thread(create_db_dump, local_date_dir)
         report_path = await generate_excel_report(local_date_dir)
 
-        # Загружаем на Яндекс.Диск в датированную подпапку
         dump_ok = await upload_to_disk(dump_path, remote_date_dir)
         report_ok = await upload_to_disk(report_path, remote_date_dir)
 
         if dump_ok and report_ok:
             logger.info("Both files uploaded successfully")
-            # Здесь можно добавить отправку письма, если нужно
         else:
             logger.warning("Some files failed to upload")
 
@@ -214,4 +229,3 @@ async def daily_backup_and_report(recipient: str):
 
     except Exception as e:
         logger.exception(f"Backup/report failed: {e}")
-    # Локальные файлы остаются в подпапке (для истории). Если нужно удалять – добавить ротацию.
