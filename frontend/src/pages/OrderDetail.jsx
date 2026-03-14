@@ -148,7 +148,7 @@ const OrderDetail = () => {
       const orderData = {
         client_id: client?.id,
         status: order.status,
-        warehouse: order.warehouse,
+       // warehouse: order.warehouse,
         service_datetime: order.service_datetime,
         promise: order.promise,
         marker_color: order.marker_color,
@@ -470,16 +470,7 @@ const OrderDetail = () => {
                   <option value="Отказ">Отказ</option>
                 </select>
               </div>
-              <div className="crm-form__field">
-                <label>Склад</label>
-                <input
-                  type="text"
-                  name="warehouse"
-                  value={order.warehouse || ""}
-                  onChange={handleOrderChange}
-                  className="crm-form__input"
-                />
-              </div>
+           
               <div className="crm-form__field">
                 <label>Дата и время обслуживания</label>
                 <input

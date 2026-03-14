@@ -20,7 +20,6 @@ const NewOrder = () => {
     service_datetime: "",
     delivery_datetime: "",
     appointment_date: "",
-    warehouse: "Основной",
     status: "Новый",
     promises: "",
     installer_opinion: "",
@@ -233,7 +232,7 @@ const NewOrder = () => {
         delivery_datetime,
         status: formData.status,
         address_text: formData.orderAddress,
-        warehouse: formData.warehouse,
+        
         promise: formData.promises || "",
       };
       const order = await api.createOrder(orderData);
@@ -390,18 +389,7 @@ const NewOrder = () => {
                 />
               </div>
        
-              <div className="crm-form__field">
-                <label className="crm-form__label">Склад</label>
-                <select
-                  name="warehouse"
-                  value={formData.warehouse}
-                  onChange={handleChange}
-                  className="crm-form__input"
-                >
-                  <option value="Основной">Основной</option>
-                  <option value="Транзит">Транзит</option>
-                </select>
-              </div>
+         
             </div>
             <div className="crm-form__field crm-form__field--full" style={{ marginTop: "20px" }}>
               <label className="crm-form__label">Адрес заказа</label>
