@@ -7,13 +7,16 @@ from src.services.finance import (
     update_finance, delete_finance
 )
 from src.schemas.finance import FinanceCreate, FinanceUpdate, FinanceOut
+from src.auth import get_current_admin
+from src.models.admins import Admin
 
 router = APIRouter(prefix="/finance", tags=["finance"])
 
 @router.post("/", response_model=FinanceOut, status_code=status.HTTP_201_CREATED)
 async def create_finance_endpoint(
     finance: FinanceCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     existing = await get_finance_by_order(db, finance.order_id)
     if existing:
@@ -23,43 +26,44 @@ async def create_finance_endpoint(
 @router.get("/", response_model=list[FinanceOut])
 async def read_finances(
     skip: int = 0,
-    limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+    limit: int = 1000,
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     return await get_finances(db, skip=skip, limit=limit)
 
 @router.get("/order/{order_id}", response_model=FinanceOut)
 async def read_finance_by_order(
     order_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     finance = await get_finance_by_order(db, order_id)
     if not finance:
         raise HTTPException(status_code=404, detail="Finance record not found for this order")
     return finance
 
-# ===== ИЗМЕНЕНИЯ ЗДЕСЬ =====
 @router.get("/summary")
 async def finance_summary(
     completed: bool = Query(False, description="Только выполненные заказы"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
-    """Возвращает сводную информацию по финансам (опционально только по выполненным заказам)"""
     return await get_finance_summary(db, completed)
 
 @router.get("/monthly")
 async def monthly_profit(
     completed: bool = Query(False, description="Только выполненные заказы"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
-    """Возвращает прибыль по месяцам (опционально только по выполненным заказам)"""
     return await get_monthly_profit(db, completed)
-# ============================
 
 @router.get("/{finance_id}", response_model=FinanceOut)
 async def read_finance(
     finance_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     finance = await get_finance(db, finance_id)
     if not finance:
@@ -70,7 +74,8 @@ async def read_finance(
 async def update_finance_endpoint(
     finance_id: int,
     finance: FinanceUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     updated = await update_finance(db, finance_id, finance)
     if not updated:
@@ -80,7 +85,8 @@ async def update_finance_endpoint(
 @router.delete("/{finance_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_finance_endpoint(
     finance_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
     deleted = await delete_finance(db, finance_id)
     if not deleted:

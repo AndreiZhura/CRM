@@ -22,7 +22,7 @@ async def create_installer_endpoint(
 @router.get("/", response_model=list[InstallerOut])
 async def read_installers(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 1000,
     db: AsyncSession = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):

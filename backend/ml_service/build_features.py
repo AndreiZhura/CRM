@@ -4,22 +4,23 @@ sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
 import asyncio
 import pandas as pd
-from sqlalchemy import select, func, text
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from core.config import settings
-from models.orders import Order
-from models.finance import Finance
-from models.weather import Weather
-from models.address_cache import AddressCache
-from models.installers import Installer
+
+from src.core.config import settings
+from src.models.orders import Order
+from src.models.finance import Finance
+from src.models.weather import Weather
+from src.models.address_cache import AddressCache
+from src.models.installers import Installer
+from src.models.order_installer import OrderInstaller
 
 async def build_dataset():
     engine = create_async_engine(settings.DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://'))
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as db:
-        # SQL-запрос с объединением всех таблиц
         stmt = select(
             Order.id.label('order_id'),
             func.date(Order.created_at).label('date'),
@@ -27,8 +28,8 @@ async def build_dataset():
             func.extract('month', Order.created_at).label('month'),
             func.extract('day', Order.created_at).label('day'),
             func.extract('dow', Order.created_at).label('day_of_week'),
-            Order.service_type,
             Order.status,
+            Order.address_text,
             AddressCache.lat,
             AddressCache.lon,
             Weather.temperature_avg,
@@ -36,11 +37,10 @@ async def build_dataset():
             Weather.temperature_max,
             Weather.precipitation,
             Weather.weather_condition,
-            Finance.sale_price_client,
+            Finance.revenue,
             Finance.profit,
-            Finance.payment_state,
-            Installer.rating.label('installer_rating'),
-            Installer.total_orders.label('installer_total_orders')
+            func.avg(Installer.rating).label('avg_installer_rating'),
+            func.count(Installer.id).label('num_installers')
         ).join(
             Finance, Finance.order_id == Order.id, isouter=True
         ).join(
@@ -48,10 +48,26 @@ async def build_dataset():
         ).join(
             Weather, (Weather.date == func.date(Order.created_at)) & (Weather.location == Order.address_text), isouter=True
         ).join(
-            Installer, Installer.id == Order.installer_id, isouter=True
+            OrderInstaller, OrderInstaller.order_id == Order.id, isouter=True
+        ).join(
+            Installer, Installer.id == OrderInstaller.installer_id, isouter=True
         ).where(
-            Order.status.in_(["Выполнен", "Оплачен"])  # только релевантные заказы
-        )
+            Order.status == "Выполнен"
+        ).group_by(
+            Order.id,
+            Order.created_at,
+            Order.status,
+            Order.address_text,
+            AddressCache.lat,
+            AddressCache.lon,
+            Weather.temperature_avg,
+            Weather.temperature_min,
+            Weather.temperature_max,
+            Weather.precipitation,
+            Weather.weather_condition,
+            Finance.revenue,
+            Finance.profit
+        ).order_by(Order.id)
 
         result = await db.execute(stmt)
         rows = result.all()

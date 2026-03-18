@@ -1,13 +1,16 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Определяем корень проекта (папка, содержащая backend)
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # backend/
-PROJECT_ROOT = BASE_DIR.parent  # корень CRM
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 ENV_FILE = PROJECT_ROOT / '.env'
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://admin:password@localhost:5433/oleg_crm"
+    # Обязательные поля – без значений по умолчанию
+    DATABASE_URL: str
+    SECRET_KEY: str
+
+    # Поля с дефолтами (можно оставить пустыми в .env)
     YANDEX_API_KEY: str = ""
     MAIL_USERNAME: str = ""
     MAIL_PASSWORD: str = ""
@@ -19,11 +22,10 @@ class Settings(BaseSettings):
     YANDEX_DISK_TOKEN: str = ""
     YANDEX_DISK_PATH: str = "/CRM/backups"
     POSTGRES_PASSWORD: str = ""
-    SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    DEBUG: bool = False   # управляет echo в SQLAlchemy
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
 settings = Settings()
-

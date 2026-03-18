@@ -23,7 +23,7 @@ async def create_client_endpoint(
 @router.get("/", response_model=List[ClientOut])
 async def read_clients(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 1000,
     db: AsyncSession = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):

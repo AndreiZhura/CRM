@@ -1,46 +1,56 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.core.db import get_db
-from src.core.scheduler import start_scheduler
-from src.core.logging import logger
-from src.core.logging import LoggingMiddleware
-from src.core.scheduler import scheduler
-from src.routers import debug
-from src.routers import clients, installers, orders, finance, reminders, auth, order_items, order_installers, order_expenses, warranty_claims, payments
+from src.core.scheduler import start_scheduler, scheduler
+from src.core.logging import logger, LoggingMiddleware
+from src.routers import (
+    auth, clients, installers, orders, finance, reminders,
+    debug, order_items, order_installers, order_expenses,
+    warranty_claims, payments
+)
 
 
-app = FastAPI(title="СRM Олега")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Starting CRM application")
+    start_scheduler()
+    logger.info("Scheduler started")
+    yield
+    # Shutdown
+    scheduler.shutdown()
+    logger.info("Scheduler stopped")
 
+
+app = FastAPI(title="СRM Олега", lifespan=lifespan)
+
+# Middleware (до роутеров)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # вместо "*"
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(LoggingMiddleware)
 
+# Роутеры
+app.include_router(auth.router)
 app.include_router(clients.router)
 app.include_router(installers.router)
 app.include_router(orders.router)
 app.include_router(finance.router)
 app.include_router(reminders.router)
-app.add_middleware(LoggingMiddleware)
-app.include_router(auth.router)
 app.include_router(order_items.router)
 app.include_router(order_installers.router)
 app.include_router(order_expenses.router)
 app.include_router(warranty_claims.router)
 app.include_router(payments.router)
 app.include_router(debug.router)
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Starting CRM application")
-    start_scheduler()
-    logger.info("Scheduler started")
 
 
 @app.get("/")
@@ -50,7 +60,6 @@ async def root():
 
 @app.get("/health")
 async def health(db: AsyncSession = Depends(get_db)):
-    """Проверка работоспособности."""
     health_data = {
         "status": "ok",
         "database": "unknown",

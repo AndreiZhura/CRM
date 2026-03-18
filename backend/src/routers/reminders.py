@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from datetime import datetime, timedelta
@@ -7,20 +7,18 @@ from src.models.orders import Order
 from src.schemas.orders import OrderOut
 from typing import List
 from src.services.email import send_reminder_email
-from fastapi import HTTPException
 from sqlalchemy.orm import selectinload
+from src.auth import get_current_admin
+from src.models.admins import Admin
 
 router = APIRouter(prefix="/reminders", tags=["reminders"])
 
 @router.get("/stale-orders", response_model=List[OrderOut])
 async def get_stale_orders(
     days: int = Query(7, description="Количество дней без обновления"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
-    """
-    Возвращает заказы, которые не обновлялись более указанного количества дней
-    и при этом не находятся в финальных статусах (Выполнен, Отменен).
-    """
     cutoff_date = datetime.now() - timedelta(days=days)
     
     result = await db.execute(
@@ -39,13 +37,10 @@ async def get_stale_orders(
 @router.post("/send-email", status_code=200)
 async def send_reminder_email_endpoint(
     recipient: str = Query(..., description="Email получателя"),
-    days: int = Query(7, description="Количество дней без обновления"),
-    db: AsyncSession = Depends(get_db)
+    days: int = Query(3, description="Количество дней без обновления"),
+    db: AsyncSession = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
 ):
-    """
-    Отправляет письмо со списком зависших заказов на указанный email.
-    """
-    # Получаем зависшие заказы
     cutoff_date = datetime.now() - timedelta(days=days)
     result = await db.execute(
         select(Order)
@@ -55,7 +50,7 @@ async def send_reminder_email_endpoint(
                 Order.status.not_in(["Выполнен", "Отменен"])
             )
         )
-        .options(selectinload(Order.client), selectinload(Order.installer))
+        .options(selectinload(Order.client), selectinload(Order.installers))
         .order_by(Order.updated_at)
     )
     orders = result.scalars().all()
@@ -63,14 +58,13 @@ async def send_reminder_email_endpoint(
     if not orders:
         return {"message": "Нет зависших заказов"}
     
-    # Формируем HTML-таблицу
     rows = ""
     for order in orders:
+        client_name = order.client.full_name if order.client else 'Н/Д'
         rows += f"""
         <tr>
             <td>{order.id}</td>
-            <td>{order.client.full_name if order.client else 'Н/Д'}</td>
-            <td>{order.service_type}</td>
+            <td>{client_name}</td>
             <td>{order.status}</td>
             <td>{order.updated_at.strftime('%Y-%m-%d %H:%M')}</td>
         </tr>
@@ -81,7 +75,6 @@ async def send_reminder_email_endpoint(
         <tr>
             <th>ID</th>
             <th>Клиент</th>
-            <th>Тип услуги</th>
             <th>Статус</th>
             <th>Последнее обновление</th>
         </tr>

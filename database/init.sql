@@ -1,7 +1,6 @@
 -- =====================================================
 -- ПРОЕКТ LUMEN ALPHA: ПОЛНАЯ СХЕМА БАЗЫ ДАННЫХ (HVAC CRM)
--- Версия: 6.0 (МУЛЬТИ-ПОЗИЦИИ, НЕСКОЛЬКО МОНТАЖНИКОВ, ГАРАНТИИ, ФИНАНСЫ)
--- Режим: Идемпотентный — безопасен для повторного запуска
+-- Версия: 6.1 (ИСПРАВЛЕННАЯ: добавлена функция recalc_order_finance)
 -- =====================================================
 
 BEGIN;
@@ -39,6 +38,7 @@ CREATE TABLE IF NOT EXISTS installers (
     rating NUMERIC(3,1) DEFAULT 10.0 CHECK (rating >= 0 AND rating <= 10),
     base_price NUMERIC(10,2) DEFAULT 0 CHECK (base_price >= 0),
     is_debtor BOOLEAN DEFAULT FALSE,
+    debt_amount NUMERIC(10,2) DEFAULT 0,
     comments TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     is_in_funnel BOOLEAN DEFAULT TRUE,
@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS installers (
     poor_work_count INTEGER DEFAULT 0 CHECK (poor_work_count >= 0),
     warranty_visits_count INTEGER DEFAULT 0 CHECK (warranty_visits_count >= 0),
     last_incident_date TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
     quality_score NUMERIC(4,2) GENERATED ALWAYS AS (
         CASE 
             WHEN total_orders > 0 
@@ -134,9 +135,6 @@ CREATE TABLE IF NOT EXISTS order_items (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-COMMENT ON COLUMN order_items.warranty_manufacturer IS 'Гарантия производителя (лет), только для товаров';
-COMMENT ON COLUMN order_items.warranty_master IS 'Гарантия мастера (лет), только для услуг';
-
 CREATE TABLE IF NOT EXISTS order_installers (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -149,8 +147,6 @@ CREATE TABLE IF NOT EXISTS order_installers (
     UNIQUE(order_id, installer_id, role)
 );
 
-COMMENT ON TABLE order_installers IS 'Монтажники, задействованные в заказе, с их ролями и базовой оплатой';
-
 CREATE TABLE IF NOT EXISTS order_item_installers (
     id SERIAL PRIMARY KEY,
     order_item_id INTEGER NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
@@ -161,8 +157,6 @@ CREATE TABLE IF NOT EXISTS order_item_installers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(order_item_id, installer_id)
 );
-
-COMMENT ON TABLE order_item_installers IS 'Привязка конкретных позиций к монтажникам (кто что делал и сколько получил)';
 
 CREATE INDEX IF NOT EXISTS idx_order_item_installers_item ON order_item_installers(order_item_id);
 CREATE INDEX IF NOT EXISTS idx_order_item_installers_installer ON order_item_installers(installer_id);
@@ -178,7 +172,6 @@ CREATE TABLE IF NOT EXISTS order_expenses (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS installer_incidents CASCADE;
 CREATE TABLE IF NOT EXISTS warranty_claims (
     id SERIAL PRIMARY KEY,
     order_item_id INTEGER NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
@@ -195,9 +188,6 @@ CREATE TABLE IF NOT EXISTS warranty_claims (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-COMMENT ON COLUMN warranty_claims.fault_type IS 'Тип вины: manufacturer (производитель), installer (монтажник), other';
-COMMENT ON COLUMN warranty_claims.cost_covered_by IS 'Кто покрывает расходы: manufacturer, installer, oleg';
 
 CREATE INDEX IF NOT EXISTS idx_warranty_claims_order_item ON warranty_claims(order_item_id);
 CREATE INDEX IF NOT EXISTS idx_warranty_claims_responsible ON warranty_claims(responsible_installer_id);
@@ -236,7 +226,6 @@ CREATE TABLE IF NOT EXISTS payments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-COMMENT ON TABLE payments IS 'Платежи: от клиента (оплата заказа) и монтажникам (выплаты)';
 CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
 CREATE INDEX IF NOT EXISTS idx_payments_installer ON payments(installer_id);
 
@@ -262,6 +251,52 @@ CREATE TABLE IF NOT EXISTS finance (
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_installers_order ON order_installers(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_expenses_order ON order_expenses(order_id);
+
+-- =================================================================
+-- ФУНКЦИЯ ПЕРЕСЧЁТА ФИНАНСОВ (ДОБАВЛЕНА!)
+-- =================================================================
+CREATE OR REPLACE FUNCTION recalc_order_finance(p_order_id INTEGER)
+RETURNS VOID AS $$
+DECLARE
+    v_revenue NUMERIC(10,2);
+    v_cost_goods NUMERIC(10,2);
+    v_installer_payments NUMERIC(10,2);
+    v_expenses NUMERIC(10,2);
+    v_warranty_oleg NUMERIC(10,2);
+BEGIN
+    -- revenue = сумма sale_price * quantity из order_items
+    SELECT COALESCE(SUM(sale_price * quantity), 0) INTO v_revenue
+    FROM order_items WHERE order_id = p_order_id;
+
+    -- cost_of_goods = сумма purchase_price * quantity из order_items
+    SELECT COALESCE(SUM(purchase_price * quantity), 0) INTO v_cost_goods
+    FROM order_items WHERE order_id = p_order_id;
+
+    -- installer_payments = сумма base_payment из order_installers
+    SELECT COALESCE(SUM(base_payment), 0) INTO v_installer_payments
+    FROM order_installers WHERE order_id = p_order_id;
+
+    -- expenses = сумма amount из order_expenses
+    SELECT COALESCE(SUM(amount), 0) INTO v_expenses
+    FROM order_expenses WHERE order_id = p_order_id;
+
+    -- warranty_costs_oleg = сумма cost из warranty_claims, где cost_covered_by = 'oleg' и связаны с заказом
+    SELECT COALESCE(SUM(wc.cost), 0) INTO v_warranty_oleg
+    FROM warranty_claims wc
+    JOIN order_items oi ON wc.order_item_id = oi.id
+    WHERE oi.order_id = p_order_id AND wc.cost_covered_by = 'oleg';
+
+    -- Вставка или обновление записи в finance
+    INSERT INTO finance (order_id, revenue, cost_of_goods, installer_payments, expenses, warranty_costs_oleg)
+    VALUES (p_order_id, v_revenue, v_cost_goods, v_installer_payments, v_expenses, v_warranty_oleg)
+    ON CONFLICT (order_id) DO UPDATE SET
+        revenue = EXCLUDED.revenue,
+        cost_of_goods = EXCLUDED.cost_of_goods,
+        installer_payments = EXCLUDED.installer_payments,
+        expenses = EXCLUDED.expenses,
+        warranty_costs_oleg = EXCLUDED.warranty_costs_oleg;
+END;
+$$ LANGUAGE plpgsql;
 
 -- -----------------------------------------------------------------
 -- ФУНКЦИЯ ДЛЯ АВТООБНОВЛЕНИЯ updated_at
@@ -388,21 +423,6 @@ BEGIN
 END $$;
 
 -- -----------------------------------------------------------------
--- ФУНКЦИЯ ДЛЯ ПЕРЕСЧЁТА РЕЙТИНГА КАЧЕСТВА (РЕГЛАМЕНТНАЯ)
--- -----------------------------------------------------------------
-CREATE OR REPLACE FUNCTION recalc_all_quality_scores()
-RETURNS VOID AS $$
-BEGIN
-    UPDATE installers SET quality_score = 
-        CASE 
-            WHEN total_orders > 0 
-            THEN (total_orders - poor_work_count - warranty_visits_count)::NUMERIC / total_orders::NUMERIC
-            ELSE 10.0 
-        END;
-END;
-$$ LANGUAGE plpgsql;
-
--- -----------------------------------------------------------------
 -- ФУНКЦИЯ И ТРИГГЕР ДЛЯ ИСТОРИИ СТАТУСОВ
 -- -----------------------------------------------------------------
 CREATE OR REPLACE FUNCTION log_order_status_change()
@@ -496,49 +516,5 @@ BEGIN
             FOR EACH ROW EXECUTE FUNCTION trigger_recalc_finance();
     END IF;
 END $$;
---------------------------------------------------------------------------
--- Добавление колонки debt_amount,которая будет показывать сумму долга 
--------------------------------------------------------------------------
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'installers'
-          AND column_name = 'debt_amount'
-    ) THEN
-        ALTER TABLE installers ADD COLUMN debt_amount NUMERIC(10,2) DEFAULT 0;
-    END IF;
-END $$;
-
-
--- Добавляем поле status для монтажников
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'installers'
-          AND column_name = 'status'
-    ) THEN
-        ALTER TABLE installers ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active';
-        COMMENT ON COLUMN installers.status IS 'Статус: active, fired, vacation, sick';
-    END IF;
-END $$;
-
--- -----------------------------------------------------------------
--- КОММЕНТАРИИ
--- -----------------------------------------------------------------
-COMMENT ON TABLE installers IS 'Монтажники, включая рейтинг и статистику брака/гарантии';
-COMMENT ON COLUMN installers.poor_work_count IS 'Количество заказов с некачественной установкой (брак/переделка)';
-COMMENT ON COLUMN installers.warranty_visits_count IS 'Количество гарантийных выездов (не по вине монтажника)';
-COMMENT ON COLUMN installers.quality_score IS 'Доля успешных заказов (без брака и гарантии)';
-COMMENT ON TABLE warranty_claims IS 'Гарантийные случаи, привязанные к позициям заказа';
-COMMENT ON TABLE order_items IS 'Позиции заказа (товары и услуги)';
-COMMENT ON TABLE order_expenses IS 'Непредвиденные расходы по заказу';
-COMMENT ON TABLE order_installers IS 'Монтажники, задействованные в заказе';
-COMMENT ON TABLE order_item_installers IS 'Связь позиций с конкретными монтажниками (детализация работ и оплаты)';
-COMMENT ON TABLE payments IS 'Платежи от клиента и монтажникам';
-COMMENT ON TABLE finance IS 'Финансовая сводка по заказу';
 
 COMMIT;

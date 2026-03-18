@@ -16,7 +16,7 @@ class Installer(Base):
     base_price = Column(Numeric(10,2), default=0)
     is_debtor = Column(Boolean, default=False)
     debt_amount = Column(Numeric(10,2), default=0)
-    status = Column(String(20), nullable=False, default='active')
+    status = Column(String(20), nullable=False, default='active')   # ← одно объявление
     comments = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     is_in_funnel = Column(Boolean, default=True)
@@ -24,16 +24,13 @@ class Installer(Base):
     poor_work_count = Column(Integer, default=0)
     warranty_visits_count = Column(Integer, default=0)
     last_incident_date = Column(DateTime(timezone=True), nullable=True)
-    # quality_score — вычисляемое поле в БД, не объявляем как колонку SQLAlchemy,
-    # но можем читать его как свойство (будет доступно автоматически)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
 
-    # Новые связи (старая связь orders удалена, так как installer_id в orders больше нет)
+    # Связи (без дублирующего status)
     order_installers = relationship("OrderInstaller", back_populates="installer", cascade="all, delete-orphan")
     item_installers = relationship("OrderItemInstaller", back_populates="installer", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="installer")
     responsible_claims = relationship("WarrantyClaim", foreign_keys="[WarrantyClaim.responsible_installer_id]", back_populates="responsible_installer")
     resolving_claims = relationship("WarrantyClaim", foreign_keys="[WarrantyClaim.resolving_installer_id]", back_populates="resolving_installer")
-    status = Column(String(20), nullable=False, default='active')
